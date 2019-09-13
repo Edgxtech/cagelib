@@ -1,0 +1,9 @@
+target/
+build/
+*.idea
+.settings/
+.project/
+.metadata/
+*.log
+*.DS_Store
+*.iml
