@@ -7,8 +7,10 @@ public class Observation {
     double tdoa;
     double aoa;
     ObservationType observationType;
+    String assetId;
 
-    public Observation(double x, double y) {
+    public Observation(String assetId, double y, double x) {
+        this.assetId = assetId;
         this.x = x;
         this.y = y;
     }
@@ -59,5 +61,13 @@ public class Observation {
 
     public void setObservationType(ObservationType observationType) {
         this.observationType = observationType;
+    }
+
+    public String getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(String assetId) {
+        this.assetId = assetId;
     }
 }
