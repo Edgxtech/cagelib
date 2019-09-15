@@ -191,17 +191,17 @@ public class AlgorithmEKF  extends Thread {
 
             //TEMP
             //   TODO, control the filter speed in configs - execute timer task on repeating schedule
-            if (loopCounter<10) {
+            if (loopCounter<5) {
                 dispatchResult(Xk);
-                //fuzerListener.result(geoMission.getGeoId(), geoMission.getTarget(),Xk.getEntry(0),Xk.getEntry(1), Xk.getEntry(2), Xk.getEntry(3));
             }
 
             if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
                 // TODO, if it has adequately converged, break;
             }
-            if (loopCounter==2500)
+            if (loopCounter==200)
             {
                 dispatchResult(Xk);
+                //break;
             }
             if (loopCounter==20000)
             {
@@ -209,7 +209,7 @@ public class AlgorithmEKF  extends Thread {
                 loopCounter=0;
 
                 if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
-                    System.out.println("This is a FIX mode run, exiting since we've had 5000 iterations already");
+                    System.out.println("This is a FIX mode run, exiting since we've had MAX iterations already");
                     break;
                 }
             }
@@ -243,28 +243,12 @@ public class AlgorithmEKF  extends Thread {
         this.fuzerListener.result(geoMission.getGeoId(),Xk.getEntry(0),Xk.getEntry(1), Xk.getEntry(2), Xk.getEntry(3));
 
         // TODO, CEP / VARIANCE
-        //varianceCounter++;
-        //        variance = (variance*(varianceCounter-1) + (Math.pow(Xk3,2) + Math.pow(Xk4,2))/2)/varianceCounter;
-        //        double cep = Math.sqrt(variance);
-        //double cep = (Math.abs(Xk3)+Math.abs(Xk4))/2;
-        //cep = 20;
-
-        //        if (geoMissions.get(geoID).showCEPs)
-        //        {
-        //            cepCircle = new ArrayList<double[]>();//removeAll(cepCircle);
-        //
-        //            //double[] cepPoint;
-        //            for (double theta = (1/2)*Math.PI; theta <= (5/2)*Math.PI; theta+= 0.2)
-        //            {
-        //                UTMRef utmCEP = new UTMRef(cep*Math.cos(theta) + Xk1, cep*Math.sin(theta) + Xk2, latZone, lngZone);
-        //                LatLng ltln2 = utmCEP.toLatLng();
-        //                double[] cepPoint = {ltln2.getLat(),ltln2.getLng()};
-        //                cepCircle.add(cepPoint);
-        //            }
-        //        }
-        //else
-        //    cepCircle.removeAll(cepCircle);
-        //////cep = Math.sqrt(variance);
+//        varianceCounter++;
+//        variance = (variance*(varianceCounter-1) + (Math.pow(Xk3,2) + Math.pow(Xk4,2))/2)/varianceCounter;
+//        double cep = Math.sqrt(variance);
+//        double cep = (Math.abs(Xk3)+Math.abs(Xk4))/2;
+        double cep = 1500;
+        this.geoMission.getTarget().setCurrent_cep(cep);
 
 
         if (this.geoMission.isOutputKml()) {

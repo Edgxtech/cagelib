@@ -1,5 +1,6 @@
 package tech.tgo.fuzer;
 
+import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
@@ -44,6 +45,7 @@ public class FuzerProcess implements Serializable {
         // TODO, input validation
 
         // Restricted to hold only one observation per asset per type
+        System.out.println("Adding obs as key: "+obs.getAssetId()+","+obs.getObservationType().name());
         this.observations.put(obs.getAssetId()+","+obs.getObservationType().name(), obs);
 
         if (this.geoMission.showMeas)
@@ -74,7 +76,9 @@ public class FuzerProcess implements Serializable {
         }
 
         // trigger the computation again - for tracking only
-        restart();
+        if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
+            restart();
+        }
     }
 
     public void restart() {

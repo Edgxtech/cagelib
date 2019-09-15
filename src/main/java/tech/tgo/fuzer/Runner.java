@@ -27,7 +27,7 @@ public class Runner implements FuzerListener {
         geoMission.setTarget(new Target("RAND-TGT_ID","RAND-TGT-NAME")); // Set this in client logic
         geoMission.setGeoId("RAND-GEOID"); // Set this in client logic
         geoMission.setShowMeas(true);
-        geoMission.setShowCEPs(false);
+        geoMission.setShowCEPs(true);
         geoMission.setShowGEOs(true);
         geoMission.setOutputKml(true);
         geoMission.setOutputKmlFilename("geoOutput.kml");
@@ -56,7 +56,6 @@ public class Runner implements FuzerListener {
 
         /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
         /* For Fixer - add observations (one per asset) then start, monitor output in result() callback */
-        fuzerProcess.start();
 
         try {
             // Add occassional new measurements to trigger updates - FILTER OPERATES IN UTM
@@ -65,16 +64,22 @@ public class Runner implements FuzerListener {
             obs.setRange(1000.0);
             obs.setObservationType(ObservationType.range);
             fuzerProcess.addObservation(obs);
+            System.out.println("Added obs from 010");
 
             double[] utm_coords_b = CoordHelpers.convertLatLngToUtmNthingEasting(-31.88, 115.97);
             Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
             obs_b.setRange(800.0);
-            obs.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs);
+            obs_b.setObservationType(ObservationType.range);
+            fuzerProcess.addObservation(obs_b);
+            System.out.println("Added obs from 011");
+
         }
         catch (Exception e) {
             System.out.println("Error adding observations: "+e.getMessage());
+            e.printStackTrace();
         }
+
+        fuzerProcess.start();
     }
 
     /* Client side receive raw result */

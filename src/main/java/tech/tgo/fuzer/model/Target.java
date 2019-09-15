@@ -4,6 +4,7 @@ public class Target {
     String id;
     String name;
     double[] current_loc;
+    double current_cep;
 
     public Target(String id, String name) {
         this.id = id;
@@ -32,5 +33,13 @@ public class Target {
 
     public void setCurrent_loc(double[] current_loc) {
         this.current_loc = current_loc;
+    }
+
+    public double getCurrent_cep() {
+        return current_cep;
+    }
+
+    public void setCurrent_cep(double current_cep) {
+        this.current_cep = current_cep;
     }
 }
