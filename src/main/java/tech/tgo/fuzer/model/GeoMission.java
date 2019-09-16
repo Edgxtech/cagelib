@@ -1,38 +1,32 @@
 package tech.tgo.fuzer.model;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+/*
+ * Geolocation fusion and tracking, using custom extended kalman filter implementation
+ *
+ * @author Timothy Edge (timmyedge)
+ */
 public class GeoMission {
     FuzerMode fuzerMode;
-    //String target;
     Target target;
     String geoId;
     char latZone;
     int lonZone;
     boolean outputKml;
     String outputKmlFilename;
-    boolean outputJson;
-    String outputJsonFilename;
 
-    public Map<String,double[]> geoResults;
+    Set<String> assets = new HashSet<String>();
 
-    //public Map<String,Target> targets;
-
-    //public Object[] devicesUsed;
-    //public GeoMissionTab geoMissionTab;
-    //public AlgorithmEKF ekf;
-    //public TCPGeoServer geoServer;
-    //public Hashtable<String,Integer> ekfArrayDeviceIndexes;
+    //public Map<String,double[]> geoResults;
 
     public boolean showCEPs = false;
     public boolean showMeas = false;
     public boolean showGEOs = false;
 
-    public Map<String,Double> measurementMetres = new HashMap<String,Double>();
     public Map<String,List<double[]>> measurementCircles = new HashMap<String,List<double[]>>();
-    public Map<String,KMLCircle> measKMLCircles = new HashMap<String,KMLCircle>();
+    public Map<String,List<double[]>> measurementHyperbolas = new HashMap<String,List<double[]>>();
+    public Map<String,List<double[]>> measurementLines = new HashMap<String,List<double[]>>();
 
     public FuzerMode getFuzerMode() {
         return fuzerMode;
@@ -90,30 +84,6 @@ public class GeoMission {
         this.outputKmlFilename = outputKmlFilename;
     }
 
-    public boolean isOutputJson() {
-        return outputJson;
-    }
-
-    public void setOutputJson(boolean outputJson) {
-        this.outputJson = outputJson;
-    }
-
-    public String getOutputJsonFilename() {
-        return outputJsonFilename;
-    }
-
-    public void setOutputJsonFilename(String outputJsonFilename) {
-        this.outputJsonFilename = outputJsonFilename;
-    }
-
-//    public Map<String, Target> getTargets() {
-//        return targets;
-//    }
-//
-//    public void setTargets(Map<String, Target> targets) {
-//        this.targets = targets;
-//    }
-
     public boolean isShowCEPs() {
         return showCEPs;
     }
@@ -136,5 +106,13 @@ public class GeoMission {
 
     public void setShowGEOs(boolean showGEOs) {
         this.showGEOs = showGEOs;
+    }
+
+    public Set<String> getAssets() {
+        return assets;
+    }
+
+    public void setAssets(Set<String> assets) {
+        this.assets = assets;
     }
 }

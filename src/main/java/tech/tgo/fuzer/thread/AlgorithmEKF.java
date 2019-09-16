@@ -15,14 +15,13 @@ import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
-import tech.tgo.fuzer.util.CoordHelpers;
+import tech.tgo.fuzer.util.Helpers;
 import tech.tgo.fuzer.util.FilesystemHelpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -43,17 +42,11 @@ public class AlgorithmEKF  extends Thread {
 
     private GeoMission geoMission;
 
-
     //    /* x_ and y_ are the assets positions */
-//    public double[] x_rssi;// = {30, 40, 80};  /// Note these are dynamically adjusted by TCPGeoServer as it gets new data.
-//    public double[] y_rssi;// = {40, 50, 80};
-//    public double[] r;// = {{22.36, 10}};  //ssuming a target loc of 50,50
-    //List<Observation> observations;
+
     Map<String,Observation> observations = new HashMap<String,Observation>();
 
     private final AtomicBoolean running = new AtomicBoolean(true);
-
-    public double[] Xtrue = {80,20};  /// used for testing only
 
     double[][] ThiData = { {1,0,1, 0}, {0,1,0,1}, {0,0,0,0}, {0,0,0,0}};
     RealMatrix Thi = new Array2DRowRealMatrix(ThiData);
@@ -132,54 +125,55 @@ public class AlgorithmEKF  extends Thread {
 
                 xk = Xk.getEntry(0);
                 yk = Xk.getEntry(1);
-                H = recalculateH(obs.getX(),obs.getY(), xk, yk);   // ORIG-H = recalculateH(x_rssi[i],y_rssi[i], xk, yk);
 
                 double f_est=0.0;
                 double d=0.0;
+                H = null;
 
                 if (obs.getObservationType().equals(ObservationType.range)) {
-                    //double f_meas = Math.sqrt(Math.pow((x_rssi[i]-Xtrue[0]),2) + Math.pow(y_rssi[i]-Xtrue[1],2));  used for debigging only
-                    f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2));  // ORIG:::  double f_est = Math.sqrt(Math.pow((x_rssi[i]-xk),2) + Math.pow(y_rssi[i]-yk,2));
 
-                    //double[] rk = {f_meas - f_est};
+                    H = recalculateH(obs.getX(),obs.getY(), xk, yk);
 
-                    //// TODO, if this is the first time r has had a value other than 500, then reset Pk .... actually, do'nt need to , it will take a bit longer to converge but that's cool
+                    f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2));
 
                     d = obs.getRange();
-                    /// ORIGINAL -  TWO OPTIONS DEPENDING ON WHETHER PASSING [dBm] or [m]
-                    ////double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));    /// Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]
-                    //double d = r[i];  // [m]
-
-                    //System.out.println("range, from RSSI="+d+" [m]");
+                    // Optionally, if passing dBm, basic model to use as follows to convert [dBm] to [m]
+                    // double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));    /// Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 
-                    // TODO, innovations here
+                    H = recalculateH_TDOA(obs.getX(),obs.getY(), obs.getXb(), obs.getYb(), xk, yk);
+
+                    f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2)) - Math.sqrt(Math.pow((obs.getXb() - xk), 2) + Math.pow(obs.getYb() - yk, 2));
+
+                    d = obs.getTdoa()*Helpers.SPEED_OF_LIGHT;
                 }
                 else if (obs.getObservationType().equals(ObservationType.aoa)) {
 
                     // TODO, innovations here
+                    H = recalculateH_AOA(obs.getX(), obs.getY(), xk, yk);
+
+//                    f_est(i,:) = [atan((y_aoa(i) - Xk(2))/(x_aoa(i) - Xk(1)))*180/pi];
+//                    if(Xk(1)<x_aoa(i))
+//                        f_est(i,:) = f_est(i,:)+180;
+//                    end
+                    f_est = Math.atan((obs.getY() - yk)/(obs.getX() - xk))*180/Math.PI;
+                    if (xk<obs.getX()) {
+                        f_est = f_est + 180;
+                    }
+
+                    d = obs.getAoa();
                 }
 
-                //double rk = d/1000 - f_est;
                 double rk = d - f_est;
-
-                //System.out.println("f_meas="+(f_meas));
-                //System.out.println("f_est="+(f_est));
-                //System.out.println("rk="+(f_meas - f_est));
 
                 RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
                 RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
                 K = Pk.multiply(H.transpose()).multiply(Inverse);
 
-                //RealVector Kk = K.getColumnVector(0);
-
-                //System.out.println("length K2:"+Kk.length);
                 double[] HXk = H.operate(Xk).toArray();
-                //K.operate(rk - HXk[0]);
                 innov = K.scalarMultiply(rk - HXk[0]).getColumnVector(0).add(innov);
 
-                ////%P_innov = P_innov + H(i,:)'*inv(Rk(i))*H(i,:);
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
             }
 
@@ -191,7 +185,7 @@ public class AlgorithmEKF  extends Thread {
 
             //TEMP
             //   TODO, control the filter speed in configs - execute timer task on repeating schedule
-            if (loopCounter<5) {
+            if (loopCounter==1 || loopCounter==10 || loopCounter == 100) {
                 dispatchResult(Xk);
             }
 
@@ -201,7 +195,6 @@ public class AlgorithmEKF  extends Thread {
             if (loopCounter==200)
             {
                 dispatchResult(Xk);
-                //break;
             }
             if (loopCounter==20000)
             {
@@ -227,7 +220,30 @@ public class AlgorithmEKF  extends Thread {
         double[][] jacobianData = {{0, 0, dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
         return H;
-        //System.out.println("H recalced, dfdx=:"+ H.getEntry(0, 3));
+    }
+
+    public RealMatrix recalculateH_TDOA(double x, double y, double x2, double y2, double Xk1, double Xk2)
+    {
+        double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow(y-Xk2,2));
+        double R2 = Math.sqrt(Math.pow((x2-Xk1),2) + Math.pow(y2-Xk2,2));
+
+        double dfdx = -(x-Xk1)/R1 - (-x2+Xk1)/R2;
+        double dfdy = -(y-Xk2)/R1 - (-y2+Xk2)/R2;
+
+        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+        RealMatrix H = new Array2DRowRealMatrix(jacobianData);
+        return H;
+    }
+
+    public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {
+        double R1 = Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2);
+
+        double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose
+        double dfdy = -(x-Xk1)/R1;
+
+        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+        RealMatrix H = new Array2DRowRealMatrix(jacobianData);
+        return H;
     }
 
     public void stopThread() {
@@ -236,8 +252,7 @@ public class AlgorithmEKF  extends Thread {
 
     public void dispatchResult(RealVector Xk) {
 
-        //this.geoMission.getTarget().setCurrent_loc(new double[]{Xk.getEntry(0),Xk.getEntry(1)});
-        double[] latLon = CoordHelpers.convertUtmNthingEastingToLatLng(Xk.getEntry(0),Xk.getEntry(1), this.geoMission.getLatZone(), this.geoMission.getLonZone());
+        double[] latLon = Helpers.convertUtmNthingEastingToLatLng(Xk.getEntry(0),Xk.getEntry(1), this.geoMission.getLatZone(), this.geoMission.getLonZone());
         this.geoMission.getTarget().setCurrent_loc(latLon);
 
         this.fuzerListener.result(geoMission.getGeoId(),Xk.getEntry(0),Xk.getEntry(1), Xk.getEntry(2), Xk.getEntry(3));
@@ -250,15 +265,9 @@ public class AlgorithmEKF  extends Thread {
         double cep = 1500;
         this.geoMission.getTarget().setCurrent_cep(cep);
 
-
         if (this.geoMission.isOutputKml()) {
-            // Export or overwrite the kml file
             FilesystemHelpers.exportGeoMissionToKml(this.geoMission);
         }
-        if (this.geoMission.isOutputJson()) {
-            // Check and use the json output file
-        }
-
     }
 
 }

@@ -1,5 +1,12 @@
 package tech.tgo.fuzer.model;
 
+/*
+ * Geolocation fusion and tracking, using custom extended kalman filter implementation
+ *
+ * Filter operates in UTM coordinates
+ *
+ * @author Timothy Edge (timmyedge)
+ */
 public class Observation {
     double x;
     double y;
@@ -8,6 +15,10 @@ public class Observation {
     double aoa;
     ObservationType observationType;
     String assetId;
+
+    String assetId_b; // For TDOA only
+    double xb; // For TDOA only
+    double yb; // For TDOA only
 
     public Observation(String assetId, double y, double x) {
         this.assetId = assetId;
@@ -69,5 +80,29 @@ public class Observation {
 
     public void setAssetId(String assetId) {
         this.assetId = assetId;
+    }
+
+    public double getXb() {
+        return xb;
+    }
+
+    public void setXb(double xb) {
+        this.xb = xb;
+    }
+
+    public double getYb() {
+        return yb;
+    }
+
+    public void setYb(double yb) {
+        this.yb = yb;
+    }
+
+    public String getAssetId_b() {
+        return assetId_b;
+    }
+
+    public void setAssetId_b(String assetId_b) {
+        this.assetId_b = assetId_b;
     }
 }

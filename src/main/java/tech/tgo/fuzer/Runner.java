@@ -1,7 +1,7 @@
 package tech.tgo.fuzer;
 
 import tech.tgo.fuzer.model.*;
-import tech.tgo.fuzer.util.CoordHelpers;
+import tech.tgo.fuzer.util.Helpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
@@ -58,20 +58,36 @@ public class Runner implements FuzerListener {
         /* For Fixer - add observations (one per asset) then start, monitor output in result() callback */
 
         try {
-            // Add occassional new measurements to trigger updates - FILTER OPERATES IN UTM
-            double[] utm_coords = CoordHelpers.convertLatLngToUtmNthingEasting(-31.9, 115.98);
-            Observation obs = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
-            obs.setRange(1000.0);
-            obs.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs);
-            System.out.println("Added obs from 010");
+            // Add occassional new measurements to trigger updates -
+            double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(-31.9, 115.98);
+//            Observation obs = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
+//            obs.setRange(1000.0);
+//            obs.setObservationType(ObservationType.range);
+//            fuzerProcess.addObservation(obs);
+//            System.out.println("Added obs from 010");
 
-            double[] utm_coords_b = CoordHelpers.convertLatLngToUtmNthingEasting(-31.88, 115.97);
-            Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
-            obs_b.setRange(800.0);
-            obs_b.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs_b);
-            System.out.println("Added obs from 011");
+            double[] utm_coords_b = Helpers.convertLatLngToUtmNthingEasting(-31.88, 115.97);
+//            Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
+//            obs_b.setRange(800.0);
+//            obs_b.setObservationType(ObservationType.range);
+//            fuzerProcess.addObservation(obs_b);
+//            System.out.println("Added obs from 011");
+
+            // Add an example TDOA measurement between 010and 011
+            Observation obs_c = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
+            obs_c.setAssetId_b("RAND-ASSET-011");
+            obs_c.setYb(utm_coords_b[0]);
+            obs_c.setXb(utm_coords_b[1]);
+            obs_c.setTdoa(0.000001); // tdoa in seconds
+            obs_c.setObservationType(ObservationType.tdoa);
+            fuzerProcess.addObservation(obs_c);
+            System.out.println("Added tdoa obs from 010/011");
+
+            Observation obs_d = new Observation("RAND-ASSET-010", utm_coords_b[0], utm_coords_b[1]);
+            obs_d.setAoa(6); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
+            obs_d.setObservationType(ObservationType.aoa);
+            fuzerProcess.addObservation(obs_d);
+            System.out.println("Added aoa obs from 010");
 
         }
         catch (Exception e) {
