@@ -16,7 +16,7 @@ public class GeoMission {
     boolean outputKml;
     String outputKmlFilename;
 
-    Set<String> assets = new HashSet<String>();
+    Map<String,Asset> assets = new HashMap<String,Asset>();
 
     //public Map<String,double[]> geoResults;
 
@@ -108,11 +108,11 @@ public class GeoMission {
         this.showGEOs = showGEOs;
     }
 
-    public Set<String> getAssets() {
+    public Map<String, Asset> getAssets() {
         return assets;
     }
 
-    public void setAssets(Set<String> assets) {
+    public void setAssets(Map<String, Asset> assets) {
         this.assets = assets;
     }
 }

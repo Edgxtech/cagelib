@@ -64,14 +64,12 @@ public class Runner implements FuzerListener {
 //            obs.setRange(1000.0);
 //            obs.setObservationType(ObservationType.range);
 //            fuzerProcess.addObservation(obs);
-//            System.out.println("Added obs from 010");
 
             double[] utm_coords_b = Helpers.convertLatLngToUtmNthingEasting(-31.88, 115.97);
-//            Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
-//            obs_b.setRange(800.0);
-//            obs_b.setObservationType(ObservationType.range);
-//            fuzerProcess.addObservation(obs_b);
-//            System.out.println("Added obs from 011");
+            Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
+            obs_b.setRange(800.0);
+            obs_b.setObservationType(ObservationType.range);
+            fuzerProcess.addObservation(obs_b);
 
             // Add an example TDOA measurement between 010and 011
             Observation obs_c = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
@@ -81,13 +79,16 @@ public class Runner implements FuzerListener {
             obs_c.setTdoa(0.000001); // tdoa in seconds
             obs_c.setObservationType(ObservationType.tdoa);
             fuzerProcess.addObservation(obs_c);
-            System.out.println("Added tdoa obs from 010/011");
 
-            Observation obs_d = new Observation("RAND-ASSET-010", utm_coords_b[0], utm_coords_b[1]);
-            obs_d.setAoa(6); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
+            Observation obs_d = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
+            obs_d.setAoa(0); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
             obs_d.setObservationType(ObservationType.aoa);
             fuzerProcess.addObservation(obs_d);
-            System.out.println("Added aoa obs from 010");
+
+            Observation obs_e = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
+//            obs_e.setAoa(3.9); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
+//            obs_e.setObservationType(ObservationType.aoa);
+//            fuzerProcess.addObservation(obs_e);
 
         }
         catch (Exception e) {

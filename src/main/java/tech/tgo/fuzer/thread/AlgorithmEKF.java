@@ -139,6 +139,12 @@ public class AlgorithmEKF  extends Thread {
                     d = obs.getRange();
                     // Optionally, if passing dBm, basic model to use as follows to convert [dBm] to [m]
                     // double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));    /// Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]
+
+                    // TODO, Normalise the innovation, so it doesnt overpower the AOA or other measurement types
+                    //f_est = f_est / obs.getRange();
+
+                    //System.out.println("RANGE innovatin: "+f_est+", vs d: "+d);
+
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 
@@ -147,25 +153,23 @@ public class AlgorithmEKF  extends Thread {
                     f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2)) - Math.sqrt(Math.pow((obs.getXb() - xk), 2) + Math.pow(obs.getYb() - yk, 2));
 
                     d = obs.getTdoa()*Helpers.SPEED_OF_LIGHT;
+
+                    //System.out.println("TDOA innovation: "+f_est+", vs d: "+d);
                 }
                 else if (obs.getObservationType().equals(ObservationType.aoa)) {
 
-                    // TODO, innovations here
                     H = recalculateH_AOA(obs.getX(), obs.getY(), xk, yk);
 
-//                    f_est(i,:) = [atan((y_aoa(i) - Xk(2))/(x_aoa(i) - Xk(1)))*180/pi];
-//                    if(Xk(1)<x_aoa(i))
-//                        f_est(i,:) = f_est(i,:)+180;
-//                    end
                     f_est = Math.atan((obs.getY() - yk)/(obs.getX() - xk))*180/Math.PI;
                     if (xk<obs.getX()) {
                         f_est = f_est + 180;
                     }
 
-                    d = obs.getAoa();
+                    d = obs.getAoa()*180/Math.PI;
                 }
 
                 double rk = d - f_est;
+                //System.out.println("Rk: "+rk);
 
                 RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
                 RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
@@ -173,6 +177,7 @@ public class AlgorithmEKF  extends Thread {
 
                 double[] HXk = H.operate(Xk).toArray();
                 innov = K.scalarMultiply(rk - HXk[0]).getColumnVector(0).add(innov);
+                //System.out.println("Innov: "+innov);
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
             }
@@ -187,6 +192,7 @@ public class AlgorithmEKF  extends Thread {
             //   TODO, control the filter speed in configs - execute timer task on repeating schedule
             if (loopCounter==1 || loopCounter==10 || loopCounter == 100) {
                 dispatchResult(Xk);
+                //break;
             }
 
             if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
@@ -196,7 +202,11 @@ public class AlgorithmEKF  extends Thread {
             {
                 dispatchResult(Xk);
             }
-            if (loopCounter==20000)
+            if (loopCounter==10000)
+            {
+                dispatchResult(Xk);
+            }
+            if (loopCounter==100000)
             {
                 dispatchResult(Xk);
                 loopCounter=0;
@@ -206,7 +216,6 @@ public class AlgorithmEKF  extends Thread {
                     break;
                 }
             }
-
         }
     }
 
@@ -236,7 +245,7 @@ public class AlgorithmEKF  extends Thread {
     }
 
     public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {
-        double R1 = Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2);
+        double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));
 
         double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose
         double dfdy = -(x-Xk1)/R1;

@@ -1,10 +1,6 @@
 package tech.tgo.fuzer;
 
-import math.geom2d.conic.Hyperbola2D;
-import tech.tgo.fuzer.model.FuzerMode;
-import tech.tgo.fuzer.model.GeoMission;
-import tech.tgo.fuzer.model.Observation;
-import tech.tgo.fuzer.model.ObservationType;
+import tech.tgo.fuzer.model.*;
 import tech.tgo.fuzer.thread.AlgorithmEKF;
 import tech.tgo.fuzer.util.FilesystemHelpers;
 import tech.tgo.fuzer.util.Helpers;
@@ -19,7 +15,6 @@ public class FuzerProcess implements Serializable {
 
     FuzerListener actionListener;
 
-    //List<Observation> observations = new ArrayList<Observation>();
     Map<String,Observation> observations = new HashMap<String,Observation>();
 
     GeoMission geoMission;
@@ -46,7 +41,19 @@ public class FuzerProcess implements Serializable {
         // Restricted to hold only one observation per asset per type
         System.out.println("Adding obs as key: "+obs.getAssetId()+","+obs.getObservationType().name());
         this.observations.put(obs.getAssetId()+","+obs.getObservationType().name(), obs);
-        this.geoMission.assets.add(obs.getAssetId());
+
+        UTMRef assetUtmLoc = new UTMRef(obs.getX(), obs.getY(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
+        LatLng asset_ltln = assetUtmLoc.toLatLng();
+        Asset asset = new Asset(obs.getAssetId(),new double[]{asset_ltln.getLat(),asset_ltln.getLng()});
+        this.geoMission.getAssets().put(obs.getAssetId(),asset);
+
+        if (obs.getObservationType().equals(ObservationType.tdoa)) {
+            // There is a second asset to register its location
+            assetUtmLoc = new UTMRef(obs.getXb(), obs.getYb(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
+            asset_ltln = assetUtmLoc.toLatLng();
+            Asset asset_b = new Asset(obs.getAssetId_b(),new double[]{asset_ltln.getLat(),asset_ltln.getLng()});
+            this.geoMission.getAssets().put(obs.getAssetId_b(),asset_b);
+        }
 
         if (this.geoMission.showMeas)
         {
@@ -59,7 +66,6 @@ public class FuzerProcess implements Serializable {
                     double[] measPoint = {ltln.getLat(), ltln.getLng()};
                     measurementCircle.add(measPoint);
                 }
-                //this.geoMission.measurementMetres.put(obs.getAssetId(), obs.getRange());
                 this.geoMission.measurementCircles.put(obs.getAssetId(), measurementCircle);
             }
 
@@ -95,17 +101,14 @@ public class FuzerProcess implements Serializable {
             }
         }
 
-        // trigger the computation again - for tracking only
+        // trigger the computation again - if tracking mission type
         if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
             restart();
         }
     }
 
     public void restart() {
-        //stop
-        //algorithmEKF.interrupt();
         algorithmEKF.stopThread();
-
         start();
     }
 
