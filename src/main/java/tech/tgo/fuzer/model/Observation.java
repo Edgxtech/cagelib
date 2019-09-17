@@ -12,6 +12,7 @@ public class Observation {
     double y;
     double range;
     double tdoa;
+    /* Valid for 0 -> 2pi */
     double aoa;
     ObservationType observationType;
     String assetId;

@@ -77,7 +77,10 @@ public class AlgorithmEKF  extends Thread {
     {
         System.out.println("Running for # observations:"+observations.size());
 
-        LatLng init_ltln = new LatLng(-31.891551,115.996399); /// Perth Area
+        // alt start point : -31.86609796014695, Lon: 115.9948057818586
+        //LatLng init_ltln = new LatLng(-31.86609796014695,115.9948057818586); /// Perth Area
+        LatLng init_ltln = new LatLng(-31.86653552023262,116.114399401754);
+        //LatLng init_ltln = new LatLng(-31.891551,115.996399); /// Perth Area
         UTMRef utm = init_ltln.toUTMRef();
 
         double[] initStateData = {utm.getEasting(), utm.getNorthing(), 1, 1};
@@ -161,11 +164,18 @@ public class AlgorithmEKF  extends Thread {
                     H = recalculateH_AOA(obs.getX(), obs.getY(), xk, yk);
 
                     f_est = Math.atan((obs.getY() - yk)/(obs.getX() - xk))*180/Math.PI;
-                    if (xk<obs.getX()) {
+
+                    //System.out.println("PRE-AOA innovation: "+f_est+", vs d: "+d);
+                    if (xk<obs.getX()) { // 2/3 quadrant
                         f_est = f_est + 180;
+                    }
+                    if (yk<obs.getY() && xk>=obs.getX()) { // 4th quadrant
+                        f_est = (180 - Math.abs(f_est)) + 180;
                     }
 
                     d = obs.getAoa()*180/Math.PI;
+
+                    //System.out.println("POST-AOA innovation: "+f_est+", vs d: "+d);
                 }
 
                 double rk = d - f_est;
@@ -202,11 +212,15 @@ public class AlgorithmEKF  extends Thread {
             {
                 dispatchResult(Xk);
             }
-            if (loopCounter==10000)
+            if (loopCounter==1000)
             {
                 dispatchResult(Xk);
             }
-            if (loopCounter==100000)
+            if (loopCounter==2000)
+            {
+                dispatchResult(Xk);
+            }
+            if (loopCounter==300000)
             {
                 dispatchResult(Xk);
                 loopCounter=0;
@@ -245,10 +259,16 @@ public class AlgorithmEKF  extends Thread {
     }
 
     public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {
+
+        // TODO, does this need to be quadrant aware?
+
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));
 
         double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose
         double dfdy = -(x-Xk1)/R1;
+
+//        double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose     orig
+//        double dfdy = -(x-Xk1)/R1;
 
         double[][] jacobianData = {{0, 0, dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);

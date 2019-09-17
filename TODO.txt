@@ -1,3 +1,11 @@
+- tracking mode
+- logging
+- LOBs measurement plots, project out in one direction
+- CEPs
+
+
 - Add logging
 - Add tests
 - Add mathcode/simulations
+
+- Normalise each type of measurement

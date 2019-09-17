@@ -66,29 +66,29 @@ public class Runner implements FuzerListener {
 //            fuzerProcess.addObservation(obs);
 
             double[] utm_coords_b = Helpers.convertLatLngToUtmNthingEasting(-31.88, 115.97);
-            Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
-            obs_b.setRange(800.0);
-            obs_b.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs_b);
+//            Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
+//            obs_b.setRange(800.0);
+//            obs_b.setObservationType(ObservationType.range);
+//            fuzerProcess.addObservation(obs_b);
 
             // Add an example TDOA measurement between 010and 011
             Observation obs_c = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
-            obs_c.setAssetId_b("RAND-ASSET-011");
-            obs_c.setYb(utm_coords_b[0]);
-            obs_c.setXb(utm_coords_b[1]);
-            obs_c.setTdoa(0.000001); // tdoa in seconds
-            obs_c.setObservationType(ObservationType.tdoa);
-            fuzerProcess.addObservation(obs_c);
+//            obs_c.setAssetId_b("RAND-ASSET-011");
+//            obs_c.setYb(utm_coords_b[0]);
+//            obs_c.setXb(utm_coords_b[1]);
+//            obs_c.setTdoa(0.000001); // tdoa in seconds
+//            obs_c.setObservationType(ObservationType.tdoa);
+//            fuzerProcess.addObservation(obs_c);
 
             Observation obs_d = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
-            obs_d.setAoa(0); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
+            obs_d.setAoa(0.4); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
             obs_d.setObservationType(ObservationType.aoa);
             fuzerProcess.addObservation(obs_d);
 
             Observation obs_e = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
-//            obs_e.setAoa(3.9); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
-//            obs_e.setObservationType(ObservationType.aoa);
-//            fuzerProcess.addObservation(obs_e);
+            obs_e.setAoa(0); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
+            obs_e.setObservationType(ObservationType.aoa);
+            fuzerProcess.addObservation(obs_e);
 
         }
         catch (Exception e) {
