@@ -116,8 +116,11 @@ public class FuzerProcess implements Serializable {
         }
 
         /* trigger the computation again - if 'tracking' mission type */
-        if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
-            restart();
+        if (algorithmEKF !=null && algorithmEKF.isRunning()) {
+            log.debug("Algorithm was running, if this is a tracking mission, need to restart IOT capture this new observation");
+            if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
+                restart();
+            }
         }
     }
 

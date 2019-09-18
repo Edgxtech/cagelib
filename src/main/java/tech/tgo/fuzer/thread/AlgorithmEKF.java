@@ -50,7 +50,7 @@ public class AlgorithmEKF  extends Thread {
 
     Map<String,Observation> observations = new HashMap<String,Observation>();
 
-    private final AtomicBoolean running = new AtomicBoolean(true);
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     double[][] ThiData = { {1,0,1, 0}, {0,1,0,1}, {0,0,0,0}, {0,0,0,0}};
     RealMatrix Thi = new Array2DRowRealMatrix(ThiData);
@@ -80,6 +80,7 @@ public class AlgorithmEKF  extends Thread {
     public void run()
     {
         log.info("Running for # observations:"+observations.size());
+        running.set(true);
 
         //TODO, pick a start point that is as orthogonal to all sensor positions as possible
         // alt start point : -31.86609796014695, Lon: 115.9948057818586
@@ -170,7 +171,6 @@ public class AlgorithmEKF  extends Thread {
 
                     f_est = Math.atan((obs.getY() - yk)/(obs.getX() - xk))*180/Math.PI;
 
-                    //log.debug("PRE-AOA innovation: "+f_est+", vs d: "+d);
                     if (xk<obs.getX()) { // 2/3 quadrant
                         f_est = f_est + 180;
                     }
@@ -180,7 +180,7 @@ public class AlgorithmEKF  extends Thread {
 
                     d = obs.getAoa()*180/Math.PI;
 
-                    log.trace("POST-AOA innovation: "+f_est+", vs d: "+d);
+                    log.trace("AOA innovation: "+f_est+", vs d: "+d);
                 }
 
                 double rk = d - f_est;
@@ -223,7 +223,7 @@ public class AlgorithmEKF  extends Thread {
             {
                 dispatchResult(Xk);
             }
-            if (loopCounter==50000)
+            if (loopCounter==10000)
             {
                 dispatchResult(Xk);
                 loopCounter=0;
@@ -232,12 +232,15 @@ public class AlgorithmEKF  extends Thread {
                     log.debug("This is a FIX mode run, exiting since we've had MAX iterations already");
                     break;
                 }
+                else {
+                    log.debug("This is a Tracking mode run, continuing...");
+                }
             }
         }
     }
 
-    public RealMatrix recalculateH(double x_rssi, double y_rssi, double Xk1, double Xk2)
-    {
+    public RealMatrix recalculateH(double x_rssi, double y_rssi, double Xk1, double Xk2) {
+
         double R1 = Math.sqrt(Math.pow((x_rssi-Xk1),2) + Math.pow(y_rssi-Xk2,2));
 
         double dfdx = -(x_rssi-Xk1)/R1;
@@ -248,8 +251,8 @@ public class AlgorithmEKF  extends Thread {
         return H;
     }
 
-    public RealMatrix recalculateH_TDOA(double x, double y, double x2, double y2, double Xk1, double Xk2)
-    {
+    public RealMatrix recalculateH_TDOA(double x, double y, double x2, double y2, double Xk1, double Xk2) {
+
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow(y-Xk2,2));
         double R2 = Math.sqrt(Math.pow((x2-Xk1),2) + Math.pow(y2-Xk2,2));
 
@@ -263,19 +266,18 @@ public class AlgorithmEKF  extends Thread {
 
     public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {
 
-        // TODO, does this need to be quadrant aware?
-
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));
 
         double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose
         double dfdy = -(x-Xk1)/R1;
 
-//        double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose     orig
-//        double dfdy = -(x-Xk1)/R1;
-
         double[][] jacobianData = {{0, 0, dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
         return H;
+    }
+
+    public boolean isRunning() {
+        return this.running.get();
     }
 
     public void stopThread() {

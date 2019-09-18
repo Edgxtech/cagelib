@@ -1,6 +1,5 @@
 package tech.tgo.fuzer;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.model.*;
@@ -9,8 +8,7 @@ import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Runner implements FuzerListener {
 
@@ -28,9 +26,9 @@ public class Runner implements FuzerListener {
 
         // config the process - Target, Type (Geo/Track), Tolerance's
         GeoMission geoMission = new GeoMission();
-        geoMission.setFuzerMode(FuzerMode.fix);
-        geoMission.setTarget(new Target("RAND-TGT_ID","RAND-TGT-NAME")); // Set this in client logic
-        geoMission.setGeoId("RAND-GEOID"); // Set this in client logic
+        geoMission.setFuzerMode(FuzerMode.track);
+        geoMission.setTarget(new Target("RAND-TGT_ID","RAND-TGT-NAME"));
+        geoMission.setGeoId("RAND-GEOID");
         geoMission.setShowMeas(true);
         geoMission.setShowCEPs(true);
         geoMission.setShowGEOs(true);
@@ -62,6 +60,8 @@ public class Runner implements FuzerListener {
         /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
         /* For Fixer - add observations (one per asset) then start, monitor output in result() callback */
 
+        List<Observation> obsToAddAfter = new ArrayList<Observation>();
+
         try {
             // Add occassional new measurements to trigger updates -
             double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(-31.9, 115.98);
@@ -72,29 +72,32 @@ public class Runner implements FuzerListener {
 
             double[] utm_coords_b = Helpers.convertLatLngToUtmNthingEasting(-31.88, 115.97);
             Observation obs_b = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
-            obs_b.setRange(800.0);
+            obs_b.setRange(800.0); //range in metres
             obs_b.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs_b);
+            //fuzerProcess.addObservation(obs_b);
 
-            // Add an example TDOA measurement between 010and 011
             Observation obs_c = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
             obs_c.setAssetId_b("RAND-ASSET-011");
             obs_c.setYb(utm_coords_b[0]);
             obs_c.setXb(utm_coords_b[1]);
             obs_c.setTdoa(0.000001); // tdoa in seconds
             obs_c.setObservationType(ObservationType.tdoa);
-            fuzerProcess.addObservation(obs_c);
+            //fuzerProcess.addObservation(obs_c);
 
             Observation obs_d = new Observation("RAND-ASSET-010", utm_coords[0], utm_coords[1]);
-            obs_d.setAoa(2.5); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
+            obs_d.setAoa(2.5); // aoa in radians
             obs_d.setObservationType(ObservationType.aoa);
-            fuzerProcess.addObservation(obs_d);
+            //fuzerProcess.addObservation(obs_d);
 
             Observation obs_e = new Observation("RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
-            obs_e.setAoa(4.6); // Approx 2.09~=120degress in radians, 4.88~=280 degrees
+            obs_e.setAoa(4.6); // aoa in radians
             obs_e.setObservationType(ObservationType.aoa);
-            fuzerProcess.addObservation(obs_e);
+            //fuzerProcess.addObservation(obs_e);
 
+            obsToAddAfter.add(obs_b);
+            obsToAddAfter.add(obs_c);
+            obsToAddAfter.add(obs_d);
+            obsToAddAfter.add(obs_e);
         }
         catch (Exception e) {
             log.debug("Error adding observations: "+e.getMessage());
@@ -102,6 +105,15 @@ public class Runner implements FuzerListener {
         }
 
         fuzerProcess.start();
+
+        log.debug("For sim and testing: adding this many observations periodically: "+obsToAddAfter.size());
+        if (obsToAddAfter.size()>0) {
+            Timer timer = new Timer();
+            ObservationAdder observationAdder = new ObservationAdder();
+            observationAdder.setFuzerProcess(fuzerProcess);
+            observationAdder.setObservations(obsToAddAfter);
+            timer.scheduleAtFixedRate(observationAdder,5000,5000);
+        }
     }
 
     /* Client side receive raw result */

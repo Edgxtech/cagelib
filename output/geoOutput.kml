@@ -2,7 +2,7 @@
           &lt;p&gt;&lt;font color="blue"&gt;RAND-ASSET-010
           &lt;b&gt;Located here&lt;/b&gt;&lt;/font&gt;&lt;/p&gt;</description><Point><coordinates>115.9799999999916,-31.90000000060773</coordinates></Point></Placemark><Placemark><name>RAND-ASSET-011</name><Style id="assetStyle"><IconStyle id="assetIconStyle"><Icon><href>http://maps.google.com/mapfiles/kml/shapes/cabs.png</href></Icon></IconStyle></Style><description>&lt;![CDATA[
           &lt;p&gt;&lt;font color="blue"&gt;RAND-ASSET-011
-          &lt;b&gt;Located here&lt;/b&gt;&lt;/font&gt;&lt;/p&gt;</description><Point><coordinates>115.96999999999146,-31.880000000606103</coordinates></Point></Placemark><Style id="measurementStyle"><LineStyle><color>7fccfc00</color><width>3</width></LineStyle></Style><Placemark><name>RANGE:RAND-ASSET-010</name><styleUrl>#measurementStyle</styleUrl><LineString><coordinates>115.99057389200101,-31.900084430005773,0 
+          &lt;b&gt;Located here&lt;/b&gt;&lt;/font&gt;&lt;/p&gt;</description><Point><coordinates>115.96999999999146,-31.880000000606103</coordinates></Point></Placemark><Style id="measurementStyle"><LineStyle><color>ff888888</color><width>3</width></LineStyle></Style><Placemark><name>RANGE:RAND-ASSET-010</name><styleUrl>#measurementStyle</styleUrl><LineString><coordinates>115.99057389200101,-31.900084430005773,0 
 115.99038268049546,-31.898290648649645,0 
 115.98977756556783,-31.89656502908355,0 
 115.98878269176748,-31.894976361147965,0 

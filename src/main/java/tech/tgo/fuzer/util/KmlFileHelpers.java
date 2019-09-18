@@ -56,11 +56,11 @@ public class KmlFileHelpers {
             GeoMission gm = geoMission;
 
             // For each unique asset
-            log.debug("# assets providing measurements: "+gm.getAssets().size());
+            log.trace("# assets providing measurements: "+gm.getAssets().size());
             Iterator keyIt = gm.getAssets().keySet().iterator();
             while (keyIt.hasNext()) {
                 String assetId = (String)keyIt.next();
-                log.debug("Creating Asset Point in KML: lat: "+gm.getAssets().get(assetId).getCurrent_loc()[0]+", lon: "+gm.getAssets().get(assetId).getCurrent_loc()[1]);
+                log.trace("Creating Asset Point in KML: lat: "+gm.getAssets().get(assetId).getCurrent_loc()[0]+", lon: "+gm.getAssets().get(assetId).getCurrent_loc()[1]);
                 exportAssetLocation(doc,dnode,gm.getAssets().get(assetId));
             }
 
@@ -72,7 +72,7 @@ public class KmlFileHelpers {
                 style.setAttribute("id", "measurementStyle");
                 Element measStyle = doc.createElement("LineStyle");
                 Element color = doc.createElement("color");
-                color.appendChild(doc.createTextNode("7fccfc00"));
+                color.appendChild(doc.createTextNode("ff888888")); //"7fccfc00"));
                 Element width = doc.createElement("width");
                 width.appendChild(doc.createTextNode("3"));
                 measStyle.appendChild(color);
@@ -97,7 +97,7 @@ public class KmlFileHelpers {
             {
                 try
                 {
-                    log.debug("Creating GEO Point in KML");
+                    log.trace("Creating GEO Point in KML");
 
                     Element crosshairStyle = doc.createElement("Style");
                     crosshairStyle.setAttribute("id", "crosshairStyle");
@@ -142,7 +142,7 @@ public class KmlFileHelpers {
                     PFplacemark.appendChild(PFpoint);
                 }
                 catch(Exception egeo){
-                    log.debug("error exporting geo position to kml");egeo.printStackTrace();
+                    log.trace("error exporting geo position to kml");egeo.printStackTrace();
                 }
             }
 
@@ -165,7 +165,7 @@ public class KmlFileHelpers {
                         cepCircle.add(cepPoint);
                     }
 
-                    log.debug("CREATING NEW CEP POLYGON");
+                    log.trace("CREATING NEW CEP POLYGON");
                     /// create new polygon
                     Element style = doc.createElement("Style");
                     style.setAttribute("id", "cepStyle");
@@ -210,7 +210,7 @@ public class KmlFileHelpers {
 
                     polyPlacemark.appendChild(polygon);
                 }
-                catch(Exception ecep){log.debug("error exporting cep circle to kml"); ecep.printStackTrace();}
+                catch(Exception ecep){log.trace("error exporting cep circle to kml"); ecep.printStackTrace();}
             }
 
 
@@ -218,13 +218,11 @@ public class KmlFileHelpers {
             Result dest = new StreamResult(new File(workingDirectory+"output/"+geoMission.getOutputKmlFilename()));
             aTransformer.transform(src, dest);
 
-            log.debug("[KML Exp Geo] updated map data.....");
-
-            log.debug("[S] finished KML Geo export");
+            log.debug("[KML Exp Geo] finished KML Geo export - updated map data");
         }
         catch (Exception e)
         {
-            log.debug(e.getMessage());}
+            log.error(e.getMessage());}
     }
 
     public static void exportAssetLocation(Document doc, Element dnode, Asset asset) {
@@ -272,21 +270,21 @@ public class KmlFileHelpers {
             PFplacemark.appendChild(PFpoint);
         }
         catch(Exception egeo){
-            log.debug("error exporting asset position to kml");egeo.printStackTrace();
+            log.error("error exporting asset position to kml");egeo.printStackTrace();
         }
     }
 
     public static void exportMeasurementCircles(Document doc, Element dnode, GeoMission geoMission) {
         ////// PLOT RANGE MEASUREMENTS
         Set keys = geoMission.measurementCircles.keySet();
-        log.debug("# measurement circles: "+keys.size());
+        log.trace("# measurement circles: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
             String assetId = (String) keyIt.next();
-            log.debug("Creating kml for asset: "+assetId);
+            log.trace("Creating kml for asset: "+assetId);
             ArrayList<double[]> circle = (ArrayList<double[]>) geoMission.measurementCircles.get(assetId);
 
-            log.debug("This asset has measurement circle data? "+!circle.isEmpty());
+            log.trace("This asset has measurement circle data? "+!circle.isEmpty());
             if (!circle.isEmpty())
             {
                 try {
@@ -328,18 +326,18 @@ public class KmlFileHelpers {
                         synchronized (circlePoints) {
                             while (circlePoints.hasNext()) {
                                 double[] point = (double[]) circlePoints.next();
-                                //log.debug("TESTING   lat:"+point[0]+". lng:"+point[1]);
+                                //log.trace("TESTING   lat:"+point[0]+". lng:"+point[1]);
                                 circleCoords.appendChild(doc.createTextNode(point[1] + "," + point[0] + ",0 \n"));
                             }
                         }
                     } catch (Exception esynch) {
-                        log.debug("error iterating over measurement circle, b/c it being updated");
+                        log.trace("error iterating over measurement circle, b/c it being updated");
                     }
                     line.appendChild(circleCoords);
 
                     measPlacemark.appendChild(line);
                 } catch (Exception emeas) {
-                    log.debug("error exporting meas circle to kml");
+                    log.error("error exporting meas circle to kml");
                     emeas.printStackTrace();
                 }
             }
@@ -349,18 +347,18 @@ public class KmlFileHelpers {
     public static void exportMeasurementHyperbolas(Document doc, Element dnode, GeoMission geoMission) {
         ////// PLOT TDOA MEASUREMENTS
         Set keys = geoMission.measurementHyperbolas.keySet();
-        log.debug("# measurement hyperbolas: "+keys.size());
+        log.trace("# measurement hyperbolas: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
             String assetId = (String) keyIt.next();
-            log.debug("Creating kml for asset: "+assetId);
+            log.trace("Creating kml for asset: "+assetId);
             ArrayList<double[]> hyperbola = (ArrayList<double[]>) geoMission.measurementHyperbolas.get(assetId);
 
-            log.debug("This asset has measurement hyperbola data? "+!hyperbola.isEmpty());
+            log.trace("This asset has measurement hyperbola data? "+!hyperbola.isEmpty());
             if (!hyperbola.isEmpty())
             {
                 try {
-                    log.debug("CREATING NEW MEAS Hyperbola in KML");
+                    log.trace("CREATING NEW MEAS Hyperbola in KML");
 
 //                    Element style = doc.createElement("Style");
 //                    style.setAttribute("id", "measurementStyle");
@@ -404,13 +402,13 @@ public class KmlFileHelpers {
                             }
                         }
                     } catch (Exception esynch) {
-                        log.debug("error iterating over measurement hyperbola, b/c it being updated");
+                        log.trace("error iterating over measurement hyperbola, b/c it being updated");
                     }
                     line.appendChild(circleCoords);
 
                     measPlacemark.appendChild(line);
                 } catch (Exception emeas) {
-                    log.debug("error exporting meas hyperbola to kml");
+                    log.error("error exporting meas hyperbola to kml");
                     emeas.printStackTrace();
                 }
             }
@@ -420,18 +418,18 @@ public class KmlFileHelpers {
     public static void exportMeasurementDirections(Document doc, Element dnode, GeoMission geoMission) {
         ////// PLOT AOA MEASUREMENTS
         Set<String> keys = geoMission.measurementLines.keySet();
-        log.debug("# measurement lines: "+keys.size());
+        log.trace("# measurement lines: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
             String assetId = (String) keyIt.next();
-            log.debug("Creating AOA kml for asset: "+assetId);
+            log.trace("Creating AOA kml for asset: "+assetId);
             ArrayList<double[]> aoa_line = (ArrayList<double[]>) geoMission.measurementLines.get(assetId);
 
-            log.debug("This asset has measurement line data? "+!aoa_line.isEmpty());
+            log.trace("This asset has measurement line data? "+!aoa_line.isEmpty());
             if (!aoa_line.isEmpty())
             {
                 try {
-                    log.debug("CREATING NEW MEAS Line in KML");
+                    log.trace("CREATING NEW MEAS Line in KML");
 
 //                    Element style = doc.createElement("Style");
 //                    style.setAttribute("id", "measurementStyle");
@@ -476,13 +474,13 @@ public class KmlFileHelpers {
                             }
                         }
                     } catch (Exception esynch) {
-                        log.debug("error iterating over measurement line, b/c it being updated");
+                        log.trace("error iterating over measurement line, b/c it being updated");
                     }
                     line.appendChild(circleCoords);
 
                     measPlacemark.appendChild(line);
                 } catch (Exception emeas) {
-                    log.debug("error exporting meas line to kml");
+                    log.error("error exporting meas line to kml");
                     emeas.printStackTrace();
                 }
             }
