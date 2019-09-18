@@ -10,13 +10,15 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.FuzerListener;
 import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
 import tech.tgo.fuzer.util.Helpers;
-import tech.tgo.fuzer.util.FilesystemHelpers;
+import tech.tgo.fuzer.util.KmlFileHelpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
@@ -27,6 +29,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AlgorithmEKF  extends Thread {
 
+    private static final Logger log = LoggerFactory.getLogger(AlgorithmEKF.class);
+    
     // Has a number of registered devices. each device has one r measurement
     //     The algorithm runs always, but the r measurement is simply adjusted for each device
     // Need to somehow split this into a control ele which allows assets to be registered (in-memory), and measurements to be passed
@@ -75,8 +79,9 @@ public class AlgorithmEKF  extends Thread {
 
     public void run()
     {
-        System.out.println("Running for # observations:"+observations.size());
+        log.info("Running for # observations:"+observations.size());
 
+        //TODO, pick a start point that is as orthogonal to all sensor positions as possible
         // alt start point : -31.86609796014695, Lon: 115.9948057818586
         //LatLng init_ltln = new LatLng(-31.86609796014695,115.9948057818586); /// Perth Area
         LatLng init_ltln = new LatLng(-31.86653552023262,116.114399401754);
@@ -84,7 +89,7 @@ public class AlgorithmEKF  extends Thread {
         UTMRef utm = init_ltln.toUTMRef();
 
         double[] initStateData = {utm.getEasting(), utm.getNorthing(), 1, 1};
-        System.out.println("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
+        log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
 
         RealVector Xinit = new ArrayRealVector(initStateData);
 
@@ -108,15 +113,15 @@ public class AlgorithmEKF  extends Thread {
         while(true)
         {
             if (!running.get()) {
-                System.out.println("Thread was stopped");
+                log.debug("Thread was stopped");
                 break;
             }
 
             Xk = Thi.operate(Xk);// + B*uu);
 
-            //System.out.println("Xk1="+Xk.toArray()[0]+" Xk2="+Xk.toArray()[1]);
+            log.trace("Xk1="+Xk.toArray()[0]+" Xk2="+Xk.toArray()[1]);
             Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
-            //System.out.println("Pk33="+Pk.getData()[2][2]+" Pk44="+Pk.getData()[3][3]);
+            log.trace("Pk33="+Pk.getData()[2][2]+" Pk44="+Pk.getData()[3][3]);
 
             innov = new ArrayRealVector(innovd);
             P_innov = new Array2DRowRealMatrix(P_innovd);
@@ -146,7 +151,7 @@ public class AlgorithmEKF  extends Thread {
                     // TODO, Normalise the innovation, so it doesnt overpower the AOA or other measurement types
                     //f_est = f_est / obs.getRange();
 
-                    //System.out.println("RANGE innovatin: "+f_est+", vs d: "+d);
+                    log.trace("RANGE innovation: "+f_est+", vs d: "+d);
 
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
@@ -157,7 +162,7 @@ public class AlgorithmEKF  extends Thread {
 
                     d = obs.getTdoa()*Helpers.SPEED_OF_LIGHT;
 
-                    //System.out.println("TDOA innovation: "+f_est+", vs d: "+d);
+                    log.trace("TDOA innovation: "+f_est+", vs d: "+d);
                 }
                 else if (obs.getObservationType().equals(ObservationType.aoa)) {
 
@@ -165,7 +170,7 @@ public class AlgorithmEKF  extends Thread {
 
                     f_est = Math.atan((obs.getY() - yk)/(obs.getX() - xk))*180/Math.PI;
 
-                    //System.out.println("PRE-AOA innovation: "+f_est+", vs d: "+d);
+                    //log.debug("PRE-AOA innovation: "+f_est+", vs d: "+d);
                     if (xk<obs.getX()) { // 2/3 quadrant
                         f_est = f_est + 180;
                     }
@@ -175,11 +180,10 @@ public class AlgorithmEKF  extends Thread {
 
                     d = obs.getAoa()*180/Math.PI;
 
-                    //System.out.println("POST-AOA innovation: "+f_est+", vs d: "+d);
+                    log.trace("POST-AOA innovation: "+f_est+", vs d: "+d);
                 }
 
                 double rk = d - f_est;
-                //System.out.println("Rk: "+rk);
 
                 RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
                 RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
@@ -187,7 +191,7 @@ public class AlgorithmEKF  extends Thread {
 
                 double[] HXk = H.operate(Xk).toArray();
                 innov = K.scalarMultiply(rk - HXk[0]).getColumnVector(0).add(innov);
-                //System.out.println("Innov: "+innov);
+                log.trace("Innov: "+innov);
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
             }
@@ -196,7 +200,6 @@ public class AlgorithmEKF  extends Thread {
             Pk = (eye.multiply(Pk)).subtract(P_innov);
 
             loopCounter++;
-
 
             //TEMP
             //   TODO, control the filter speed in configs - execute timer task on repeating schedule
@@ -220,13 +223,13 @@ public class AlgorithmEKF  extends Thread {
             {
                 dispatchResult(Xk);
             }
-            if (loopCounter==300000)
+            if (loopCounter==50000)
             {
                 dispatchResult(Xk);
                 loopCounter=0;
 
                 if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
-                    System.out.println("This is a FIX mode run, exiting since we've had MAX iterations already");
+                    log.debug("This is a FIX mode run, exiting since we've had MAX iterations already");
                     break;
                 }
             }
@@ -295,7 +298,7 @@ public class AlgorithmEKF  extends Thread {
         this.geoMission.getTarget().setCurrent_cep(cep);
 
         if (this.geoMission.isOutputKml()) {
-            FilesystemHelpers.exportGeoMissionToKml(this.geoMission);
+            KmlFileHelpers.exportGeoMissionToKml(this.geoMission);
         }
     }
 

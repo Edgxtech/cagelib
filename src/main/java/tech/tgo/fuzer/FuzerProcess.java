@@ -1,8 +1,10 @@
 package tech.tgo.fuzer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.model.*;
 import tech.tgo.fuzer.thread.AlgorithmEKF;
-import tech.tgo.fuzer.util.FilesystemHelpers;
+import tech.tgo.fuzer.util.KmlFileHelpers;
 import tech.tgo.fuzer.util.Helpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
@@ -12,6 +14,8 @@ import java.io.Serializable;
 import java.util.*;
 
 public class FuzerProcess implements Serializable {
+
+    private static final Logger log = LoggerFactory.getLogger(FuzerProcess.class);
 
     FuzerListener actionListener;
 
@@ -29,8 +33,8 @@ public class FuzerProcess implements Serializable {
         this.geoMission = geoMission;
 
         if (geoMission.isOutputKml()) {
-            System.out.println("Creating new file as: "+FilesystemHelpers.workingDirectory+"output/"+geoMission.getOutputKmlFilename());
-            File kmlOutput = new File(FilesystemHelpers.workingDirectory+"output/"+geoMission.getOutputKmlFilename());
+            log.debug("Creating new kml output file as: "+ KmlFileHelpers.workingDirectory+"output/"+geoMission.getOutputKmlFilename());
+            File kmlOutput = new File(KmlFileHelpers.workingDirectory+"output/"+geoMission.getOutputKmlFilename());
             kmlOutput.createNewFile();
         }
     }
@@ -39,7 +43,7 @@ public class FuzerProcess implements Serializable {
         // TODO, input validation
 
         // Restricted to hold only one observation per asset per type
-        System.out.println("Adding obs as key: "+obs.getAssetId()+","+obs.getObservationType().name());
+        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name());
         this.observations.put(obs.getAssetId()+","+obs.getObservationType().name(), obs);
 
         UTMRef assetUtmLoc = new UTMRef(obs.getX(), obs.getY(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
@@ -90,7 +94,17 @@ public class FuzerProcess implements Serializable {
             if (obs.getObservationType().equals(ObservationType.aoa)) {
                 List<double[]> measurementLine = new ArrayList<double[]>();
                 double b = obs.getY() - Math.tan(obs.getAoa())*obs.getX();
-                for (double t = obs.getX()-2000; t<= obs.getX()+2000; t += 100) {
+                double fromVal=0; double toVal=0;
+                double x_run = Math.abs(Math.cos(obs.getAoa()))*5000;
+                log.debug("X RUN: "+x_run);
+                if (obs.getAoa()>Math.PI/2 && obs.getAoa()<3*Math.PI/2) { // negative-x plane projection
+                    fromVal=-x_run; toVal=0;
+                }
+                else { // positive-x plane projection
+                    fromVal=0; toVal=x_run;
+                }
+
+                for (double t = obs.getX()+fromVal; t<= obs.getX()+toVal; t += 100) {
                     double y = Math.tan(obs.getAoa())*t + b;
                     UTMRef utmMeas = new UTMRef(t, y, this.geoMission.getLatZone(), this.geoMission.getLonZone());
                     LatLng ltln = utmMeas.toLatLng();
@@ -101,7 +115,7 @@ public class FuzerProcess implements Serializable {
             }
         }
 
-        // trigger the computation again - if tracking mission type
+        /* trigger the computation again - if 'tracking' mission type */
         if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
             restart();
         }
@@ -113,9 +127,9 @@ public class FuzerProcess implements Serializable {
     }
 
     public void start() {
-        // stop currently active thread if any, but preserve its state if it was running
+        // TODO, stop currently active thread if any, but preserve its state if it was running
 
-        // run a convergence thread here using current obs
+        /* run a filter thread here using current observations */
         algorithmEKF = new AlgorithmEKF(this.actionListener, this.observations, this.geoMission);
         algorithmEKF.start();
 

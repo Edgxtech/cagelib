@@ -1,10 +1,10 @@
 - tracking mode
-- logging
-- LOBs measurement plots, project out in one direction
 - CEPs
+- pick a start point that is as orthogonal to all sensor positions as possible
+- TODO, stop currently active thread if any, but preserve its state if it was running
+- TODO, also need a method for managing/expiring old observations
+- TODO, experiment with measurement noise, R param to convert in sticky situations
 
-
-- Add logging
 - Add tests
 - Add mathcode/simulations
 
