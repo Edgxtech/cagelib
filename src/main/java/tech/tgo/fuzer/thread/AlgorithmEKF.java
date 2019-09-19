@@ -22,12 +22,11 @@ import tech.tgo.fuzer.util.KmlFileHelpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AlgorithmEKF  extends Thread {
+public class AlgorithmEKF implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(AlgorithmEKF.class);
     
@@ -46,9 +45,12 @@ public class AlgorithmEKF  extends Thread {
 
     private GeoMission geoMission;
 
+    private Long ekf_filter_throttle = null;
+    //private Timer ekf_timer;
+
     //    /* x_ and y_ are the assets positions */
 
-    Map<String,Observation> observations = new HashMap<String,Observation>();
+    Map<String,Observation> observations = new ConcurrentHashMap<String,Observation>();
 
     private final AtomicBoolean running = new AtomicBoolean(false);
 
@@ -67,6 +69,23 @@ public class AlgorithmEKF  extends Thread {
     double[][] measurementNoiseData = {{5}};
     RealMatrix Rk = new Array2DRowRealMatrix(measurementNoiseData);
 
+
+    /// NEW FROM HERE
+    RealVector Xk;
+    RealMatrix Pk;
+
+    RealVector innov;
+    RealMatrix P_innov;
+
+    RealMatrix eye;
+
+    RealMatrix H;
+    double xk;
+    double yk;
+    RealMatrix K;
+
+    //int loopCounter = 0;
+
     /*
      * Create an algorithm tracker process for the given config, observations and client implemented listener
      */
@@ -75,12 +94,50 @@ public class AlgorithmEKF  extends Thread {
         this.fuzerListener = fuzerListener;
         this.observations = observations;
         this.geoMission = geoMission;
+        //this.ekf_timer = ekf_timer;
+
+        log.info("Running for # observations:"+observations.size());
+        running.set(true);
+
+        /* Extract throttle setting */
+        if (geoMission.getProperties().getProperty("ekf.filter.throttle")!=null && !geoMission.getProperties().getProperty("ekf.filter.throttle").isEmpty()) {
+            ekf_filter_throttle = Long.parseLong(geoMission.getProperties().getProperty("ekf.filter.throttle"));
+        }
+
+        /* Initialise filter state */
+//        //TODO, pick a start point that is as orthogonal to all sensor positions as possible
+//        // alt start point : -31.86609796014695, Lon: 115.9948057818586
+//        //LatLng init_ltln = new LatLng(-31.86609796014695,115.9948057818586); /// Perth Area
+//        //LatLng init_ltln = new LatLng(-31.86653552023262,116.114399401754);
+//        LatLng init_ltln = new LatLng(-31.891551,115.996399); /// Perth Area
+//        UTMRef utm = init_ltln.toUTMRef();
+//
+//        double[] initStateData = {utm.getEasting(), utm.getNorthing(), 1, 1};
+//        log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
+//
+//        RealVector Xinit = new ArrayRealVector(initStateData);
+//
+//        Xk = Xinit;
+//        Pk = Pinit.scalarMultiply(1000.0);
+//
+//        double[] innovd = {0,0,0,0};
+//        innov = new ArrayRealVector(innovd);
+//        double[][] P_innovd = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
+//        P_innov = new Array2DRowRealMatrix(P_innovd);
+//
+//        double[][] eyeData = {{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}};
+//        eye = new Array2DRowRealMatrix(eyeData);
+    }
+
+    public void setObservations(Map<String, Observation> observations) {
+        this.observations = observations;
     }
 
     public void run()
     {
         log.info("Running for # observations:"+observations.size());
         running.set(true);
+
 
         //TODO, pick a start point that is as orthogonal to all sensor positions as possible
         // alt start point : -31.86609796014695, Lon: 115.9948057818586
@@ -110,7 +167,8 @@ public class AlgorithmEKF  extends Thread {
         double yk;
         RealMatrix K;
 
-        int loopCounter = 0;
+        long startTime = Calendar.getInstance().getTimeInMillis();
+
         while(true)
         {
             if (!running.get()) {
@@ -118,16 +176,27 @@ public class AlgorithmEKF  extends Thread {
                 break;
             }
 
+            if (ekf_filter_throttle!=null) {
+                try {
+                    log.trace("Throttling for miliseconds: "+ekf_filter_throttle);
+                    Thread.sleep(ekf_filter_throttle);
+                }
+                catch(InterruptedException ie) {
+                    log.warn("Error throttling filter");
+                }
+            }
+
             Xk = Thi.operate(Xk);// + B*uu);
 
             log.trace("Xk1="+Xk.toArray()[0]+" Xk2="+Xk.toArray()[1]);
             Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
-            log.trace("Pk33="+Pk.getData()[2][2]+" Pk44="+Pk.getData()[3][3]);
 
-            innov = new ArrayRealVector(innovd);
+            innov = new ArrayRealVector(innovd);   //redundant - NO, this is aboslutely required here otherwise filter bounces all over the place
             P_innov = new Array2DRowRealMatrix(P_innovd);
 
-            Iterator obsIterator = observations.values().iterator();
+
+            // NOTE: observations is dynamically updated for tracking mode missions
+            Iterator obsIterator = this.observations.values().iterator();
             while (obsIterator.hasNext()) {
 
                 Observation obs = (Observation) obsIterator.next();
@@ -146,11 +215,6 @@ public class AlgorithmEKF  extends Thread {
                     f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2));
 
                     d = obs.getRange();
-                    // Optionally, if passing dBm, basic model to use as follows to convert [dBm] to [m]
-                    // double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));    /// Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]
-
-                    // TODO, Normalise the innovation, so it doesnt overpower the AOA or other measurement types
-                    //f_est = f_est / obs.getRange();
 
                     log.trace("RANGE innovation: "+f_est+", vs d: "+d);
 
@@ -199,38 +263,23 @@ public class AlgorithmEKF  extends Thread {
             Xk = Xk.add(innov);
             Pk = (eye.multiply(Pk)).subtract(P_innov);
 
-            loopCounter++;
+            //loopCounter++;
 
-            //TEMP
-            //   TODO, control the filter speed in configs - execute timer task on repeating schedule
-            if (loopCounter==1 || loopCounter==10 || loopCounter == 100) {
-                dispatchResult(Xk);
-                //break;
-            }
+            if ((Calendar.getInstance().getTimeInMillis() - startTime) > this.geoMission.getDispatchResultsPeriod()) {
+                log.debug("DISPATCHING RESULT..");
+                startTime = Calendar.getInstance().getTimeInMillis();
 
-            if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
-                // TODO, if it has adequately converged, break;
-            }
-            if (loopCounter==200)
-            {
                 dispatchResult(Xk);
-            }
-            if (loopCounter==1000)
-            {
-                dispatchResult(Xk);
-            }
-            if (loopCounter==2000)
-            {
-                dispatchResult(Xk);
-            }
-            if (loopCounter==10000)
-            {
-                dispatchResult(Xk);
-                loopCounter=0;
 
                 if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
-                    log.debug("This is a FIX mode run, exiting since we've had MAX iterations already");
-                    break;
+
+                    // TODO, if filters has converged as much as possible
+                    double residual = Math.abs(Xk.getEntry(2) + Xk.getEntry(3));
+                    if (residual < 0.01) {
+                        log.debug("Exiting since this is a FIX Mode run and filter has converged to threshold");
+                        running.set(false);
+                        break;
+                    }
                 }
                 else {
                     log.debug("This is a Tracking mode run, continuing...");

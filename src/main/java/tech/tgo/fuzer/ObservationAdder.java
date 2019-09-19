@@ -3,8 +3,6 @@ package tech.tgo.fuzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.model.Observation;
-
-import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,12 +20,13 @@ public class ObservationAdder extends TimerTask {
 
     @Override
     public void run() {
-        log.debug("Adding one more observation");
         if (it.hasNext()) {
+            log.debug("Adding one more observation..");
+
             Observation obs = (Observation) it.next();
             try {
                 fuzerProcess.addObservation(obs);
-                log.debug("Added");
+                log.debug("..Added");
             }
             catch (Exception e) {
                 log.error(e.getMessage());

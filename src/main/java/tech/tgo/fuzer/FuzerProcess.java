@@ -4,14 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.model.*;
 import tech.tgo.fuzer.thread.AlgorithmEKF;
-import tech.tgo.fuzer.util.KmlFileHelpers;
 import tech.tgo.fuzer.util.Helpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
-
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FuzerProcess implements Serializable {
 
@@ -19,7 +17,7 @@ public class FuzerProcess implements Serializable {
 
     FuzerListener actionListener;
 
-    Map<String,Observation> observations = new HashMap<String,Observation>();
+    Map<String,Observation> observations = new ConcurrentHashMap<String,Observation>();
 
     GeoMission geoMission;
 
@@ -27,18 +25,36 @@ public class FuzerProcess implements Serializable {
 
     public FuzerProcess(FuzerListener actionListener) {
         this.actionListener = actionListener;
+
     }
 
     public void configure(GeoMission geoMission) throws Exception {
         this.geoMission = geoMission;
 
+        Properties properties = new Properties();
+        String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";
+        try {
+            properties.load(new FileInputStream(appConfigPath));
+            this.geoMission.setProperties(properties);
+        }
+        catch(IOException ioe) {
+            log.error(ioe.getMessage());
+            ioe.printStackTrace();
+            log.error("Error reading application properties");
+        }
+
         if (geoMission.isOutputKml()) {
-            log.debug("Creating new kml output file as: "+ KmlFileHelpers.workingDirectory+"output/"+geoMission.getOutputKmlFilename());
-            File kmlOutput = new File(KmlFileHelpers.workingDirectory+"output/"+geoMission.getOutputKmlFilename());
+            log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
+            File kmlOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
             kmlOutput.createNewFile();
+        }
+
+        if (geoMission.getDispatchResultsPeriod()==null) {
+            geoMission.setDispatchResultsPeriod(new Long(properties.getProperty("ekf.filter.default_dispatch_results_period")));
         }
     }
 
+    // Fix vs Track: difference is one uses preselected obs only, track ha ability to dynamically add/remove them and stay online
     public void addObservation(Observation obs) throws Exception {
         // TODO, input validation
 
@@ -50,6 +66,7 @@ public class FuzerProcess implements Serializable {
         LatLng asset_ltln = assetUtmLoc.toLatLng();
         Asset asset = new Asset(obs.getAssetId(),new double[]{asset_ltln.getLat(),asset_ltln.getLng()});
         this.geoMission.getAssets().put(obs.getAssetId(),asset);
+
 
         if (obs.getObservationType().equals(ObservationType.tdoa)) {
             // There is a second asset to register its location
@@ -115,17 +132,26 @@ public class FuzerProcess implements Serializable {
             }
         }
 
-        /* trigger the computation again - if 'tracking' mission type */
+
+        /* Update the live observations - if 'tracking' mission type */
         if (algorithmEKF !=null && algorithmEKF.isRunning()) {
-            log.debug("Algorithm was running, if this is a tracking mission, need to restart IOT capture this new observation");
+            log.debug("Algorithm was running, will update observations list for tracking mode runs only");
             if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
-                restart();
+                log.debug("Setting OBSERVATIONS in the filter, new size: "+this.observations.size());
+                algorithmEKF.setObservations(this.observations);
             }
+            else {
+                log.debug("Not adding this OBSERVATION to filter since is configured to produce a single FIX, run again with different observations");
+            }
+        }
+        else {
+            log.debug("Algorithm was not running, observation will be available for future runs");
         }
     }
 
     public void restart() {
         algorithmEKF.stopThread();
+
         start();
     }
 
@@ -134,7 +160,8 @@ public class FuzerProcess implements Serializable {
 
         /* run a filter thread here using current observations */
         algorithmEKF = new AlgorithmEKF(this.actionListener, this.observations, this.geoMission);
-        algorithmEKF.start();
+        Thread thread = new Thread(algorithmEKF);
+        thread.start();
 
         // TODO, also need a method for managing/expiring old observations
     }

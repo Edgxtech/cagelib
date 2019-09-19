@@ -28,6 +28,11 @@ public class GeoMission {
     public Map<String,List<double[]>> measurementHyperbolas = new HashMap<String,List<double[]>>();
     public Map<String,List<double[]>> measurementLines = new HashMap<String,List<double[]>>();
 
+    public Properties properties;
+
+    /* Period [ms] in which to dispatch filter location result for usage */
+    public Long dispatchResultsPeriod;
+
     public FuzerMode getFuzerMode() {
         return fuzerMode;
     }
@@ -114,5 +119,21 @@ public class GeoMission {
 
     public void setAssets(Map<String, Asset> assets) {
         this.assets = assets;
+    }
+
+    public Long getDispatchResultsPeriod() {
+        return dispatchResultsPeriod;
+    }
+
+    public void setDispatchResultsPeriod(Long dispatchResultsPeriod) {
+        this.dispatchResultsPeriod = dispatchResultsPeriod;
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
     }
 }

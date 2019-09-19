@@ -3,18 +3,33 @@ package tech.tgo.fuzer.model;
 /*
  * Geolocation fusion and tracking, using custom extended kalman filter implementation
  *
- * Filter operates in UTM coordinates
- *
  * @author Timothy Edge (timmyedge)
  */
 public class Observation {
+
+    /* Asset UTM Easting */
     double x;
+
+    /* Asset UTM Northing */
     double y;
+
+    /* Measured Range [m] - used ICW ObservationType.RANGE
+    /* Alternative, if passing [dBm], rudimentary propagation model may be used as follows: [dBm] to [m]
+    /* double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));
+    /* Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]*/
     double range;
+
+    /* Measured TDOA [s] - used ICW ObservationType.TDOA */
     double tdoa;
+
+    /* Measured AOA [radians] - used ICW ObservationType.AOA
     /* Valid for 0 -> 2pi */
     double aoa;
+
+    /* Observation Type */
     ObservationType observationType;
+
+    /* Asset Id */
     String assetId;
 
     String assetId_b; // For TDOA only

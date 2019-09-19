@@ -33,9 +33,6 @@ public class KmlFileHelpers {
 
     private static final Logger log = LoggerFactory.getLogger(KmlFileHelpers.class);
 
-    // TODO, get this from application.properties
-    public static String workingDirectory = "";
-
     public static void exportGeoMissionToKml(GeoMission geoMission) {
         try
         {
@@ -215,7 +212,7 @@ public class KmlFileHelpers {
 
 
             Source src = new DOMSource(doc);
-            Result dest = new StreamResult(new File(workingDirectory+"output/"+geoMission.getOutputKmlFilename()));
+            Result dest = new StreamResult(new File(geoMission.getProperties().getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename()));
             aTransformer.transform(src, dest);
 
             log.debug("[KML Exp Geo] finished KML Geo export - updated map data");
