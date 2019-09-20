@@ -17,6 +17,12 @@ public class Helpers {
         return new double[]{utm.getNorthing(),utm.getEasting()};
     }
 
+    public static Object[] getUtmLatZoneLonZone(double lat, double lng) {
+        LatLng ltln = new LatLng(lat,lng);
+        UTMRef utm = ltln.toUTMRef();
+        return new Object[]{utm.getLatZone(),utm.getLngZone()};
+    }
+
     public static double[] convertUtmNthingEastingToLatLng(double nthing, double easting, char latZone, int lngZone) {
         UTMRef utm = new UTMRef(nthing,easting,latZone,lngZone);
         LatLng ltln = utm.toLatLng();

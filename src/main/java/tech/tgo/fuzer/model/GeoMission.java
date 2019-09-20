@@ -10,13 +10,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GeoMission {
 
-    /* fix or track */
+    /* required - fix or track */
     FuzerMode fuzerMode;
 
+    /* required - name and id */
     Target target;
 
+    /* required */
     String geoId;
 
+    /* Set internally using measurements */
     char latZone;
     int lonZone;
 
@@ -25,11 +28,11 @@ public class GeoMission {
     /*  - Switch
     /*  - Output filename
     /*  - Which artefacts to show: Geo result, measurements and CEPs */
-    boolean outputKml;
-    String outputKmlFilename;
-    public boolean showCEPs = false;
-    public boolean showMeas = false;
-    public boolean showGEOs = false;
+    Boolean outputKml = false;
+    String outputKmlFilename = null;
+    public Boolean showCEPs = false;
+    public Boolean showMeas = false;
+    public Boolean showGEOs = false;
 
     /* Memory store of assets contributing to the mission */
     Map<String,Asset> assets = new HashMap<String,Asset>();
@@ -48,7 +51,7 @@ public class GeoMission {
     /* Optional to override default - Period [ms] in which to dispatch filter location result for usage - Default: 1000[ms] */
     public Long dispatchResultsPeriod;
 
-    /* Optional - Period [m] in which to throttle filter iterations (only to be used to control computational utilisation - Default: Null/Open throttle */
+    /* Optional - Period [m] in which to throttle filter iterations (only to be used to slow down computation - Default: Null/Open throttle */
     public Long filterThrottle;
 
     /* Optional to override default - filter summative residual state error threshold used by fix mode runs only - Default: 0.01 */
@@ -94,13 +97,13 @@ public class GeoMission {
         this.lonZone = lonZone;
     }
 
-    public boolean isOutputKml() {
-        return outputKml;
-    }
-
-    public void setOutputKml(boolean outputKml) {
-        this.outputKml = outputKml;
-    }
+//    public boolean isOutputKml() {
+//        return outputKml;
+//    }
+//
+//    public void setOutputKml(boolean outputKml) {
+//        this.outputKml = outputKml;
+//    }
 
     public String getOutputKmlFilename() {
         return outputKmlFilename;
@@ -110,27 +113,35 @@ public class GeoMission {
         this.outputKmlFilename = outputKmlFilename;
     }
 
-    public boolean isShowCEPs() {
+    public Boolean getOutputKml() {
+        return outputKml;
+    }
+
+    public void setOutputKml(Boolean outputKml) {
+        this.outputKml = outputKml;
+    }
+
+    public Boolean getShowCEPs() {
         return showCEPs;
     }
 
-    public void setShowCEPs(boolean showCEPs) {
+    public void setShowCEPs(Boolean showCEPs) {
         this.showCEPs = showCEPs;
     }
 
-    public boolean isShowMeas() {
+    public Boolean getShowMeas() {
         return showMeas;
     }
 
-    public void setShowMeas(boolean showMeas) {
+    public void setShowMeas(Boolean showMeas) {
         this.showMeas = showMeas;
     }
 
-    public boolean isShowGEOs() {
+    public Boolean getShowGEOs() {
         return showGEOs;
     }
 
-    public void setShowGEOs(boolean showGEOs) {
+    public void setShowGEOs(Boolean showGEOs) {
         this.showGEOs = showGEOs;
     }
 

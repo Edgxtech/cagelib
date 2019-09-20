@@ -12,11 +12,21 @@ public class Observation {
     /* Unique ID - specified by client, enables lifecycle management of the observation */
     Long id;
 
+    /* Asset lat */
+    double lat;
+
+    /* Asset lon */
+    double lon;
+
     /* Asset UTM Easting */
     double x;
 
     /* Asset UTM Northing */
     double y;
+
+    /* UTM reference zones */
+    int x_lonZone;
+    char y_latZone;
 
     /* Measured Range [m] - used ICW ObservationType.RANGE
     /* Alternative, if passing [dBm], rudimentary propagation model may be used as follows: [dBm] to [m]
@@ -40,17 +50,19 @@ public class Observation {
     String assetId_b; // For TDOA only
     double xb; // For TDOA only
     double yb; // For TDOA only
+    double lat_b; // For TDOA only
+    double lon_b; // For TDOA only
 
     /* Lat/Lon geometry describing the measurement */
     List<double[]> circleGeometry;
     List<double[]> hyperbolaGeometry;
     List<double[]> lineGeometry;
 
-    public Observation(Long id, String assetId, double y, double x) {
+    public Observation(Long id, String assetId, double lat, double lon) {
         this.id = id;
         this.assetId = assetId;
-        this.x = x;
-        this.y = y;
+        this.lon = lon;
+        this.lat = lat;
     }
 
     public double getX() {
@@ -163,5 +175,53 @@ public class Observation {
 
     public void setLineGeometry(List<double[]> lineGeometry) {
         this.lineGeometry = lineGeometry;
+    }
+
+    public int getX_lonZone() {
+        return x_lonZone;
+    }
+
+    public void setX_lonZone(int x_lonZone) {
+        this.x_lonZone = x_lonZone;
+    }
+
+    public char getY_latZone() {
+        return y_latZone;
+    }
+
+    public void setY_latZone(char y_latZone) {
+        this.y_latZone = y_latZone;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
+    public double getLat_b() {
+        return lat_b;
+    }
+
+    public void setLat_b(double lat_b) {
+        this.lat_b = lat_b;
+    }
+
+    public double getLon_b() {
+        return lon_b;
+    }
+
+    public void setLon_b(double lon_b) {
+        this.lon_b = lon_b;
     }
 }

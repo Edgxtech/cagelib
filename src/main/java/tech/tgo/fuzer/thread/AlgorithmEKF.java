@@ -19,8 +19,6 @@ import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
 import tech.tgo.fuzer.util.Helpers;
 import tech.tgo.fuzer.util.KmlFileHelpers;
-import uk.me.jstott.jcoord.LatLng;
-import uk.me.jstott.jcoord.UTMRef;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,10 +31,6 @@ public class AlgorithmEKF implements Runnable {
     private FuzerListener fuzerListener;
 
     private GeoMission geoMission;
-
-//    private Long ekf_filter_throttle = null;
-//
-//    private Double ekf_filter_convergence_threshold = null;
 
     Map<Long,Observation> observations = new ConcurrentHashMap<Long,Observation>();
 
@@ -57,15 +51,18 @@ public class AlgorithmEKF implements Runnable {
     double[][] measurementNoiseData = {{5}};
     RealMatrix Rk = new Array2DRowRealMatrix(measurementNoiseData);
 
-
-    /// NEW FROM HERE
+    /* State and Covariance */
     RealVector Xk;
     RealMatrix Pk;
 
+    double[] innovd = {0,0,0,0};
     RealVector innov;
+
+    double[][] P_innovd = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
     RealMatrix P_innov;
 
-    RealMatrix eye;
+    double[][] eyeData = {{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}};
+    RealMatrix eye = new Array2DRowRealMatrix(eyeData);
 
     RealMatrix H;
     double xk;
@@ -80,6 +77,18 @@ public class AlgorithmEKF implements Runnable {
         this.fuzerListener = fuzerListener;
         this.observations = observations;
         this.geoMission = geoMission;
+
+        /* Initialise filter state */
+        log.debug("Finding rudimentary start point between first two observations");
+        double[] start_x_y = findRudimentaryStartPoint(this.observations.values());
+        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
+        log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
+        double[] latLonStart = Helpers.convertUtmNthingEastingToLatLng(initStateData[0], initStateData[1], geoMission.getLatZone(), geoMission.getLonZone());
+        log.info("Init start point: "+latLonStart[0]+","+latLonStart[1]);
+        RealVector Xinit = new ArrayRealVector(initStateData);
+
+        Xk = Xinit;
+        Pk = Pinit.scalarMultiply(1000.0);
     }
 
     public void setObservations(Map<Long, Observation> observations) {
@@ -96,40 +105,6 @@ public class AlgorithmEKF implements Runnable {
         }
 
         running.set(true);
-
-        //TODO, pick a start point that is as orthogonal to all sensor positions as possible
-        // alt start point : -31.86609796014695, Lon: 115.9948057818586
-        //LatLng init_ltln = new LatLng(-31.86609796014695,115.9948057818586); /// Perth Area
-        //LatLng init_ltln = new LatLng(-31.86653552023262,116.114399401754);
-        //LatLng init_ltln = new LatLng(-31.891551,115.996399); /// Perth Area
-        //UTMRef utm = init_ltln.toUTMRef();
-        //double[] initStateData = {utm.getEasting(), utm.getNorthing(), 1, 1};
-
-
-        /* Initialise filter state */
-        log.debug("Finding rudimentary start point between first two observations");
-        double[] start_x_y = findRudimentaryStartPoint(this.observations.values());
-        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
-
-        log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
-
-        RealVector Xinit = new ArrayRealVector(initStateData);
-
-        RealVector Xk = Xinit;
-        RealMatrix Pk = Pinit.scalarMultiply(1000.0);
-
-        double[] innovd = {0,0,0,0};
-        RealVector innov = new ArrayRealVector(innovd);
-        double[][] P_innovd = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
-        RealMatrix P_innov = new Array2DRowRealMatrix(P_innovd);
-
-        double[][] eyeData = {{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}};
-        RealMatrix eye = new Array2DRowRealMatrix(eyeData);
-
-        RealMatrix H;
-        double xk;
-        double yk;
-        RealMatrix K;
 
         long startTime = Calendar.getInstance().getTimeInMillis();
 
@@ -155,10 +130,11 @@ public class AlgorithmEKF implements Runnable {
             log.trace("Xk1="+Xk.toArray()[0]+" Xk2="+Xk.toArray()[1]);
             Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
 
-            innov = new ArrayRealVector(innovd);   //redundant - NO, this is aboslutely required here otherwise filter bounces all over the place
+            /* reinitialise innovation vector each time */
+            innov = new ArrayRealVector(innovd);
             P_innov = new Array2DRowRealMatrix(P_innovd);
 
-            // NOTE: observations is dynamically updated for tracking mode missions
+            /* observations collection is dynamically updated for tracking mode missions */
             Iterator obsIterator = this.observations.values().iterator();
             while (obsIterator.hasNext()) {
 
@@ -180,7 +156,6 @@ public class AlgorithmEKF implements Runnable {
                     d = obs.getRange();
 
                     log.trace("RANGE innovation: "+f_est+", vs d: "+d);
-
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 
@@ -293,18 +268,14 @@ public class AlgorithmEKF implements Runnable {
             y_init = obs.getY() + 500;
         }
         else if (observations.size()>1) {
-            Observation obs = (Observation)it.next();
-            for (int i = 0; i < observations.size(); i++) {
-                if (i == 0) {
-                    x_init = obs.getX();
-                    y_init = obs.getY();
-                } else if (i == 2) {
-                    double x_n = obs.getX();
-                    double y_n = obs.getX();
-                    x_init = x_init + (x_init - x_n) / 2;
-                    y_init = y_init + (y_init - y_n) / 2;
-                }
-            }
+            Observation obs_a = (Observation)it.next();
+            Observation obs_b = (Observation)it.next();
+            x_init = obs_a.getX();
+            y_init = obs_a.getY();
+            double x_n = obs_b.getX();
+            double y_n = obs_b.getY();
+            x_init = x_init + (x_init - x_n) / 2;
+            y_init = y_init + (y_init - y_n) / 2;
         }
         return new double[]{x_init,y_init};
     }
@@ -332,7 +303,7 @@ public class AlgorithmEKF implements Runnable {
         double cep = 1500;
         this.geoMission.getTarget().setCurrent_cep(cep);
 
-        if (this.geoMission.isOutputKml()) {
+        if (this.geoMission.getOutputKml()) {
             KmlFileHelpers.exportGeoMissionToKml(this.geoMission);
         }
     }

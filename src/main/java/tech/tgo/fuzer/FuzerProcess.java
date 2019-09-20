@@ -8,17 +8,19 @@ import tech.tgo.fuzer.util.ConfigurationException;
 import tech.tgo.fuzer.util.Helpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
-
 import java.io.*;
 import java.util.*;
 
+/*
+ * Geolocation fusion and tracking, using custom extended kalman filter implementation
+ *
+ * @author Timothy Edge (timmyedge)
+ */
 public class FuzerProcess implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(FuzerProcess.class);
 
     FuzerListener actionListener;
-
-    //Map<Long,Observation> observations = new ConcurrentHashMap<Long,Observation>();  moved to GM
 
     GeoMission geoMission;
 
@@ -26,11 +28,30 @@ public class FuzerProcess implements Serializable {
 
     public FuzerProcess(FuzerListener actionListener) {
         this.actionListener = actionListener;
+    }
 
+    public void validate(GeoMission geoMission) throws Exception {
+        if (geoMission.getOutputKml()!=null && geoMission.getOutputKml().equals(true) && geoMission.getOutputKmlFilename()==null) {
+            throw new ConfigurationException("Output KML is selected however no output filname was specified");
+        }
+        if (geoMission.getFuzerMode()==null) {
+            throw new ConfigurationException("Mode was not specified: fix or track");
+        }
+        if (geoMission.getTarget()==null) {
+            throw new ConfigurationException("Target was not specified");
+        }
+        else if (geoMission.getTarget().getId()==null || geoMission.getTarget().getName()==null) {
+            throw new ConfigurationException("Target was not specified correctly");
+        }
+        if (geoMission.getGeoId()==null) {
+            throw new ConfigurationException("Mission id was not set: specify a unique string label");
+        }
     }
 
     public void configure(GeoMission geoMission) throws Exception {
         this.geoMission = geoMission;
+
+        validate(geoMission);
 
         Properties properties = new Properties();
         String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";
@@ -42,9 +63,10 @@ public class FuzerProcess implements Serializable {
             log.error(ioe.getMessage());
             ioe.printStackTrace();
             log.error("Error reading application properties");
+            throw new ConfigurationException("Trouble loading common application properties, reinstall the application");
         }
 
-        if (geoMission.isOutputKml()) {
+        if (geoMission.getOutputKml()) {
             log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
             File kmlOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
             kmlOutput.createNewFile();
@@ -83,9 +105,13 @@ public class FuzerProcess implements Serializable {
         }
     }
 
+    public void removeObservation(Long observationId) throws Exception {
+        Observation obs = this.geoMission.observations.get(observationId);
+        removeObservation(obs);
+    }
+
     public void removeObservation(Observation obs) throws Exception {
         log.debug("Removing observation: "+obs.getAssetId()+","+obs.getObservationType().name());
-        //this.observations.remove(obs.getAssetId()+","+obs.getObservationType().name());
         this.geoMission.observations.remove(obs.getId());
 
         /* If asset has no other linked observations, remove it */
@@ -112,26 +138,34 @@ public class FuzerProcess implements Serializable {
         }
     }
 
-    // Fix vs Track: difference is one uses preselected obs only, track ha ability to dynamically add/remove them and stay online
     public void addObservation(Observation obs) throws Exception {
-        // TODO, input validation
+        // TODO, input validation - lat/lon,type,measurement itself
 
-        // Restricted to hold only one observation per asset per type
         log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+", ID: "+obs.getId());
-        //this.observations.put(obs.getAssetId()+","+obs.getObservationType().name(), obs);
         this.geoMission.observations.put(obs.getId(), obs);
 
-        UTMRef assetUtmLoc = new UTMRef(obs.getX(), obs.getY(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
-        LatLng asset_ltln = assetUtmLoc.toLatLng();
-        Asset asset = new Asset(obs.getAssetId(),new double[]{asset_ltln.getLat(),asset_ltln.getLng()});
+        Object[] zones = Helpers.getUtmLatZoneLonZone(obs.getLat(), obs.getLon());
+        obs.setY_latZone((char)zones[0]);
+        obs.setX_lonZone((int)zones[1]);
+
+        /* Rudimentary here - use zones attached to the most recent observation. improvements to come later */
+        this.geoMission.setLatZone(obs.getY_latZone());
+        this.geoMission.setLonZone(obs.getX_lonZone());
+
+        double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(obs.getLat(), obs.getLon());
+        obs.setY(utm_coords[0]);
+        obs.setX(utm_coords[1]);
+
+        Asset asset = new Asset(obs.getAssetId(),new double[]{obs.getLat(),obs.getLon()});
         this.geoMission.getAssets().put(obs.getAssetId(),asset);
 
-
+        /* There is a second asset to register its location */
         if (obs.getObservationType().equals(ObservationType.tdoa)) {
-            // There is a second asset to register its location
-            assetUtmLoc = new UTMRef(obs.getXb(), obs.getYb(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
-            asset_ltln = assetUtmLoc.toLatLng();
-            Asset asset_b = new Asset(obs.getAssetId_b(),new double[]{asset_ltln.getLat(),asset_ltln.getLng()});
+            double[] utm_coords_b = Helpers.convertLatLngToUtmNthingEasting(obs.getLat_b(), obs.getLon_b());
+            obs.setYb(utm_coords_b[0]);
+            obs.setXb(utm_coords_b[1]);
+
+            Asset asset_b = new Asset(obs.getAssetId_b(),new double[]{obs.getLat_b(),obs.getLon_b()});
             this.geoMission.getAssets().put(obs.getAssetId_b(),asset_b);
         }
 
@@ -146,8 +180,6 @@ public class FuzerProcess implements Serializable {
                     double[] measPoint = {ltln.getLat(), ltln.getLng()};
                     measurementCircle.add(measPoint);
                 }
-                // tODO, add it back to the observation itself, instead of the geoMission, then just add a refernce to current active measCircles in a Set
-                //this.geoMission.measurementCircles.put(obs.getAssetId(), measurementCircle);
                 this.geoMission.circlesToShow.add(obs.getId());
                 obs.setCircleGeometry(measurementCircle);
             }
@@ -166,7 +198,6 @@ public class FuzerProcess implements Serializable {
                     LatLng ltln = utmMeas.toLatLng();
                     measurementHyperbola.add(new double[]{ltln.getLat(),ltln.getLng()});
                 }
-                //this.geoMission.measurementHyperbolas.put(obs.getAssetId()+"/"+obs.getAssetId_b(), measurementHyperbola);
                 this.geoMission.hyperbolasToShow.add(obs.getId());
                 obs.setHyperbolaGeometry(measurementHyperbola);
             }
@@ -192,14 +223,12 @@ public class FuzerProcess implements Serializable {
                     double[] measPoint = {ltln.getLat(), ltln.getLng()};
                     measurementLine.add(measPoint);
                 }
-                //this.geoMission.measurementLines.put(obs.getAssetId(), measurementLine);
                 this.geoMission.linesToShow.add(obs.getId());
                 obs.setLineGeometry(measurementLine);
             }
         }
 
-
-        /* Update the live observations - if 'tracking' mission type */
+        /* Update the live observations - if a 'tracking' mission type */
         if (algorithmEKF !=null && algorithmEKF.isRunning()) {
             log.debug("Algorithm was running, will update observations list for tracking mode runs only");
             if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
@@ -215,20 +244,18 @@ public class FuzerProcess implements Serializable {
         }
     }
 
-    public void restart() {
+    public void stop() throws Exception {
         algorithmEKF.stopThread();
-
-        start();
     }
 
-    public void start() {
-        // TODO, stop currently active thread if any, but preserve its state if it was running
+    public void start() throws Exception {
+        Iterator it = this.geoMission.observations.values().iterator();
+        if (!it.hasNext()) {
+            throw new ConfigurationException("There were no observations, couldn't start the process");
+        }
 
-        /* run a filter thread here using current observations */
         algorithmEKF = new AlgorithmEKF(this.actionListener, this.geoMission.observations, this.geoMission);
         Thread thread = new Thread(algorithmEKF);
         thread.start();
-
-        // TODO, also need a method for managing/expiring old observations
     }
 }

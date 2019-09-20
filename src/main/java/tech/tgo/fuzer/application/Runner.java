@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.FuzerListener;
 import tech.tgo.fuzer.FuzerProcess;
 import tech.tgo.fuzer.model.*;
-import tech.tgo.fuzer.util.Helpers;
+import tech.tgo.fuzer.util.ConfigurationException;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
@@ -26,7 +26,7 @@ public class Runner implements FuzerListener {
     public void runFuzerTest() {
         FuzerProcess fuzerProcess = new FuzerProcess(this);
 
-        // config the process - Target, Type (Geo/Track), Tolerance's
+        /* Configure the intended mission */
         GeoMission geoMission = new GeoMission();
         geoMission.setFuzerMode(FuzerMode.track);
         geoMission.setTarget(new Target("RAND-TGT_ID","RAND-TGT-NAME"));
@@ -36,28 +36,33 @@ public class Runner implements FuzerListener {
         geoMission.setShowGEOs(true);
         geoMission.setOutputKml(true);
         geoMission.setOutputKmlFilename("geoOutput.kml");
+
+        /* These configs are available for optional override */
         geoMission.setDispatchResultsPeriod(new Long(1000)); // Default it 1000
+        geoMission.setFilterThrottle(null); // Default is null
+        geoMission.setFilterConvergenceResidualThreshold(0.01); // Default is 0.01
 
         try {
             fuzerProcess.configure(geoMission);
         }
+        catch (ConfigurationException ce) {
+            log.error("Error trying to configure mission, returning. Error: "+ce.getMessage());
+            ce.printStackTrace();
+            return;
+        }
         catch (IOException ioe) {
-            log.debug("IO Error trying to configure geo mission: "+ioe.getMessage());
+            log.error("IO Error trying to configure mission, returning. Error: "+ioe.getMessage());
             ioe.printStackTrace();
             return;
         }
         catch (Exception e) {
-            log.debug("Error trying to configure geo mission, returning");
+            log.error("Error trying to configuremission, returning");
             e.printStackTrace();
             return;
         }
         log.debug("Configured Geo Mission, continuing");
 
-        // Need an indication of geographical area to start with IOT set common lat/lon Zone
-        LatLng ltln = new LatLng(-31.891551,115.996399); // -31.891551,115.996399 PERTH AREA   6471146.785151098,405091.95251542656
-        UTMRef utm = ltln.toUTMRef();
-        geoMission.setLatZone(utm.getLatZone());
-        geoMission.setLonZone(utm.getLngZone());
+        /* Client side needs to manage geomission references for callback response */
         fuzerMissions.put(geoMission.getGeoId(), geoMission);
 
         /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
@@ -67,37 +72,37 @@ public class Runner implements FuzerListener {
         List<Observation> obsToRemoveAfter = new ArrayList<Observation>();
 
         try {
-            // Add occassional new measurements to trigger updates -
-            double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(-31.9, 115.98);
-            Observation obs = new Observation(new Long(1001), "RAND-ASSET-010", utm_coords[0], utm_coords[1]);
+            // Add occassional new measurements to trigger updates
+            double[] asset_a_coords = new double[]{-31.9, 115.98};
+            Observation obs = new Observation(new Long(1001), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs.setRange(1000.0);
             obs.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs);
+            //fuzerProcess.addObservation(obs);
 
-            Observation obs_update = new Observation(new Long(1001), "RAND-ASSET-010", utm_coords[0], utm_coords[1]);
+            Observation obs_update = new Observation(new Long(1001), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs_update.setRange(700.0);
             obs_update.setObservationType(ObservationType.range);
 
-            double[] utm_coords_b = Helpers.convertLatLngToUtmNthingEasting(-31.88, 115.97);
-            Observation obs_b = new Observation(new Long(1002),"RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
+            double[] asset_b_coords = new double[]{-31.88, 115.97};
+            Observation obs_b = new Observation(new Long(1002),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
             obs_b.setRange(800.0); //range in metres
             obs_b.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs_b);
+            //fuzerProcess.addObservation(obs_b);
 
-            Observation obs_c = new Observation(new Long(1003),"RAND-ASSET-010", utm_coords[0], utm_coords[1]);
+            Observation obs_c = new Observation(new Long(1003),"RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs_c.setAssetId_b("RAND-ASSET-011");
-            obs_c.setYb(utm_coords_b[0]);
-            obs_c.setXb(utm_coords_b[1]);
+            obs_c.setLat_b(asset_b_coords[0]);
+            obs_c.setLon_b(asset_b_coords[1]);
             obs_c.setTdoa(0.000001); // tdoa in seconds
             obs_c.setObservationType(ObservationType.tdoa);
             //fuzerProcess.addObservation(obs_c);
 
-            Observation obs_d = new Observation(new Long(1004),"RAND-ASSET-010", utm_coords[0], utm_coords[1]);
+            Observation obs_d = new Observation(new Long(1004),"RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs_d.setAoa(2.5); // aoa in radians
             obs_d.setObservationType(ObservationType.aoa);
-            //fuzerProcess.addObservation(obs_d);
+            fuzerProcess.addObservation(obs_d);
 
-            Observation obs_e = new Observation(new Long(1005),"RAND-ASSET-011", utm_coords_b[0], utm_coords_b[1]);
+            Observation obs_e = new Observation(new Long(1005),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
             obs_e.setAoa(4.6); // aoa in radians
             obs_e.setObservationType(ObservationType.aoa);
             //fuzerProcess.addObservation(obs_e);
@@ -107,7 +112,7 @@ public class Runner implements FuzerListener {
             //obsToAddAfter.add(obs_c);
             //obsToAddAfter.add(obs_d);
             //obsToAddAfter.add(obs_e);
-            obsToAddAfter.add(obs_update);
+            //obsToAddAfter.add(obs_update);
 
             //obsToRemoveAfter.add(obs);
             //obsToRemoveAfter.add(obs_b);
@@ -119,7 +124,12 @@ public class Runner implements FuzerListener {
             e.printStackTrace();
         }
 
-        fuzerProcess.start();
+        try {
+            fuzerProcess.start();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // TODO, create a moving track simulation with reverse engineered observations to test tracking better
 
@@ -140,15 +150,33 @@ public class Runner implements FuzerListener {
             timer.scheduleAtFixedRate(observationRemover,10000,5000);
         }
 
-        try {
-            if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
-                Thread.sleep(30000);
-                fuzerProcess.start();
-            }
-        }
-        catch (InterruptedException iee) {
-
-        }
+        /* RUN STOP START AS A TEST */
+//        try {
+//            Thread.sleep(10000);
+//            log.info("STOPPING PROCESS");
+//            fuzerProcess.stop();
+//
+//            fuzerProcess.removeObservation(new Long(1001));
+//            fuzerProcess.removeObservation(new Long(1002));
+//
+//            Observation obs_d = new Observation(new Long(1006),"RAND-ASSET-013", -31.93, 115.93);
+//            obs_d.setAoa(2.6); // aoa in radians
+//            obs_d.setObservationType(ObservationType.aoa);
+//            fuzerProcess.addObservation(obs_d);
+//
+//            Observation obs_e = new Observation(new Long(1007),"RAND-ASSET-011", -31.88, 115.97);
+//            obs_e.setAoa(3.3); // aoa in radians
+//            obs_e.setObservationType(ObservationType.aoa);
+//            fuzerProcess.addObservation(obs_e);
+//
+//            Thread.sleep(5000);
+//
+//            log.info("STARTING PROCESS");
+//            fuzerProcess.start();
+//        }
+//        catch (Exception e) {
+//            log.error("Problem starting process: "+e.getMessage());
+//        }
     }
 
     /* Client side receive raw result */
