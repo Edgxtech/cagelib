@@ -29,28 +29,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AlgorithmEKF implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(AlgorithmEKF.class);
-    
-    // Has a number of registered devices. each device has one r measurement
-    //     The algorithm runs always, but the r measurement is simply adjusted for each device
-    // Need to somehow split this into a control ele which allows assets to be registered (in-memory), and measurements to be passed
-    // Then need to adjust the compute component (i.e. this component), to only re attempt convergence when substantial new information is provided - IN TRACKING MODE
-    // Also need a geo Mode, which stops after convergence.
-    // Also need target management, or allow using clients to conduct this
-
-    // Run a thread which loops fast on new data update, then gradually slows down???
-
-    // Need to think through, where is the actual interface point for the network responsible for fetching the data.
 
     private FuzerListener fuzerListener;
 
     private GeoMission geoMission;
 
-    private Long ekf_filter_throttle = null;
-    //private Timer ekf_timer;
+//    private Long ekf_filter_throttle = null;
+//
+//    private Double ekf_filter_convergence_threshold = null;
 
-    //    /* x_ and y_ are the assets positions */
-
-    Map<String,Observation> observations = new ConcurrentHashMap<String,Observation>();
+    Map<Long,Observation> observations = new ConcurrentHashMap<Long,Observation>();
 
     private final AtomicBoolean running = new AtomicBoolean(false);
 
@@ -84,69 +72,45 @@ public class AlgorithmEKF implements Runnable {
     double yk;
     RealMatrix K;
 
-    //int loopCounter = 0;
-
     /*
      * Create an algorithm tracker process for the given config, observations and client implemented listener
      */
-    public AlgorithmEKF(FuzerListener fuzerListener, Map<String,Observation> observations, GeoMission geoMission)
+    public AlgorithmEKF(FuzerListener fuzerListener, Map<Long,Observation> observations, GeoMission geoMission)
     {
         this.fuzerListener = fuzerListener;
         this.observations = observations;
         this.geoMission = geoMission;
-        //this.ekf_timer = ekf_timer;
-
-        log.info("Running for # observations:"+observations.size());
-        running.set(true);
-
-        /* Extract throttle setting */
-        if (geoMission.getProperties().getProperty("ekf.filter.throttle")!=null && !geoMission.getProperties().getProperty("ekf.filter.throttle").isEmpty()) {
-            ekf_filter_throttle = Long.parseLong(geoMission.getProperties().getProperty("ekf.filter.throttle"));
-        }
-
-        /* Initialise filter state */
-//        //TODO, pick a start point that is as orthogonal to all sensor positions as possible
-//        // alt start point : -31.86609796014695, Lon: 115.9948057818586
-//        //LatLng init_ltln = new LatLng(-31.86609796014695,115.9948057818586); /// Perth Area
-//        //LatLng init_ltln = new LatLng(-31.86653552023262,116.114399401754);
-//        LatLng init_ltln = new LatLng(-31.891551,115.996399); /// Perth Area
-//        UTMRef utm = init_ltln.toUTMRef();
-//
-//        double[] initStateData = {utm.getEasting(), utm.getNorthing(), 1, 1};
-//        log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
-//
-//        RealVector Xinit = new ArrayRealVector(initStateData);
-//
-//        Xk = Xinit;
-//        Pk = Pinit.scalarMultiply(1000.0);
-//
-//        double[] innovd = {0,0,0,0};
-//        innov = new ArrayRealVector(innovd);
-//        double[][] P_innovd = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
-//        P_innov = new Array2DRowRealMatrix(P_innovd);
-//
-//        double[][] eyeData = {{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}};
-//        eye = new Array2DRowRealMatrix(eyeData);
     }
 
-    public void setObservations(Map<String, Observation> observations) {
+    public void setObservations(Map<Long, Observation> observations) {
         this.observations = observations;
     }
 
     public void run()
     {
         log.info("Running for # observations:"+observations.size());
-        running.set(true);
 
+        if (observations.size()==0) {
+            log.info("No observations returning");
+            return;
+        }
+
+        running.set(true);
 
         //TODO, pick a start point that is as orthogonal to all sensor positions as possible
         // alt start point : -31.86609796014695, Lon: 115.9948057818586
         //LatLng init_ltln = new LatLng(-31.86609796014695,115.9948057818586); /// Perth Area
-        LatLng init_ltln = new LatLng(-31.86653552023262,116.114399401754);
+        //LatLng init_ltln = new LatLng(-31.86653552023262,116.114399401754);
         //LatLng init_ltln = new LatLng(-31.891551,115.996399); /// Perth Area
-        UTMRef utm = init_ltln.toUTMRef();
+        //UTMRef utm = init_ltln.toUTMRef();
+        //double[] initStateData = {utm.getEasting(), utm.getNorthing(), 1, 1};
 
-        double[] initStateData = {utm.getEasting(), utm.getNorthing(), 1, 1};
+
+        /* Initialise filter state */
+        log.debug("Finding rudimentary start point between first two observations");
+        double[] start_x_y = findRudimentaryStartPoint(this.observations.values());
+        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
+
         log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
 
         RealVector Xinit = new ArrayRealVector(initStateData);
@@ -176,10 +140,10 @@ public class AlgorithmEKF implements Runnable {
                 break;
             }
 
-            if (ekf_filter_throttle!=null) {
+            if (this.geoMission.getFilterThrottle()!=null) {
                 try {
-                    log.trace("Throttling for miliseconds: "+ekf_filter_throttle);
-                    Thread.sleep(ekf_filter_throttle);
+                    log.trace("Throttling for miliseconds: "+this.geoMission.getFilterThrottle());
+                    Thread.sleep(this.geoMission.getFilterThrottle());
                 }
                 catch(InterruptedException ie) {
                     log.warn("Error throttling filter");
@@ -193,7 +157,6 @@ public class AlgorithmEKF implements Runnable {
 
             innov = new ArrayRealVector(innovd);   //redundant - NO, this is aboslutely required here otherwise filter bounces all over the place
             P_innov = new Array2DRowRealMatrix(P_innovd);
-
 
             // NOTE: observations is dynamically updated for tracking mode missions
             Iterator obsIterator = this.observations.values().iterator();
@@ -235,10 +198,10 @@ public class AlgorithmEKF implements Runnable {
 
                     f_est = Math.atan((obs.getY() - yk)/(obs.getX() - xk))*180/Math.PI;
 
-                    if (xk<obs.getX()) { // 2/3 quadrant
+                    if (xk<obs.getX()) {
                         f_est = f_est + 180;
                     }
-                    if (yk<obs.getY() && xk>=obs.getX()) { // 4th quadrant
+                    if (yk<obs.getY() && xk>=obs.getX()) {
                         f_est = (180 - Math.abs(f_est)) + 180;
                     }
 
@@ -263,19 +226,15 @@ public class AlgorithmEKF implements Runnable {
             Xk = Xk.add(innov);
             Pk = (eye.multiply(Pk)).subtract(P_innov);
 
-            //loopCounter++;
-
             if ((Calendar.getInstance().getTimeInMillis() - startTime) > this.geoMission.getDispatchResultsPeriod()) {
-                log.debug("DISPATCHING RESULT..");
+                log.debug("DISPATCHING RESULT.. From # Observations: "+this.observations.size());
                 startTime = Calendar.getInstance().getTimeInMillis();
 
                 dispatchResult(Xk);
 
                 if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
-
-                    // TODO, if filters has converged as much as possible
                     double residual = Math.abs(Xk.getEntry(2) + Xk.getEntry(3));
-                    if (residual < 0.01) {
+                    if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
                         log.debug("Exiting since this is a FIX Mode run and filter has converged to threshold");
                         running.set(false);
                         break;
@@ -317,12 +276,37 @@ public class AlgorithmEKF implements Runnable {
 
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));
 
-        double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose
+        double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose linearisation
         double dfdy = -(x-Xk1)/R1;
 
         double[][] jacobianData = {{0, 0, dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
         return H;
+    }
+
+    public double[] findRudimentaryStartPoint(Collection<Observation> observations) {
+        double x_init=0; double y_init=0;
+        Iterator it = observations.iterator();
+        if (observations.size()==1) {
+            Observation obs = (Observation)it.next();
+            x_init = obs.getX() + 500;
+            y_init = obs.getY() + 500;
+        }
+        else if (observations.size()>1) {
+            Observation obs = (Observation)it.next();
+            for (int i = 0; i < observations.size(); i++) {
+                if (i == 0) {
+                    x_init = obs.getX();
+                    y_init = obs.getY();
+                } else if (i == 2) {
+                    double x_n = obs.getX();
+                    double y_n = obs.getX();
+                    x_init = x_init + (x_init - x_n) / 2;
+                    y_init = y_init + (y_init - y_n) / 2;
+                }
+            }
+        }
+        return new double[]{x_init,y_init};
     }
 
     public boolean isRunning() {
@@ -352,5 +336,4 @@ public class AlgorithmEKF implements Runnable {
             KmlFileHelpers.exportGeoMissionToKml(this.geoMission);
         }
     }
-
 }

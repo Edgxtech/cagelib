@@ -273,40 +273,25 @@ public class KmlFileHelpers {
 
     public static void exportMeasurementCircles(Document doc, Element dnode, GeoMission geoMission) {
         ////// PLOT RANGE MEASUREMENTS
-        Set keys = geoMission.measurementCircles.keySet();
+        //Set keys = geoMission.measurementCircles.keySet();
+        Set keys = geoMission.circlesToShow;
         log.trace("# measurement circles: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
-            String assetId = (String) keyIt.next();
-            log.trace("Creating kml for asset: "+assetId);
-            ArrayList<double[]> circle = (ArrayList<double[]>) geoMission.measurementCircles.get(assetId);
+            Long ele = (Long) keyIt.next();
+            log.trace("Creating kml for ele: "+ele);
+            //ArrayList<double[]> circle = (ArrayList<double[]>) geoMission.measurementCircles.get(assetId);
+            List<double[]> circle = (ArrayList<double[]>) geoMission.getObservations().get(ele).getCircleGeometry();
 
             log.trace("This asset has measurement circle data? "+!circle.isEmpty());
             if (!circle.isEmpty())
             {
                 try {
-//                    Element style = doc.createElement("Style");
-//                    style.setAttribute("id", "measurementStyle");
-//
-//                    Element measStyle = doc.createElement("LineStyle");
-//                    Element color = doc.createElement("color");
-//                    color.appendChild(doc.createTextNode("7fcccc00"));
-//
-//                    Element width = doc.createElement("width");
-//                    width.appendChild(doc.createTextNode("3"));
-//
-//                    measStyle.appendChild(color);
-//                    measStyle.appendChild(width);
-//
-//                    style.appendChild(measStyle);
-//
-//                    dnode.appendChild(style);
-
                     Element measPlacemark = doc.createElement("Placemark");
                     dnode.appendChild(measPlacemark);
 
                     Element name = doc.createElement("name");
-                    name.appendChild(doc.createTextNode("RANGE:"+assetId));
+                    name.appendChild(doc.createTextNode("RANGE:"+geoMission.getObservations().get(ele).getAssetId()));
                     measPlacemark.appendChild(name);
 
                     Element styleUrl = doc.createElement("styleUrl");
@@ -323,7 +308,6 @@ public class KmlFileHelpers {
                         synchronized (circlePoints) {
                             while (circlePoints.hasNext()) {
                                 double[] point = (double[]) circlePoints.next();
-                                //log.trace("TESTING   lat:"+point[0]+". lng:"+point[1]);
                                 circleCoords.appendChild(doc.createTextNode(point[1] + "," + point[0] + ",0 \n"));
                             }
                         }
@@ -343,13 +327,15 @@ public class KmlFileHelpers {
 
     public static void exportMeasurementHyperbolas(Document doc, Element dnode, GeoMission geoMission) {
         ////// PLOT TDOA MEASUREMENTS
-        Set keys = geoMission.measurementHyperbolas.keySet();
+        //Set keys = geoMission.measurementHyperbolas.keySet();
+        Set keys = geoMission.hyperbolasToShow;
         log.trace("# measurement hyperbolas: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
-            String assetId = (String) keyIt.next();
-            log.trace("Creating kml for asset: "+assetId);
-            ArrayList<double[]> hyperbola = (ArrayList<double[]>) geoMission.measurementHyperbolas.get(assetId);
+            Long ele = (Long) keyIt.next();
+            log.trace("Creating kml for ele: "+ele);
+            //ArrayList<double[]> hyperbola = (ArrayList<double[]>) geoMission.measurementHyperbolas.get(assetId);
+            List<double[]> hyperbola = (ArrayList<double[]>) geoMission.getObservations().get(ele).getHyperbolaGeometry();
 
             log.trace("This asset has measurement hyperbola data? "+!hyperbola.isEmpty());
             if (!hyperbola.isEmpty())
@@ -357,28 +343,11 @@ public class KmlFileHelpers {
                 try {
                     log.trace("CREATING NEW MEAS Hyperbola in KML");
 
-//                    Element style = doc.createElement("Style");
-//                    style.setAttribute("id", "measurementStyle");
-//
-//                    Element measStyle = doc.createElement("LineStyle");
-//                    Element color = doc.createElement("color");
-//                    color.appendChild(doc.createTextNode("7fccfc00"));
-//
-//                    Element width = doc.createElement("width");
-//                    width.appendChild(doc.createTextNode("3"));
-//
-//                    measStyle.appendChild(color);
-//                    measStyle.appendChild(width);
-//
-//                    style.appendChild(measStyle);
-//
-//                    dnode.appendChild(style);
-
                     Element measPlacemark = doc.createElement("Placemark");
                     dnode.appendChild(measPlacemark);
 
                     Element name = doc.createElement("name");
-                    name.appendChild(doc.createTextNode("TDOA:"+assetId));
+                    name.appendChild(doc.createTextNode("TDOA:"+geoMission.getObservations().get(ele).getAssetId()+"/"+geoMission.getObservations().get(ele).getAssetId_b()));
                     measPlacemark.appendChild(name);
 
                     Element styleUrl = doc.createElement("styleUrl");
@@ -414,13 +383,15 @@ public class KmlFileHelpers {
 
     public static void exportMeasurementDirections(Document doc, Element dnode, GeoMission geoMission) {
         ////// PLOT AOA MEASUREMENTS
-        Set<String> keys = geoMission.measurementLines.keySet();
+        //Set<String> keys = geoMission.measurementLines.keySet();
+        Set keys = geoMission.linesToShow;
         log.trace("# measurement lines: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
-            String assetId = (String) keyIt.next();
-            log.trace("Creating AOA kml for asset: "+assetId);
-            ArrayList<double[]> aoa_line = (ArrayList<double[]>) geoMission.measurementLines.get(assetId);
+            Long ele = (Long) keyIt.next();
+            log.trace("Creating AOA kml for ele: "+ele);
+            //ArrayList<double[]> aoa_line = (ArrayList<double[]>) geoMission.measurementLines.get(assetId);
+            List<double[]> aoa_line = (ArrayList<double[]>) geoMission.getObservations().get(ele).getLineGeometry();
 
             log.trace("This asset has measurement line data? "+!aoa_line.isEmpty());
             if (!aoa_line.isEmpty())
@@ -428,28 +399,11 @@ public class KmlFileHelpers {
                 try {
                     log.trace("CREATING NEW MEAS Line in KML");
 
-//                    Element style = doc.createElement("Style");
-//                    style.setAttribute("id", "measurementStyle");
-//
-//                    Element measStyle = doc.createElement("LineStyle");
-//                    Element color = doc.createElement("color");
-//                    color.appendChild(doc.createTextNode("7fcffc00"));
-//
-//                    Element width = doc.createElement("width");
-//                    width.appendChild(doc.createTextNode("3"));
-//
-//                    measStyle.appendChild(color);
-//                    measStyle.appendChild(width);
-//
-//                    style.appendChild(measStyle);
-//
-//                    dnode.appendChild(style);
-
                     Element measPlacemark = doc.createElement("Placemark");
                     dnode.appendChild(measPlacemark);
 
                     Element name = doc.createElement("name");
-                    name.appendChild(doc.createTextNode("AOA:"+assetId));
+                    name.appendChild(doc.createTextNode("AOA:"+geoMission.getObservations().get(ele).getAssetId()));
                     measPlacemark.appendChild(name);
 
                     Element styleUrl = doc.createElement("styleUrl");

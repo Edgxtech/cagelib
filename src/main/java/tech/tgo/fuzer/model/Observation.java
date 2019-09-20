@@ -1,11 +1,16 @@
 package tech.tgo.fuzer.model;
 
+import java.util.List;
+
 /*
  * Geolocation fusion and tracking, using custom extended kalman filter implementation
  *
  * @author Timothy Edge (timmyedge)
  */
 public class Observation {
+
+    /* Unique ID - specified by client, enables lifecycle management of the observation */
+    Long id;
 
     /* Asset UTM Easting */
     double x;
@@ -36,7 +41,13 @@ public class Observation {
     double xb; // For TDOA only
     double yb; // For TDOA only
 
-    public Observation(String assetId, double y, double x) {
+    /* Lat/Lon geometry describing the measurement */
+    List<double[]> circleGeometry;
+    List<double[]> hyperbolaGeometry;
+    List<double[]> lineGeometry;
+
+    public Observation(Long id, String assetId, double y, double x) {
+        this.id = id;
         this.assetId = assetId;
         this.x = x;
         this.y = y;
@@ -120,5 +131,37 @@ public class Observation {
 
     public void setAssetId_b(String assetId_b) {
         this.assetId_b = assetId_b;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public List<double[]> getCircleGeometry() {
+        return circleGeometry;
+    }
+
+    public void setCircleGeometry(List<double[]> circleGeometry) {
+        this.circleGeometry = circleGeometry;
+    }
+
+    public List<double[]> getHyperbolaGeometry() {
+        return hyperbolaGeometry;
+    }
+
+    public void setHyperbolaGeometry(List<double[]> hyperbolaGeometry) {
+        this.hyperbolaGeometry = hyperbolaGeometry;
+    }
+
+    public List<double[]> getLineGeometry() {
+        return lineGeometry;
+    }
+
+    public void setLineGeometry(List<double[]> lineGeometry) {
+        this.lineGeometry = lineGeometry;
     }
 }

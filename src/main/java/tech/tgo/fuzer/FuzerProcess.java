@@ -4,12 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.model.*;
 import tech.tgo.fuzer.thread.AlgorithmEKF;
+import tech.tgo.fuzer.util.ConfigurationException;
 import tech.tgo.fuzer.util.Helpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
+
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class FuzerProcess implements Serializable {
 
@@ -17,7 +18,7 @@ public class FuzerProcess implements Serializable {
 
     FuzerListener actionListener;
 
-    Map<String,Observation> observations = new ConcurrentHashMap<String,Observation>();
+    //Map<Long,Observation> observations = new ConcurrentHashMap<Long,Observation>();  moved to GM
 
     GeoMission geoMission;
 
@@ -49,8 +50,65 @@ public class FuzerProcess implements Serializable {
             kmlOutput.createNewFile();
         }
 
+        /* Extract results dispatch period */
         if (geoMission.getDispatchResultsPeriod()==null) {
-            geoMission.setDispatchResultsPeriod(new Long(properties.getProperty("ekf.filter.default_dispatch_results_period")));
+            if (geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period") != null && !geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period").isEmpty()) {
+                geoMission.setDispatchResultsPeriod(new Long(properties.getProperty("ekf.filter.default.dispatch_results_period")));
+            }
+            else {
+                throw new ConfigurationException("No dispatch results period specified");
+            }
+        }
+
+        /* Extract throttle setting - NULL is allowed */
+        if (geoMission.getFilterThrottle()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.throttle") != null) {
+                if (geoMission.getProperties().getProperty("ekf.filter.default.throttle").isEmpty()) {
+                    geoMission.setFilterThrottle(null);
+                }
+                else {
+                    geoMission.setFilterThrottle(Long.parseLong(geoMission.getProperties().getProperty("ekf.filter.default.throttle")));
+                }
+            }
+        }
+
+        /* Extract convergence threshold setting */
+        if (geoMission.getFilterConvergenceResidualThreshold()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold") != null && !geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold").isEmpty()) {
+                geoMission.setFilterConvergenceResidualThreshold(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold")));
+            }
+            else {
+                throw new ConfigurationException("No convergence threshold specified");
+            }
+        }
+    }
+
+    public void removeObservation(Observation obs) throws Exception {
+        log.debug("Removing observation: "+obs.getAssetId()+","+obs.getObservationType().name());
+        //this.observations.remove(obs.getAssetId()+","+obs.getObservationType().name());
+        this.geoMission.observations.remove(obs.getId());
+
+        /* If asset has no other linked observations, remove it */
+        boolean hasOtherObs = false;
+        for (Map.Entry<Long, Observation> o : this.geoMission.observations.entrySet()) {
+            if (o.getValue().getAssetId().equals(obs.getAssetId())) {
+                hasOtherObs=true;
+                break;
+            }
+        }
+        if (!hasOtherObs) {
+            this.geoMission.getAssets().remove(obs.getAssetId());
+        }
+
+        // Remove plottable measurement
+        if (obs.getObservationType().equals(ObservationType.range)) {
+            this.geoMission.circlesToShow.remove(obs.getId());
+        }
+        else if (obs.getObservationType().equals(ObservationType.tdoa)) {
+            this.geoMission.hyperbolasToShow.remove(obs.getId());
+        }
+        else if (obs.getObservationType().equals(ObservationType.aoa)) {
+            this.geoMission.linesToShow.remove(obs.getId());
         }
     }
 
@@ -59,8 +117,9 @@ public class FuzerProcess implements Serializable {
         // TODO, input validation
 
         // Restricted to hold only one observation per asset per type
-        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name());
-        this.observations.put(obs.getAssetId()+","+obs.getObservationType().name(), obs);
+        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+", ID: "+obs.getId());
+        //this.observations.put(obs.getAssetId()+","+obs.getObservationType().name(), obs);
+        this.geoMission.observations.put(obs.getId(), obs);
 
         UTMRef assetUtmLoc = new UTMRef(obs.getX(), obs.getY(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
         LatLng asset_ltln = assetUtmLoc.toLatLng();
@@ -87,7 +146,10 @@ public class FuzerProcess implements Serializable {
                     double[] measPoint = {ltln.getLat(), ltln.getLng()};
                     measurementCircle.add(measPoint);
                 }
-                this.geoMission.measurementCircles.put(obs.getAssetId(), measurementCircle);
+                // tODO, add it back to the observation itself, instead of the geoMission, then just add a refernce to current active measCircles in a Set
+                //this.geoMission.measurementCircles.put(obs.getAssetId(), measurementCircle);
+                this.geoMission.circlesToShow.add(obs.getId());
+                obs.setCircleGeometry(measurementCircle);
             }
 
             /* TDOA MEASUREMENT */
@@ -104,7 +166,9 @@ public class FuzerProcess implements Serializable {
                     LatLng ltln = utmMeas.toLatLng();
                     measurementHyperbola.add(new double[]{ltln.getLat(),ltln.getLng()});
                 }
-                this.geoMission.measurementHyperbolas.put(obs.getAssetId()+"/"+obs.getAssetId_b(), measurementHyperbola);
+                //this.geoMission.measurementHyperbolas.put(obs.getAssetId()+"/"+obs.getAssetId_b(), measurementHyperbola);
+                this.geoMission.hyperbolasToShow.add(obs.getId());
+                obs.setHyperbolaGeometry(measurementHyperbola);
             }
 
             /* AOA MEASUREMENT */
@@ -128,7 +192,9 @@ public class FuzerProcess implements Serializable {
                     double[] measPoint = {ltln.getLat(), ltln.getLng()};
                     measurementLine.add(measPoint);
                 }
-                this.geoMission.measurementLines.put(obs.getAssetId(), measurementLine);
+                //this.geoMission.measurementLines.put(obs.getAssetId(), measurementLine);
+                this.geoMission.linesToShow.add(obs.getId());
+                obs.setLineGeometry(measurementLine);
             }
         }
 
@@ -137,8 +203,8 @@ public class FuzerProcess implements Serializable {
         if (algorithmEKF !=null && algorithmEKF.isRunning()) {
             log.debug("Algorithm was running, will update observations list for tracking mode runs only");
             if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
-                log.debug("Setting OBSERVATIONS in the filter, new size: "+this.observations.size());
-                algorithmEKF.setObservations(this.observations);
+                log.debug("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
+                algorithmEKF.setObservations(this.geoMission.observations);
             }
             else {
                 log.debug("Not adding this OBSERVATION to filter since is configured to produce a single FIX, run again with different observations");
@@ -159,7 +225,7 @@ public class FuzerProcess implements Serializable {
         // TODO, stop currently active thread if any, but preserve its state if it was running
 
         /* run a filter thread here using current observations */
-        algorithmEKF = new AlgorithmEKF(this.actionListener, this.observations, this.geoMission);
+        algorithmEKF = new AlgorithmEKF(this.actionListener, this.geoMission.observations, this.geoMission);
         Thread thread = new Thread(algorithmEKF);
         thread.start();
 

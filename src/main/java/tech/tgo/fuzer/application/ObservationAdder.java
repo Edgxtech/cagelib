@@ -1,7 +1,8 @@
-package tech.tgo.fuzer;
+package tech.tgo.fuzer.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.tgo.fuzer.FuzerProcess;
 import tech.tgo.fuzer.model.Observation;
 import java.util.ArrayList;
 import java.util.Iterator;

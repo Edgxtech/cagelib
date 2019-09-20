@@ -1,6 +1,7 @@
 package tech.tgo.fuzer.model;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
  * Geolocation fusion and tracking, using custom extended kalman filter implementation
@@ -8,30 +9,50 @@ import java.util.*;
  * @author Timothy Edge (timmyedge)
  */
 public class GeoMission {
+
+    /* fix or track */
     FuzerMode fuzerMode;
+
     Target target;
+
     String geoId;
+
     char latZone;
     int lonZone;
+
+    /*
+    /* Settings if choosing for fuzer to output to KML
+    /*  - Switch
+    /*  - Output filename
+    /*  - Which artefacts to show: Geo result, measurements and CEPs */
     boolean outputKml;
     String outputKmlFilename;
-
-    Map<String,Asset> assets = new HashMap<String,Asset>();
-
-    //public Map<String,double[]> geoResults;
-
     public boolean showCEPs = false;
     public boolean showMeas = false;
     public boolean showGEOs = false;
 
-    public Map<String,List<double[]>> measurementCircles = new HashMap<String,List<double[]>>();
-    public Map<String,List<double[]>> measurementHyperbolas = new HashMap<String,List<double[]>>();
-    public Map<String,List<double[]>> measurementLines = new HashMap<String,List<double[]>>();
+    /* Memory store of assets contributing to the mission */
+    Map<String,Asset> assets = new HashMap<String,Asset>();
 
+    /* Memory store of observations contributing to the mission - updated dynamically for track missions */
+    public Map<Long,Observation> observations = new ConcurrentHashMap<Long,Observation>();
+
+    /* Memory store of calculated observation geometries for plotting */
+    public Set<Long> circlesToShow = new HashSet<Long>();
+    public Set<Long> hyperbolasToShow = new HashSet<Long>();
+    public Set<Long> linesToShow = new HashSet<Long>();
+
+    /* Library default properties*/
     public Properties properties;
 
-    /* Period [ms] in which to dispatch filter location result for usage */
+    /* Optional to override default - Period [ms] in which to dispatch filter location result for usage - Default: 1000[ms] */
     public Long dispatchResultsPeriod;
+
+    /* Optional - Period [m] in which to throttle filter iterations (only to be used to control computational utilisation - Default: Null/Open throttle */
+    public Long filterThrottle;
+
+    /* Optional to override default - filter summative residual state error threshold used by fix mode runs only - Default: 0.01 */
+    public Double filterConvergenceResidualThreshold;
 
     public FuzerMode getFuzerMode() {
         return fuzerMode;
@@ -129,11 +150,35 @@ public class GeoMission {
         this.dispatchResultsPeriod = dispatchResultsPeriod;
     }
 
+    public Long getFilterThrottle() {
+        return filterThrottle;
+    }
+
+    public void setFilterThrottle(Long filterThrottle) {
+        this.filterThrottle = filterThrottle;
+    }
+
+    public Double getFilterConvergenceResidualThreshold() {
+        return filterConvergenceResidualThreshold;
+    }
+
+    public void setFilterConvergenceResidualThreshold(Double filterConvergenceResidualThreshold) {
+        this.filterConvergenceResidualThreshold = filterConvergenceResidualThreshold;
+    }
+
     public Properties getProperties() {
         return properties;
     }
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public Map<Long, Observation> getObservations() {
+        return observations;
+    }
+
+    public void setObservations(Map<Long, Observation> observations) {
+        this.observations = observations;
     }
 }
