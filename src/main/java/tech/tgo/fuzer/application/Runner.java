@@ -71,42 +71,63 @@ public class Runner implements FuzerListener {
         List<Observation> obsToAddAfter = new ArrayList<Observation>();
         List<Observation> obsToRemoveAfter = new ArrayList<Observation>();
 
+        /* Some common asset coords to reuse */
+        double[] asset_a_coords = new double[]{-31.9, 115.98};
+        double[] asset_b_coords = new double[]{-31.88, 115.97};
+
         try {
-            // Add occassional new measurements to trigger updates
-            double[] asset_a_coords = new double[]{-31.9, 115.98};
             Observation obs = new Observation(new Long(1001), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs.setRange(1000.0);
             obs.setObservationType(ObservationType.range);
-            //fuzerProcess.addObservation(obs);
+            fuzerProcess.addObservation(obs);
+        }
+        catch (Exception e) { e.printStackTrace(); }
 
+        try {
             Observation obs_update = new Observation(new Long(1001), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs_update.setRange(700.0);
             obs_update.setObservationType(ObservationType.range);
+        }
+        catch (Exception e) { e.printStackTrace(); }
 
-            double[] asset_b_coords = new double[]{-31.88, 115.97};
-            Observation obs_b = new Observation(new Long(1002),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
+
+        try {
+            Observation obs_b = new Observation(new Long(1002), "RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
             obs_b.setRange(800.0); //range in metres
             obs_b.setObservationType(ObservationType.range);
             //fuzerProcess.addObservation(obs_b);
+        } catch (Exception e) { e.printStackTrace(); }
 
-            Observation obs_c = new Observation(new Long(1003),"RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
+
+        try {
+            Observation obs_c = new Observation(new Long(1003), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs_c.setAssetId_b("RAND-ASSET-011");
             obs_c.setLat_b(asset_b_coords[0]);
             obs_c.setLon_b(asset_b_coords[1]);
             obs_c.setTdoa(0.000001); // tdoa in seconds
             obs_c.setObservationType(ObservationType.tdoa);
-            //fuzerProcess.addObservation(obs_c);
+            fuzerProcess.addObservation(obs_c);
+        }
+        catch (Exception e) { e.printStackTrace(); }
 
+        try {
             Observation obs_d = new Observation(new Long(1004),"RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs_d.setAoa(2.5); // aoa in radians
             obs_d.setObservationType(ObservationType.aoa);
             fuzerProcess.addObservation(obs_d);
+        }
+        catch (Exception e) { e.printStackTrace(); }
 
+
+        try {
             Observation obs_e = new Observation(new Long(1005),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
             obs_e.setAoa(4.6); // aoa in radians
             obs_e.setObservationType(ObservationType.aoa);
             //fuzerProcess.addObservation(obs_e);
+        }
+        catch (Exception e) { e.printStackTrace(); }
 
+        try{
             //obsToAddAfter.add(obs);
             //obsToAddAfter.add(obs_b);
             //obsToAddAfter.add(obs_c);
@@ -119,10 +140,7 @@ public class Runner implements FuzerListener {
             //obsToRemoveAfter.add(obs_c);
 
         }
-        catch (Exception e) {
-            log.debug("Error adding observations: "+e.getMessage());
-            e.printStackTrace();
-        }
+        catch (Exception e) { e.printStackTrace(); }
 
         try {
             fuzerProcess.start();

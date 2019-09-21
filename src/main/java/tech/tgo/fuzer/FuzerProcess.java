@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.model.*;
 import tech.tgo.fuzer.thread.AlgorithmEKF;
 import tech.tgo.fuzer.util.ConfigurationException;
+import tech.tgo.fuzer.util.FuzerValidator;
 import tech.tgo.fuzer.util.Helpers;
+import tech.tgo.fuzer.util.ObservationException;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 import java.io.*;
@@ -30,28 +32,10 @@ public class FuzerProcess implements Serializable {
         this.actionListener = actionListener;
     }
 
-    public void validate(GeoMission geoMission) throws Exception {
-        if (geoMission.getOutputKml()!=null && geoMission.getOutputKml().equals(true) && geoMission.getOutputKmlFilename()==null) {
-            throw new ConfigurationException("Output KML is selected however no output filname was specified");
-        }
-        if (geoMission.getFuzerMode()==null) {
-            throw new ConfigurationException("Mode was not specified: fix or track");
-        }
-        if (geoMission.getTarget()==null) {
-            throw new ConfigurationException("Target was not specified");
-        }
-        else if (geoMission.getTarget().getId()==null || geoMission.getTarget().getName()==null) {
-            throw new ConfigurationException("Target was not specified correctly");
-        }
-        if (geoMission.getGeoId()==null) {
-            throw new ConfigurationException("Mission id was not set: specify a unique string label");
-        }
-    }
-
     public void configure(GeoMission geoMission) throws Exception {
         this.geoMission = geoMission;
 
-        validate(geoMission);
+        FuzerValidator.validate(geoMission);
 
         Properties properties = new Properties();
         String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";
@@ -139,7 +123,7 @@ public class FuzerProcess implements Serializable {
     }
 
     public void addObservation(Observation obs) throws Exception {
-        // TODO, input validation - lat/lon,type,measurement itself
+        FuzerValidator.validate(obs);
 
         log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+", ID: "+obs.getId());
         this.geoMission.observations.put(obs.getId(), obs);
