@@ -234,7 +234,7 @@ public class FuzerProcess implements Serializable {
 
     public void start() throws Exception {
         Iterator it = this.geoMission.observations.values().iterator();
-        if (!it.hasNext()) {
+        if (!it.hasNext() && this.geoMission.getFuzerMode().equals(FuzerMode.fix)) {
             throw new ConfigurationException("There were no observations, couldn't start the process");
         }
 
