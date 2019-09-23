@@ -36,6 +36,7 @@ public class Runner implements FuzerListener {
         geoMission.setShowGEOs(true);
         geoMission.setOutputKml(true);
         geoMission.setOutputKmlFilename("geoOutput.kml");
+        geoMission.setShowTrueLoc(true);
 
         /* These configs are available for optional override */
         geoMission.setDispatchResultsPeriod(new Long(1000)); // Default it 1000
@@ -71,16 +72,16 @@ public class Runner implements FuzerListener {
         Timer timer = new Timer();
 
         /* Test test basic filter operation */
-//        StationaryTargetObserver stationaryTargetObserver = new StationaryTargetObserver();
-//        stationaryTargetObserver.setFuzerProcess(fuzerProcess);
-//        timer.schedule(stationaryTargetObserver,0); // Run once
+        StationaryTargetObserver stationaryTargetObserver = new StationaryTargetObserver();
+        stationaryTargetObserver.setFuzerProcess(fuzerProcess);
+        timer.schedule(stationaryTargetObserver,0); // Run once
 
         /* To test target moving */
-        MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
-        movingTargetObserver.setFuzerProcess(fuzerProcess);
-        movingTargetObserver.setTrue_lat(-31.83);
-        movingTargetObserver.setTrue_lon(115.93);
-        timer.scheduleAtFixedRate(movingTargetObserver,0,999); // New target movement (thus observation) every 1 second
+//        MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
+//        movingTargetObserver.setFuzerProcess(fuzerProcess);
+//        movingTargetObserver.setTrue_lat(-31.83);
+//        movingTargetObserver.setTrue_lon(115.93);
+//        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
 
         try {
             fuzerProcess.start();

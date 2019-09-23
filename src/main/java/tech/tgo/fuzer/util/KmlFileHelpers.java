@@ -1,8 +1,8 @@
 package tech.tgo.fuzer.util;
 
 /**
- * Filesystem I/O
- * @author (timmyedge)
+ * KML Filesystem I/O
+ * @author Timothy Edge (timmyedge)
  */
 
 import java.io.*;
@@ -44,7 +44,7 @@ public class KmlFileHelpers {
             Document doc = builder.newDocument();
             Element root = doc.createElement("kml");
             root.setAttribute("xmlns", "http://www.opengis.net/kml/2.2");
-            root.setAttribute("xmlns:gx","http://www.google.com/kml/ext/2.2"); // alt "xmlns", "http://earth.google.com/kml/2.1"
+            root.setAttribute("xmlns:gx","http://www.google.com/kml/ext/2.2");
             doc.appendChild(root);
 
             Element dnode = doc.createElement("Document");
@@ -61,8 +61,7 @@ public class KmlFileHelpers {
                 exportAssetLocation(doc,dnode,gm.getAssets().get(assetId));
             }
 
-            /////////////////////////////////////////////////
-            /////////// PLOT the measurements /////////////////
+            /* PLOT the measurements */
             if (gm.showMeas) {
 
                 Element style = doc.createElement("Style");
@@ -77,7 +76,6 @@ public class KmlFileHelpers {
                 style.appendChild(measStyle);
                 dnode.appendChild(style);
 
-
                 /* Export range measurements */
                 exportMeasurementCircles(doc,dnode,geoMission);
 
@@ -88,128 +86,23 @@ public class KmlFileHelpers {
                 exportMeasurementDirections(doc,dnode,geoMission);
             }
 
-            /////////////////////////////////////////////////
-            /////////// PLOT the geo result /////////////////
+            /* PLOT the geo result */
             if (gm.showGEOs)
             {
-                try
-                {
-                    log.trace("Creating GEO Point in KML");
-
-                    Element crosshairStyle = doc.createElement("Style");
-                    crosshairStyle.setAttribute("id", "crosshairStyle");
-
-                    Element crosshairIconStyle = doc.createElement("IconStyle");
-                    crosshairIconStyle.setAttribute("id", "crosshairIconStyle");
-
-                    Element crosshairIcon = doc.createElement("Icon");
-
-                    Element crosshairIconHref = doc.createElement("href");
-                    crosshairIconHref.appendChild(doc.createTextNode("http://maps.google.com/mapfiles/kml/shapes/earthquake.png"));
-
-                    crosshairStyle.appendChild(crosshairIconStyle);
-                    crosshairIcon.appendChild(crosshairIconHref);
-                    crosshairIconStyle.appendChild(crosshairIcon);
-                    dnode.appendChild(crosshairStyle);
-                    ///////////////////////////////////////////////
-
-                    Element PFplacemark = doc.createElement("Placemark");
-                    dnode.appendChild(PFplacemark);
-
-                    Element name = doc.createElement("name");
-                    name.appendChild(doc.createTextNode(geoMission.getTarget().getName()));
-                    PFplacemark.appendChild(name);
-
-                    PFplacemark.appendChild(crosshairStyle);
-
-                    Element descrip = doc.createElement("description");
-                    descrip.appendChild(doc.createTextNode("<![CDATA[\n" +
-                            "          <p><font color=\"red\">"+geoMission.getTarget().getId()+" : "+geoMission.getTarget().getName()+"\n" +
-                            "          <b>Located here</b></font></p>"));
-                    PFplacemark.appendChild(descrip);
-
-                    Element PFpoint = doc.createElement("Point");
-                    Element coordinates = doc.createElement("coordinates");
-
-                    // Format is Lon/Lat
-                    Text textNode = doc.createTextNode(geoMission.getTarget().getCurrent_loc()[1]+ "," + geoMission.getTarget().getCurrent_loc()[0]);
-                    coordinates.appendChild(textNode);
-                    PFpoint.appendChild(coordinates);
-
-                    PFplacemark.appendChild(PFpoint);
-                }
-                catch(Exception egeo){
-                    log.trace("error exporting geo position to kml");egeo.printStackTrace();
-                }
+                exportTargetEstimationResult(doc,dnode,geoMission);
             }
 
-
-            ///////////////////////////////////////////////////
-            ///////////// PLOT the geo CEP result /////////////////
+            /* PLOT the geo CEP result */
             if (geoMission.showCEPs)
             {
-                try
-                {
-                    List<double[]> cepCircle = new ArrayList<double[]>();
-
-                    double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(geoMission.getTarget().getCurrent_loc()[0],geoMission.getTarget().getCurrent_loc()[1]);
-
-                    for (double theta = (1/2)*Math.PI; theta <= (5/2)*Math.PI; theta+= 0.2)
-                    {
-                        UTMRef utmCEP = new UTMRef(geoMission.getTarget().getCurrent_cep()*Math.cos(theta) + utm_target_loc[1], geoMission.getTarget().getCurrent_cep()*Math.sin(theta) + utm_target_loc[0], geoMission.getLatZone(), geoMission.getLonZone());
-                        LatLng ltln2 = utmCEP.toLatLng();
-                        double[] cepPoint = {ltln2.getLat(),ltln2.getLng()};
-                        cepCircle.add(cepPoint);
-                    }
-
-                    log.trace("CREATING NEW CEP POLYGON");
-                    /// create new polygon
-                    Element style = doc.createElement("Style");
-                    style.setAttribute("id", "cepStyle");
-
-                    Element polyStyle = doc.createElement("PolyStyle");
-                    Element color = doc.createElement("color");
-                    color.appendChild(doc.createTextNode("3f2002e4"));
-
-                    polyStyle.appendChild(color);
-                    style.appendChild(polyStyle);
-
-                    dnode.appendChild(style);
-                    Element polyPlacemark = doc.createElement("Placemark");
-                    dnode.appendChild(polyPlacemark);
-
-                    Element name = doc.createElement("name");
-                    name.appendChild(doc.createTextNode(geoMission.getTarget().getId()+":cep"));
-                    polyPlacemark.appendChild(name);
-
-                    Element styleUrl = doc.createElement("styleUrl");
-                    styleUrl.appendChild(doc.createTextNode("#cepStyle"));
-
-                    polyPlacemark.appendChild(styleUrl);
-
-                    Element polygon = doc.createElement("Polygon");
-
-                    Element outer = doc.createElement("outerBoundaryIs");
-                    Element cepOuterRing = doc.createElement("LinearRing");
-                    Element cepCircleCoords = doc.createElement("coordinates");
-
-                    Iterator circlePoints = cepCircle.iterator();
-                    while (circlePoints.hasNext())
-                    {
-                        double[] point = (double[])circlePoints.next();
-
-                        cepCircleCoords.appendChild(doc.createTextNode(point[1]+","+point[0]+",0 \n"));
-                    }
-                    cepOuterRing.appendChild(cepCircleCoords);
-
-                    outer.appendChild(cepOuterRing);
-                    polygon.appendChild(outer);
-
-                    polyPlacemark.appendChild(polygon);
-                }
-                catch(Exception ecep){log.trace("error exporting cep circle to kml"); ecep.printStackTrace();}
+                exportTargetEstimationCEP(doc,dnode,geoMission);
             }
 
+            /* PLOT the true target loc - for experiment purposes */
+            if (gm.showTrueLoc)
+            {
+                exportTargetTrueLocation(doc,dnode,geoMission);
+            }
 
             Source src = new DOMSource(doc);
             Result dest = new StreamResult(new File(geoMission.getProperties().getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename()));
@@ -220,6 +113,178 @@ public class KmlFileHelpers {
         catch (Exception e)
         {
             log.error(e.getMessage());}
+    }
+
+    public static void exportTargetTrueLocation(Document doc, Element dnode, GeoMission geoMission) {
+        try {
+            try {
+                Element crosshairStyle = doc.createElement("Style");
+                crosshairStyle.setAttribute("id", "crosshairStyle");
+
+                Element crosshairIconStyle = doc.createElement("IconStyle");
+                crosshairIconStyle.setAttribute("id", "crosshairIconStyle");
+
+                Element crosshairIcon = doc.createElement("Icon");
+
+                Element crosshairIconHref = doc.createElement("href");
+                crosshairIconHref.appendChild(doc.createTextNode("http://maps.google.com/mapfiles/kml/pal4/icon47.png"));
+
+                crosshairStyle.appendChild(crosshairIconStyle);
+                crosshairIcon.appendChild(crosshairIconHref);
+                crosshairIconStyle.appendChild(crosshairIcon);
+                dnode.appendChild(crosshairStyle);
+                ///////////////////////////////////////////////
+
+                Element PFplacemark = doc.createElement("Placemark");
+                dnode.appendChild(PFplacemark);
+
+                Element name = doc.createElement("name");
+                name.appendChild(doc.createTextNode(geoMission.getTarget().getName()));
+                PFplacemark.appendChild(name);
+
+                PFplacemark.appendChild(crosshairStyle);
+
+                Element descrip = doc.createElement("description");
+                descrip.appendChild(doc.createTextNode("<![CDATA[\n" +
+                        "          <p><font color=\"red\">"+geoMission.getTarget().getId()+" : "+geoMission.getTarget().getName()+"\n" +
+                        "          <b>(True Location) is here</b></font></p>"));
+                PFplacemark.appendChild(descrip);
+
+                Element PFpoint = doc.createElement("Point");
+                Element coordinates = doc.createElement("coordinates");
+
+                // Format is Lon/Lat
+                Text textNode = doc.createTextNode(geoMission.getTarget().getTrue_current_loc()[1]+ "," + geoMission.getTarget().getTrue_current_loc()[0]);
+                coordinates.appendChild(textNode);
+                PFpoint.appendChild(coordinates);
+
+                PFplacemark.appendChild(PFpoint);
+            }
+            catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public static void exportTargetEstimationResult(Document doc, Element dnode, GeoMission geoMission) {
+        try
+        {
+            log.trace("Creating GEO Point in KML");
+
+            Element crosshairStyle = doc.createElement("Style");
+            crosshairStyle.setAttribute("id", "crosshairStyle");
+
+            Element crosshairIconStyle = doc.createElement("IconStyle");
+            crosshairIconStyle.setAttribute("id", "crosshairIconStyle");
+
+            Element crosshairIcon = doc.createElement("Icon");
+
+            Element crosshairIconHref = doc.createElement("href");
+            crosshairIconHref.appendChild(doc.createTextNode("http://maps.google.com/mapfiles/kml/shapes/earthquake.png"));
+
+            crosshairStyle.appendChild(crosshairIconStyle);
+            crosshairIcon.appendChild(crosshairIconHref);
+            crosshairIconStyle.appendChild(crosshairIcon);
+            dnode.appendChild(crosshairStyle);
+            ///////////////////////////////////////////////
+
+            Element PFplacemark = doc.createElement("Placemark");
+            dnode.appendChild(PFplacemark);
+
+            Element name = doc.createElement("name");
+            name.appendChild(doc.createTextNode(geoMission.getTarget().getName()));
+            PFplacemark.appendChild(name);
+
+            PFplacemark.appendChild(crosshairStyle);
+
+            Element descrip = doc.createElement("description");
+            descrip.appendChild(doc.createTextNode("<![CDATA[\n" +
+                    "          <p><font color=\"red\">"+geoMission.getTarget().getId()+" : "+geoMission.getTarget().getName()+"\n" +
+                    "          <b>Located here</b></font></p>"));
+            PFplacemark.appendChild(descrip);
+
+            Element PFpoint = doc.createElement("Point");
+            Element coordinates = doc.createElement("coordinates");
+
+            // Format is Lon/Lat
+            Text textNode = doc.createTextNode(geoMission.getTarget().getCurrent_loc()[1]+ "," + geoMission.getTarget().getCurrent_loc()[0]);
+            coordinates.appendChild(textNode);
+            PFpoint.appendChild(coordinates);
+
+            PFplacemark.appendChild(PFpoint);
+        }
+        catch(Exception egeo){
+            log.trace("error exporting geo position to kml");egeo.printStackTrace();
+        }
+    }
+
+    public static void exportTargetEstimationCEP(Document doc, Element dnode, GeoMission geoMission) {
+        try {
+            try
+            {
+                List<double[]> cepCircle = new ArrayList<double[]>();
+
+                double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(geoMission.getTarget().getCurrent_loc()[0],geoMission.getTarget().getCurrent_loc()[1]);
+
+                for (double theta = (1/2)*Math.PI; theta <= (5/2)*Math.PI; theta+= 0.2)
+                {
+                    UTMRef utmCEP = new UTMRef(geoMission.getTarget().getCurrent_cep()*Math.cos(theta) + utm_target_loc[1], geoMission.getTarget().getCurrent_cep()*Math.sin(theta) + utm_target_loc[0], geoMission.getLatZone(), geoMission.getLonZone());
+                    LatLng ltln2 = utmCEP.toLatLng();
+                    double[] cepPoint = {ltln2.getLat(),ltln2.getLng()};
+                    cepCircle.add(cepPoint);
+                }
+
+                log.trace("CREATING NEW CEP POLYGON");
+                /// create new polygon
+                Element style = doc.createElement("Style");
+                style.setAttribute("id", "cepStyle");
+
+                Element polyStyle = doc.createElement("PolyStyle");
+                Element color = doc.createElement("color");
+                color.appendChild(doc.createTextNode("3f2002e4"));
+
+                polyStyle.appendChild(color);
+                style.appendChild(polyStyle);
+
+                dnode.appendChild(style);
+                Element polyPlacemark = doc.createElement("Placemark");
+                dnode.appendChild(polyPlacemark);
+
+                Element name = doc.createElement("name");
+                name.appendChild(doc.createTextNode(geoMission.getTarget().getId()+":cep"));
+                polyPlacemark.appendChild(name);
+
+                Element styleUrl = doc.createElement("styleUrl");
+                styleUrl.appendChild(doc.createTextNode("#cepStyle"));
+
+                polyPlacemark.appendChild(styleUrl);
+
+                Element polygon = doc.createElement("Polygon");
+
+                Element outer = doc.createElement("outerBoundaryIs");
+                Element cepOuterRing = doc.createElement("LinearRing");
+                Element cepCircleCoords = doc.createElement("coordinates");
+
+                Iterator circlePoints = cepCircle.iterator();
+                while (circlePoints.hasNext())
+                {
+                    double[] point = (double[])circlePoints.next();
+
+                    cepCircleCoords.appendChild(doc.createTextNode(point[1]+","+point[0]+",0 \n"));
+                }
+                cepOuterRing.appendChild(cepCircleCoords);
+
+                outer.appendChild(cepOuterRing);
+                polygon.appendChild(outer);
+
+                polyPlacemark.appendChild(polygon);
+            }
+            catch(Exception ecep){log.trace("error exporting cep circle to kml"); ecep.printStackTrace();}
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     public static void exportAssetLocation(Document doc, Element dnode, Asset asset) {
@@ -271,16 +336,14 @@ public class KmlFileHelpers {
         }
     }
 
+    /* Plot Range estimates */
     public static void exportMeasurementCircles(Document doc, Element dnode, GeoMission geoMission) {
-        ////// PLOT RANGE MEASUREMENTS
-        //Set keys = geoMission.measurementCircles.keySet();
         Set keys = geoMission.circlesToShow;
         log.trace("# measurement circles: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
             Long ele = (Long) keyIt.next();
             log.trace("Creating kml for ele: "+ele);
-            //ArrayList<double[]> circle = (ArrayList<double[]>) geoMission.measurementCircles.get(assetId);
             List<double[]> circle = (ArrayList<double[]>) geoMission.getObservations().get(ele).getCircleGeometry();
 
             log.trace("This asset has measurement circle data? "+!circle.isEmpty());
@@ -325,16 +388,14 @@ public class KmlFileHelpers {
         }
     }
 
+    /* Plot TDOA measurements */
     public static void exportMeasurementHyperbolas(Document doc, Element dnode, GeoMission geoMission) {
-        ////// PLOT TDOA MEASUREMENTS
-        //Set keys = geoMission.measurementHyperbolas.keySet();
         Set keys = geoMission.hyperbolasToShow;
         log.trace("# measurement hyperbolas: "+keys.size());
         Iterator keyIt = keys.iterator();
         while (keyIt.hasNext()) {
             Long ele = (Long) keyIt.next();
             log.trace("Creating kml for ele: "+ele);
-            //ArrayList<double[]> hyperbola = (ArrayList<double[]>) geoMission.measurementHyperbolas.get(assetId);
             List<double[]> hyperbola = (ArrayList<double[]>) geoMission.getObservations().get(ele).getHyperbolaGeometry();
 
             log.trace("This asset has measurement hyperbola data? "+!hyperbola.isEmpty());
@@ -381,9 +442,8 @@ public class KmlFileHelpers {
         }
     }
 
+    /* Plot AOA measurements */
     public static void exportMeasurementDirections(Document doc, Element dnode, GeoMission geoMission) {
-        ////// PLOT AOA MEASUREMENTS
-        //Set<String> keys = geoMission.measurementLines.keySet();
         Set keys = geoMission.linesToShow;
         log.trace("# measurement lines: "+keys.size());
         Iterator keyIt = keys.iterator();

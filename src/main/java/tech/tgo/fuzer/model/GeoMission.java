@@ -33,6 +33,7 @@ public class GeoMission {
     public Boolean showCEPs = false;
     public Boolean showMeas = false;
     public Boolean showGEOs = false;
+    public Boolean showTrueLoc = false;
 
     /* Memory store of assets contributing to the mission */
     Map<String,Asset> assets = new HashMap<String,Asset>();
@@ -143,6 +144,14 @@ public class GeoMission {
 
     public void setShowGEOs(Boolean showGEOs) {
         this.showGEOs = showGEOs;
+    }
+
+    public Boolean getShowTrueLoc() {
+        return showTrueLoc;
+    }
+
+    public void setShowTrueLoc(Boolean showTrueLoc) {
+        this.showTrueLoc = showTrueLoc;
     }
 
     public Map<String, Asset> getAssets() {

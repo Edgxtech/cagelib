@@ -25,6 +25,16 @@ public class StationaryTargetObserver extends TimerTask {
     double[] asset_a_coords = new double[]{-31.9, 115.98};
     double[] asset_b_coords = new double[]{-31.88, 115.97};
 
+
+    // TODO, test filter with these
+    //    010
+    //            18:02:43.438 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas range: 12127.685912858213
+    //    011
+    //            18:02:43.442 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas range: 9866.33387558542
+    //    010/011 TDOA
+    //            18:02:43.442 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas tdoa: 7.550502415838483E-6
+
+
     @Override
     public void run() {
 
@@ -32,17 +42,17 @@ public class StationaryTargetObserver extends TimerTask {
 
         try {
             Observation obs = new Observation(new Long(1001), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs.setRange(1000);
+            obs.setRange(12127); // 1000
             obs.setObservationType(ObservationType.range);
-            //fuzerProcess.addObservation(obs);
+            fuzerProcess.addObservation(obs);
         }
         catch (Exception e) { e.printStackTrace(); }
 
         try {
             Observation obs_b = new Observation(new Long(1002), "RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_b.setRange(800.0); //range in metres
+            obs_b.setRange(9866); //range in metres, 800
             obs_b.setObservationType(ObservationType.range);
-            //fuzerProcess.addObservation(obs_b);
+            fuzerProcess.addObservation(obs_b);
         } catch (Exception e) { e.printStackTrace(); }
 
         try {
@@ -50,7 +60,7 @@ public class StationaryTargetObserver extends TimerTask {
             obs_c.setAssetId_b("RAND-ASSET-011");
             obs_c.setLat_b(asset_b_coords[0]);
             obs_c.setLon_b(asset_b_coords[1]);
-            obs_c.setTdoa(0.000001); // tdoa in seconds
+            obs_c.setTdoa(7.550502415838483E-6); // tdoa in seconds, 0.000001
             obs_c.setObservationType(ObservationType.tdoa);
             fuzerProcess.addObservation(obs_c);
         }
@@ -60,7 +70,7 @@ public class StationaryTargetObserver extends TimerTask {
             Observation obs_d = new Observation(new Long(1004),"RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
             obs_d.setAoa(2.5); // aoa in radians
             obs_d.setObservationType(ObservationType.aoa);
-            fuzerProcess.addObservation(obs_d);
+            //fuzerProcess.addObservation(obs_d);
         }
         catch (Exception e) { e.printStackTrace(); }
 
@@ -68,7 +78,7 @@ public class StationaryTargetObserver extends TimerTask {
             Observation obs_e = new Observation(new Long(1005),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
             obs_e.setAoa(4.6); // aoa in radians
             obs_e.setObservationType(ObservationType.aoa);
-            fuzerProcess.addObservation(obs_e);
+            //fuzerProcess.addObservation(obs_e);
         }
         catch (Exception e) { e.printStackTrace(); }
 

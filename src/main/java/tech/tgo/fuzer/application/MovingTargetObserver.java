@@ -34,8 +34,11 @@ public class MovingTargetObserver extends TimerTask {
 
         // at fixed rate, add new observations suite (one of each type)
         // move from previous point according to some movement model
-        true_lat = true_lat + 0.00001;
-        true_lon = true_lon + 0.00001;
+        true_lat = true_lat + 0.001;
+        true_lon = true_lon + 0.001;
+
+        // update GeoMission::Target::TrueLocation - so it can be plotted
+        fuzerProcess.getGeoMission().getTarget().setTrue_current_loc(new double[]{true_lat,true_lon});
 
         double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(true_lat, true_lon);
         double true_y = utm_coords[0];
@@ -53,9 +56,6 @@ public class MovingTargetObserver extends TimerTask {
         try {
             //    init_meas(j,:) = [sqrt((x_rssi(j)-X_true(1,1))^2 + (y_rssi(j)-X_true(2,1))^2)];
             //f_meas(i,:) = [sqrt((x_rssi(i)-X_true(1,k))^2 + (y_rssi(i)-X_true(2,k))^2)] + 1*(0.5-rand);
-
-
-            // TODO, use UTM here
 
             double meas_range = Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2)) + Math.random()*rand_factor;
             log.debug("Meas range: "+meas_range);
@@ -78,37 +78,40 @@ public class MovingTargetObserver extends TimerTask {
         } catch (Exception e) { e.printStackTrace(); }
 
 
-//        try {
-        //     init_meas(j,:) = [sqrt((x(1)-X_true(1,1))^2 + (y(1)-X_true(2,1))^2) - sqrt((x(j+1)-X_true(1,1))^2 + (y(j+1)-X_true(2,1))^2)];
-        // f_meas(i,:) = [sqrt((x(1)-X_true(1,k))^2 + (y(1)-X_true(2,k))^2) - sqrt((x(i+1)-X_true(1,k))^2 + (y(i+1)-X_true(2,k))^2)] + 1*(0.5-rand);
+        try {
+             //init_meas(j,:) = [sqrt((x(1)-X_true(1,1))^2 + (y(1)-X_true(2,1))^2) - sqrt((x(j+1)-X_true(1,1))^2 + (y(j+1)-X_true(2,1))^2)];
+             //f_meas(i,:) = [sqrt((x(1)-X_true(1,k))^2 + (y(1)-X_true(2,k))^2) - sqrt((x(i+1)-X_true(1,k))^2 + (y(i+1)-X_true(2,k))^2)] + 1*(0.5-rand);
 
+            double meas_tdoa = (Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2))
+                    - Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)))/Helpers.SPEED_OF_LIGHT
+                    + Math.random()*rand_factor;
+            log.debug("Meas tdoa: "+meas_tdoa);
 
-//            double meas_range = Math.sqrt(Math.pow(asset_a_coords[0]-true_lat,2) + Math.pow(asset_a_coords[1]-true_lon,2)) + Math.random()*rand_factor;
-//            log.debug("Meas range: "+meas_range);
-//
-//            Observation obs_c = new Observation(new Long(1003), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-//            obs_c.setAssetId_b("RAND-ASSET-011");
-//            obs_c.setLat_b(asset_b_coords[0]);
-//            obs_c.setLon_b(asset_b_coords[1]);
-//            obs_c.setTdoa(0.000001); // tdoa in seconds
-//            obs_c.setObservationType(ObservationType.tdoa);
-//            fuzerProcess.addObservation(obs_c);
-//        }
-//        catch (Exception e) { e.printStackTrace(); }
-//
-//        try {
-        // f_meas(i,:) = [atan((y_aoa(i) - X_true(2,k))/(x_aoa(i) - X_true(1,k)))*180/pi];
-        // Need to adjust for quadrant
+            Observation obs_c = new Observation(new Long(1003), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
+            obs_c.setAssetId_b("RAND-ASSET-011");
+            obs_c.setLat_b(asset_b_coords[0]);
+            obs_c.setLon_b(asset_b_coords[1]);
+            obs_c.setTdoa(meas_tdoa); // tdoa in seconds
+            obs_c.setObservationType(ObservationType.tdoa);
+            fuzerProcess.addObservation(obs_c);
+        }
+        catch (Exception e) { e.printStackTrace(); }
 
+        try {
+            //f_meas(i,:) = [atan((y_aoa(i) - X_true(2,k))/(x_aoa(i) - X_true(1,k)))*180/pi];
+            //Need to adjust for quadrant
+
+            double meas_aoa = Math.atan((a_y-true_y)/(a_x-true_x));
+            log.debug("Meas AOA: "+meas_aoa);
 
 //            Observation obs_d = new Observation(new Long(1004),"RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
 //            obs_d.setAoa(2.5); // aoa in radians
 //            obs_d.setObservationType(ObservationType.aoa);
 //            fuzerProcess.addObservation(obs_d);
-//        }
-//        catch (Exception e) { e.printStackTrace(); }
-//
-//
+        }
+        catch (Exception e) { e.printStackTrace(); }
+
+
 //        try {
 //            Observation obs_e = new Observation(new Long(1005),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
 //            obs_e.setAoa(4.6); // aoa in radians

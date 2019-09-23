@@ -242,4 +242,8 @@ public class FuzerProcess implements Serializable {
         Thread thread = new Thread(algorithmEKF);
         thread.start();
     }
+
+    public GeoMission getGeoMission() {
+        return geoMission;
+    }
 }
