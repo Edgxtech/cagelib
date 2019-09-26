@@ -72,16 +72,18 @@ public class Runner implements FuzerListener {
         Timer timer = new Timer();
 
         /* Test test basic filter operation */
-        StationaryTargetObserver stationaryTargetObserver = new StationaryTargetObserver();
-        stationaryTargetObserver.setFuzerProcess(fuzerProcess);
-        timer.schedule(stationaryTargetObserver,0); // Run once
+//        StationaryTargetObserver stationaryTargetObserver = new StationaryTargetObserver();
+//        stationaryTargetObserver.setFuzerProcess(fuzerProcess);
+//        timer.schedule(stationaryTargetObserver,0); // Run once
 
         /* To test target moving */
-//        MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
-//        movingTargetObserver.setFuzerProcess(fuzerProcess);
-//        movingTargetObserver.setTrue_lat(-31.83);
-//        movingTargetObserver.setTrue_lon(115.93);
-//        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+        MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
+        movingTargetObserver.setFuzerProcess(fuzerProcess);
+        movingTargetObserver.setTrue_lat(-31.83);
+        movingTargetObserver.setTrue_lon(115.93);
+        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+        //movingTargetObserver.run();
+        //timer.schedule(movingTargetObserver,30000);
 
         try {
             fuzerProcess.start();

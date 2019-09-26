@@ -42,7 +42,7 @@ public class StationaryTargetObserver extends TimerTask {
 
         try {
             Observation obs = new Observation(new Long(1001), "RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs.setRange(12127); // 1000
+            obs.setRange(9578.033028205187); // 1000
             obs.setObservationType(ObservationType.range);
             fuzerProcess.addObservation(obs);
         }
@@ -50,7 +50,7 @@ public class StationaryTargetObserver extends TimerTask {
 
         try {
             Observation obs_b = new Observation(new Long(1002), "RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_b.setRange(9866); //range in metres, 800
+            obs_b.setRange(7167.968659991545); //range in metres, 800
             obs_b.setObservationType(ObservationType.range);
             fuzerProcess.addObservation(obs_b);
         } catch (Exception e) { e.printStackTrace(); }
@@ -60,7 +60,7 @@ public class StationaryTargetObserver extends TimerTask {
             obs_c.setAssetId_b("RAND-ASSET-011");
             obs_c.setLat_b(asset_b_coords[0]);
             obs_c.setLon_b(asset_b_coords[1]);
-            obs_c.setTdoa(7.550502415838483E-6); // tdoa in seconds, 0.000001
+            obs_c.setTdoa(8.11004087653552E-6); // tdoa in seconds, 0.000001
             obs_c.setObservationType(ObservationType.tdoa);
             fuzerProcess.addObservation(obs_c);
         }
@@ -68,19 +68,19 @@ public class StationaryTargetObserver extends TimerTask {
 
         try {
             Observation obs_d = new Observation(new Long(1004),"RAND-ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs_d.setAoa(2.5); // aoa in radians
+            obs_d.setAoa(1.9973481642311934); // aoa in radians
             obs_d.setObservationType(ObservationType.aoa);
-            //fuzerProcess.addObservation(obs_d);
+            fuzerProcess.addObservation(obs_d);
         }
         catch (Exception e) { e.printStackTrace(); }
 
-        try {
-            Observation obs_e = new Observation(new Long(1005),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_e.setAoa(4.6); // aoa in radians
-            obs_e.setObservationType(ObservationType.aoa);
-            //fuzerProcess.addObservation(obs_e);
-        }
-        catch (Exception e) { e.printStackTrace(); }
+//        try {
+//            Observation obs_e = new Observation(new Long(1005),"RAND-ASSET-011", asset_b_coords[0], asset_b_coords[1]);
+//            obs_e.setAoa(4.6); // aoa in radians
+//            obs_e.setObservationType(ObservationType.aoa);
+//            //fuzerProcess.addObservation(obs_e);
+//        }
+//        catch (Exception e) { e.printStackTrace(); }
 
 
         List<Observation> obsToRemoveAfter = new ArrayList<Observation>();

@@ -132,7 +132,7 @@ public class FuzerProcess implements Serializable {
         obs.setY_latZone((char)zones[0]);
         obs.setX_lonZone((int)zones[1]);
 
-        /* Rudimentary here - use zones attached to the most recent observation. improvements to come later */
+        /* Rudimentary here - use zones attached to the most recent observation. improvements to come */
         this.geoMission.setLatZone(obs.getY_latZone());
         this.geoMission.setLonZone(obs.getX_lonZone());
 
@@ -172,12 +172,23 @@ public class FuzerProcess implements Serializable {
             if (obs.getObservationType().equals(ObservationType.tdoa)) {
                 List<double[]> measurementHyperbola = new ArrayList<double[]>();
                 double c = Math.sqrt(Math.pow((obs.getX()-obs.getXb()),2)+Math.pow((obs.getYb()-obs.getY()),2))/2;
-                double a=(obs.getTdoa()* Helpers.SPEED_OF_LIGHT)/2; double b=Math.sqrt(Math.pow(c,2)-Math.pow(a,2));
-                double ca = (obs.getXb()-obs.getX())/(2*c); double sa = (obs.getYb()-obs.getY())/(2*c); // COS and SIN of rot angle
+                double a=(obs.getTdoa()* Helpers.SPEED_OF_LIGHT)/2; double b=Math.sqrt(Math.abs(Math.pow(c,2)-Math.pow(a,2)));
+//                log.debug("c: "+c);
+//                log.debug("a: "+a);
+//
+//                log.debug("c sq: "+Math.pow(c,2));
+//                log.debug("a sq: "+Math.pow(a,2));
+
+                double ca = (obs.getXb()-obs.getX())/(2*c); double sa = (obs.getYb()-obs.getY())/(2*c); //# COS and SIN of rot angle
+                //log.debug("b: "+b);
                 for (double t = -2; t<= 2; t += 0.1) {
-                    double X = a*Math.cosh(t); double Y = b*Math.sinh(t); // Hyperbola branch
+                    double X = a*Math.cosh(t); double Y = b*Math.sinh(t); //# Hyperbola branch
                     double x = (obs.getX()+obs.getXb())/2 + X*ca - Y*sa; //# Rotated and translated
                     double y = (obs.getY()+obs.getYb())/2 + X*sa + Y*ca;
+//                    log.debug("branch x/y: "+X+","+Y);
+//                    log.debug("Asset1/2 X: "+obs.getX()+","+obs.getXb());
+//                    log.debug("Asset1/2 Y: "+obs.getY()+","+obs.getYb());
+//                    log.debug("HYP x/y: "+x+","+y);
                     UTMRef utmMeas = new UTMRef(x, y, this.geoMission.getLatZone(), this.geoMission.getLonZone());
                     LatLng ltln = utmMeas.toLatLng();
                     measurementHyperbola.add(new double[]{ltln.getLat(),ltln.getLng()});

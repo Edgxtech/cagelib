@@ -48,7 +48,7 @@ public class AlgorithmEKF implements Runnable {
     double[][] initCovarData = {{1, 0, 0, 0}, {0, 1, 0 ,0}, {0, 0, 1, 0}, {0, 0, 0 ,1}};
     RealMatrix Pinit = new Array2DRowRealMatrix(initCovarData);
 
-    double[][] measurementNoiseData = {{5}};
+    double[][] measurementNoiseData = {{0.01}}; // Smaller for trusted measurements. Guide: {0.01 -> 0.1}
     RealMatrix Rk = new Array2DRowRealMatrix(measurementNoiseData);
 
     /* State and Covariance */

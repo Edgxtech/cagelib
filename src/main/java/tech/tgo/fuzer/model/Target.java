@@ -5,7 +5,7 @@ public class Target {
     String name;
     double[] current_loc;
     double current_cep;
-    double[] true_current_loc;
+    Double[] true_current_loc;
 
     public Target(String id, String name) {
         this.id = id;
@@ -44,11 +44,11 @@ public class Target {
         this.current_cep = current_cep;
     }
 
-    public double[] getTrue_current_loc() {
+    public Double[] getTrue_current_loc() {
         return true_current_loc;
     }
 
-    public void setTrue_current_loc(double[] true_current_loc) {
+    public void setTrue_current_loc(Double[] true_current_loc) {
         this.true_current_loc = true_current_loc;
     }
 }

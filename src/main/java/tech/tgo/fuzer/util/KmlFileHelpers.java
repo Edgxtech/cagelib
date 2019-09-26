@@ -101,7 +101,7 @@ public class KmlFileHelpers {
             /* PLOT the true target loc - for experiment purposes */
             if (gm.showTrueLoc)
             {
-                exportTargetTrueLocation(doc,dnode,geoMission);
+                exportTargetTrueLocation(doc, dnode, geoMission);
             }
 
             Source src = new DOMSource(doc);
@@ -117,7 +117,7 @@ public class KmlFileHelpers {
 
     public static void exportTargetTrueLocation(Document doc, Element dnode, GeoMission geoMission) {
         try {
-            try {
+            if (geoMission.getTarget().getTrue_current_loc()!=null) {
                 Element crosshairStyle = doc.createElement("Style");
                 crosshairStyle.setAttribute("id", "crosshairStyle");
 
@@ -133,7 +133,6 @@ public class KmlFileHelpers {
                 crosshairIcon.appendChild(crosshairIconHref);
                 crosshairIconStyle.appendChild(crosshairIcon);
                 dnode.appendChild(crosshairStyle);
-                ///////////////////////////////////////////////
 
                 Element PFplacemark = doc.createElement("Placemark");
                 dnode.appendChild(PFplacemark);
@@ -146,33 +145,31 @@ public class KmlFileHelpers {
 
                 Element descrip = doc.createElement("description");
                 descrip.appendChild(doc.createTextNode("<![CDATA[\n" +
-                        "          <p><font color=\"red\">"+geoMission.getTarget().getId()+" : "+geoMission.getTarget().getName()+"\n" +
+                        "          <p><font color=\"red\">" + geoMission.getTarget().getId() + " : " + geoMission.getTarget().getName() + "\n" +
                         "          <b>(True Location) is here</b></font></p>"));
                 PFplacemark.appendChild(descrip);
 
                 Element PFpoint = doc.createElement("Point");
                 Element coordinates = doc.createElement("coordinates");
 
-                // Format is Lon/Lat
-                Text textNode = doc.createTextNode(geoMission.getTarget().getTrue_current_loc()[1]+ "," + geoMission.getTarget().getTrue_current_loc()[0]);
+                Text textNode = doc.createTextNode(geoMission.getTarget().getTrue_current_loc()[1] + "," + geoMission.getTarget().getTrue_current_loc()[0]);
                 coordinates.appendChild(textNode);
                 PFpoint.appendChild(coordinates);
 
                 PFplacemark.appendChild(PFpoint);
             }
-            catch (Exception e) {
-                log.error(e.getMessage());
+            else {
+                log.debug("Attempted to export true location however none was available");
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error exporting true location: " + e.toString());
         }
+
     }
 
     public static void exportTargetEstimationResult(Document doc, Element dnode, GeoMission geoMission) {
         try
         {
-            log.trace("Creating GEO Point in KML");
-
             Element crosshairStyle = doc.createElement("Style");
             crosshairStyle.setAttribute("id", "crosshairStyle");
 
@@ -208,7 +205,6 @@ public class KmlFileHelpers {
             Element PFpoint = doc.createElement("Point");
             Element coordinates = doc.createElement("coordinates");
 
-            // Format is Lon/Lat
             Text textNode = doc.createTextNode(geoMission.getTarget().getCurrent_loc()[1]+ "," + geoMission.getTarget().getCurrent_loc()[0]);
             coordinates.appendChild(textNode);
             PFpoint.appendChild(coordinates);
@@ -216,7 +212,8 @@ public class KmlFileHelpers {
             PFplacemark.appendChild(PFpoint);
         }
         catch(Exception egeo){
-            log.trace("error exporting geo position to kml");egeo.printStackTrace();
+            log.trace("error exporting geo position to kml");
+            egeo.printStackTrace();
         }
     }
 
@@ -236,8 +233,6 @@ public class KmlFileHelpers {
                     cepCircle.add(cepPoint);
                 }
 
-                log.trace("CREATING NEW CEP POLYGON");
-                /// create new polygon
                 Element style = doc.createElement("Style");
                 style.setAttribute("id", "cepStyle");
 
@@ -283,7 +278,8 @@ public class KmlFileHelpers {
             }
             catch(Exception ecep){log.trace("error exporting cep circle to kml"); ecep.printStackTrace();}
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -324,7 +320,6 @@ public class KmlFileHelpers {
             Element PFpoint = doc.createElement("Point");
             Element coordinates = doc.createElement("coordinates");
 
-            // Format is Lon/Lat
             Text textNode = doc.createTextNode(asset.getCurrent_loc()[1]+ "," + asset.getCurrent_loc()[0]);
             coordinates.appendChild(textNode);
             PFpoint.appendChild(coordinates);
@@ -402,8 +397,6 @@ public class KmlFileHelpers {
             if (!hyperbola.isEmpty())
             {
                 try {
-                    log.trace("CREATING NEW MEAS Hyperbola in KML");
-
                     Element measPlacemark = doc.createElement("Placemark");
                     dnode.appendChild(measPlacemark);
 
@@ -429,7 +422,7 @@ public class KmlFileHelpers {
                             }
                         }
                     } catch (Exception esynch) {
-                        log.trace("error iterating over measurement hyperbola, b/c it being updated");
+                        log.debug("error iterating over measurement hyperbola, b/c it being updated");
                     }
                     line.appendChild(circleCoords);
 
@@ -450,10 +443,8 @@ public class KmlFileHelpers {
         while (keyIt.hasNext()) {
             Long ele = (Long) keyIt.next();
             log.trace("Creating AOA kml for ele: "+ele);
-            //ArrayList<double[]> aoa_line = (ArrayList<double[]>) geoMission.measurementLines.get(assetId);
             List<double[]> aoa_line = (ArrayList<double[]>) geoMission.getObservations().get(ele).getLineGeometry();
 
-            log.trace("This asset has measurement line data? "+!aoa_line.isEmpty());
             if (!aoa_line.isEmpty())
             {
                 try {
@@ -473,7 +464,6 @@ public class KmlFileHelpers {
 
                     Element line = doc.createElement("LineString");
                     Element circleCoords = doc.createElement("coordinates");
-                    Element oldCircleCoords = doc.createElement("coordinates");
 
                     Iterator linePoints = aoa_line.iterator();
 
