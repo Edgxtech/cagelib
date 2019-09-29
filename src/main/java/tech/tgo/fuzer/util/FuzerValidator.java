@@ -65,17 +65,15 @@ public class FuzerValidator {
             if (observation.getTdoa()==0.0) {
                 throw new ObservationException("No observation tdoa value was specified for observation type "+observation.getObservationType().name());
             }
-            if (observation.getTdoa()<0) {
-                throw new ObservationException("TDOA value should be positive for observation type "+observation.getObservationType().name());
-            }
         }
         else if (observation.getObservationType().equals(ObservationType.aoa)) {
             if (observation.getAoa()==0.0) {
                 throw new ObservationException("No observation aoa value was specified for observation type "+observation.getObservationType().name());
             }
-            if (observation.getAoa()<0 || observation.getAoa()>2*Math.PI) {
-                throw new ObservationException("AOA value should be between 0 and 2*pi for observation type "+observation.getObservationType().name());
-            }
+            // TODO, change this to +- pi
+//            if (observation.getAoa()<0 || observation.getAoa()>2*Math.PI) {
+//                throw new ObservationException("AOA value should be between 0 and 2*pi for observation type "+observation.getObservationType().name());
+//            }
         }
     }
 }

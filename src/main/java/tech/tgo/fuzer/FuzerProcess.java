@@ -7,7 +7,6 @@ import tech.tgo.fuzer.thread.AlgorithmEKF;
 import tech.tgo.fuzer.util.ConfigurationException;
 import tech.tgo.fuzer.util.FuzerValidator;
 import tech.tgo.fuzer.util.Helpers;
-import tech.tgo.fuzer.util.ObservationException;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 import java.io.*;
@@ -87,6 +86,26 @@ public class FuzerProcess implements Serializable {
                 throw new ConfigurationException("No convergence threshold specified");
             }
         }
+
+        /* Extract dispatch threshold setting */
+        if (geoMission.getFilterDispatchResidualThreshold()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold") != null && !geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold").isEmpty()) {
+                geoMission.setFilterDispatchResidualThreshold(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold")));
+            }
+            else {
+                throw new ConfigurationException("No dispatch threshold specified");
+            }
+        }
+
+        /* Extract filter measurement error setting */
+        if (geoMission.getFilterMeasurementError()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.measurement.error") != null && !geoMission.getProperties().getProperty("ekf.filter.default.measurement.error").isEmpty()) {
+                geoMission.setFilterMeasurementError(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.measurement.error")));
+            }
+            else {
+                throw new ConfigurationException("No filter measurement error specified specified");
+            }
+        }
     }
 
     public void removeObservation(Long observationId) throws Exception {
@@ -139,6 +158,7 @@ public class FuzerProcess implements Serializable {
         double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(obs.getLat(), obs.getLon());
         obs.setY(utm_coords[0]);
         obs.setX(utm_coords[1]);
+        log.debug("Asset:"+obs.getY()+","+obs.getX());
 
         Asset asset = new Asset(obs.getAssetId(),new double[]{obs.getLat(),obs.getLon()});
         this.geoMission.getAssets().put(obs.getAssetId(),asset);
@@ -173,14 +193,7 @@ public class FuzerProcess implements Serializable {
                 List<double[]> measurementHyperbola = new ArrayList<double[]>();
                 double c = Math.sqrt(Math.pow((obs.getX()-obs.getXb()),2)+Math.pow((obs.getYb()-obs.getY()),2))/2;
                 double a=(obs.getTdoa()* Helpers.SPEED_OF_LIGHT)/2; double b=Math.sqrt(Math.abs(Math.pow(c,2)-Math.pow(a,2)));
-//                log.debug("c: "+c);
-//                log.debug("a: "+a);
-//
-//                log.debug("c sq: "+Math.pow(c,2));
-//                log.debug("a sq: "+Math.pow(a,2));
-
                 double ca = (obs.getXb()-obs.getX())/(2*c); double sa = (obs.getYb()-obs.getY())/(2*c); //# COS and SIN of rot angle
-                //log.debug("b: "+b);
                 for (double t = -2; t<= 2; t += 0.1) {
                     double X = a*Math.cosh(t); double Y = b*Math.sinh(t); //# Hyperbola branch
                     double x = (obs.getX()+obs.getXb())/2 + X*ca - Y*sa; //# Rotated and translated
@@ -203,7 +216,6 @@ public class FuzerProcess implements Serializable {
                 double b = obs.getY() - Math.tan(obs.getAoa())*obs.getX();
                 double fromVal=0; double toVal=0;
                 double x_run = Math.abs(Math.cos(obs.getAoa()))*5000;
-                log.debug("X RUN: "+x_run);
                 if (obs.getAoa()>Math.PI/2 && obs.getAoa()<3*Math.PI/2) { // negative-x plane projection
                     fromVal=-x_run; toVal=0;
                 }
@@ -227,6 +239,11 @@ public class FuzerProcess implements Serializable {
         if (algorithmEKF !=null && algorithmEKF.isRunning()) {
             log.debug("Algorithm was running, will update observations list for tracking mode runs only");
             if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
+
+                // TODO, DEV, reset covariances
+                //algorithmEKF.resetCovariances();
+
+
                 log.debug("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
                 algorithmEKF.setObservations(this.geoMission.observations);
             }

@@ -58,6 +58,12 @@ public class GeoMission {
     /* Optional to override default - filter summative residual state error threshold used by fix mode runs only - Default: 0.01 */
     public Double filterConvergenceResidualThreshold;
 
+    /* Optional to override default - filter summative residual state error threshold used to decide on dispatch or not - Default: 0.5 */
+    public Double filterDispatchResidualThreshold;
+
+    /* Optional to override default - filter measurement error parameter (Rk) - Default: 0.1 */
+    public Double filterMeasurementError;
+
     public FuzerMode getFuzerMode() {
         return fuzerMode;
     }
@@ -97,14 +103,6 @@ public class GeoMission {
     public void setLonZone(int lonZone) {
         this.lonZone = lonZone;
     }
-
-//    public boolean isOutputKml() {
-//        return outputKml;
-//    }
-//
-//    public void setOutputKml(boolean outputKml) {
-//        this.outputKml = outputKml;
-//    }
 
     public String getOutputKmlFilename() {
         return outputKmlFilename;
@@ -200,5 +198,21 @@ public class GeoMission {
 
     public void setObservations(Map<Long, Observation> observations) {
         this.observations = observations;
+    }
+
+    public Double getFilterDispatchResidualThreshold() {
+        return filterDispatchResidualThreshold;
+    }
+
+    public void setFilterDispatchResidualThreshold(Double filterDispatchResidualThreshold) {
+        this.filterDispatchResidualThreshold = filterDispatchResidualThreshold;
+    }
+
+    public Double getFilterMeasurementError() {
+        return filterMeasurementError;
+    }
+
+    public void setFilterMeasurementError(Double filterMeasurementError) {
+        this.filterMeasurementError = filterMeasurementError;
     }
 }

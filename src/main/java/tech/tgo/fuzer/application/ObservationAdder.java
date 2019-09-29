@@ -21,6 +21,7 @@ public class ObservationAdder extends TimerTask {
 
     @Override
     public void run() {
+
         if (it.hasNext()) {
             log.debug("Adding one more observation..");
 
