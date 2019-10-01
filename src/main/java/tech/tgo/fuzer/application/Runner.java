@@ -80,18 +80,18 @@ public class Runner implements FuzerListener {
           /* To test target stationary */
 //        StationaryTargetObserver stationaryTargetObserver = new StationaryTargetObserver();
 //        stationaryTargetObserver.setFuzerProcess(fuzerProcess);
-//        stationaryTargetObserver.setTrue_lat(-31.910000000000096);
-//        stationaryTargetObserver.setTrue_lon(116.08000000000038);
+//        stationaryTargetObserver.setTrue_lat(-31.893999999999995);
+//        stationaryTargetObserver.setTrue_lon(115.998);
 //        stationaryTargetObserver.run();
 
 
         /* To test target moving */
         MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
         movingTargetObserver.setFuzerProcess(fuzerProcess);
-//        movingTargetObserver.setTrue_lat(-31.83); // orig: -31.83,115.93
-//        movingTargetObserver.setTrue_lon(116);
-        movingTargetObserver.setTrue_lat(-31.83); // orig: -31.83,115.93
-        movingTargetObserver.setTrue_lon(116);
+//        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
+//        movingTargetObserver.setTrue_lon(116.08);
+        movingTargetObserver.setTrue_lat(-31.99); // TOPLEFT
+        movingTargetObserver.setTrue_lon(115.95);
         timer.scheduleAtFixedRate(movingTargetObserver,0,999);
 
         try {

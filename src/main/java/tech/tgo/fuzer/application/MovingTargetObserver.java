@@ -29,9 +29,9 @@ public class MovingTargetObserver extends TimerTask {
 //    double range_rand_factor = 5; /* Guide: 50 [m] */
 //    double tdoa_rand_factor = 0.0000001; /* Guide: 0.0000001 [sec] */
 //    double aoa_rand_factor = 0.001; /* Guide: 0.1 [radians] */
-    double range_rand_factor = 0; /* Guide: 50 [m] */
-    double tdoa_rand_factor = 0; /* Guide: 0.0000001 [sec] */
-    double aoa_rand_factor = 0; /* Guide: 0.1 [radians] */
+    double range_rand_factor = 300; /* Guide: 50 [m] */
+    double tdoa_rand_factor = 0.0000001; /* Guide: 0.0000001 [sec] */
+    double aoa_rand_factor = 0.2; /* Guide: 0.1 [radians] */
 
     @Override
     public void run() {
@@ -39,8 +39,8 @@ public class MovingTargetObserver extends TimerTask {
         // Generate lat,lon path
         // at fixed rate, add new observations suite (one of each type)
         // move from previous point according to some movement model
-        true_lat = true_lat + 0.008;
-        true_lon = true_lon - 0.004;
+        true_lat = true_lat + 0.012;
+        true_lon = true_lon - 0.006;
         log.debug("Moving Observer, moved target to: "+true_lat+","+true_lon);
 
         // update GeoMission::Target::TrueLocation
@@ -63,21 +63,21 @@ public class MovingTargetObserver extends TimerTask {
             log.debug("Meas range: "+meas_range);
 
             Observation obs = new Observation(new Long(1001), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs.setRange(meas_range);
+            obs.setMeas(meas_range);
             obs.setObservationType(ObservationType.range);
             fuzerProcess.addObservation(obs);
         }
         catch (Exception e) { e.printStackTrace(); }
-//
-//        try {
-//            double meas_range = Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)) + Math.random()*range_rand_factor;
-//            log.debug("Meas range: "+meas_range);
-//
-//            Observation obs_b = new Observation(new Long(1002), "ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-//            obs_b.setRange(meas_range); //range in metres
-//            obs_b.setObservationType(ObservationType.range);
-//            fuzerProcess.addObservation(obs_b);
-//        } catch (Exception e) { e.printStackTrace(); }
+
+        try {
+            double meas_range = Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)) + Math.random()*range_rand_factor;
+            log.debug("Meas range: "+meas_range);
+
+            Observation obs_b = new Observation(new Long(1002), "ASSET-011", asset_b_coords[0], asset_b_coords[1]);
+            obs_b.setMeas(meas_range); //range in metres
+            obs_b.setObservationType(ObservationType.range);
+            fuzerProcess.addObservation(obs_b);
+        } catch (Exception e) { e.printStackTrace(); }
 
         try {
             double meas_tdoa = (Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2))
@@ -89,7 +89,7 @@ public class MovingTargetObserver extends TimerTask {
             obs_c.setAssetId_b("ASSET-011");
             obs_c.setLat_b(asset_b_coords[0]);
             obs_c.setLon_b(asset_b_coords[1]);
-            obs_c.setTdoa(meas_tdoa); // tdoa in seconds
+            obs_c.setMeas(meas_tdoa); // tdoa in seconds
             obs_c.setObservationType(ObservationType.tdoa);
             fuzerProcess.addObservation(obs_c);
         }
@@ -102,37 +102,13 @@ public class MovingTargetObserver extends TimerTask {
             if (true_x < a_x) {
                 meas_aoa = meas_aoa + Math.PI;
             }
-//            /* 2nd quadrant */
-//            if (true_y > a_y && true_x < a_x ) {
-//                log.debug("2nd quadrant");
-//                meas_aoa = meas_aoa + Math.PI;
-//            }
-//            /* 3rd quadrant */
-//            else if (true_y <= a_y && true_x < a_x ) {
-//                log.debug("3rd quadrant");
-//                meas_aoa = - (Math.PI - meas_aoa);
-//            }
-//            /* 4th quadrant */
-//            else if (true_y <= a_y && true_x > a_x ) {
-//                log.debug("4th quadrant");
-//                meas_aoa = (meas_aoa);
-//            }
-
-//            // IF true below asset and in 4th quad
-//            if (true_x < a_x) {
-//                meas_aoa = -(Math.PI - meas_aoa);
-//            }
-
-//            if (true_x<a_x) {
-//                meas_aoa = meas_aoa + Math.PI;
-//            }
             if (true_y<a_y && true_x>=a_x) {
                 meas_aoa = (Math.PI- Math.abs(meas_aoa)) + Math.PI;
             }
-            log.debug("Meas AOA (adjustted): "+meas_aoa);
+            log.debug("Meas AOA (adjusted): "+meas_aoa);
 
             Observation obs_d = new Observation(new Long(1004),"ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs_d.setAoa(meas_aoa); // aoa in radians
+            obs_d.setMeas(meas_aoa); // aoa in radians
             obs_d.setObservationType(ObservationType.aoa);
             fuzerProcess.addObservation(obs_d);
         }
@@ -145,37 +121,13 @@ public class MovingTargetObserver extends TimerTask {
             if (true_x < b_x) {
                 meas_aoa = meas_aoa + Math.PI;
             }
-
-//            /* 2nd quadrant */
-//            if (true_y > b_y && true_x < b_x ) {
-//                log.debug("2nd quadrant");
-//                meas_aoa = meas_aoa + Math.PI;
-//            }
-//            /* 3rd quadrant */
-//            else if (true_y <= b_y && true_x < b_x ) {
-//                log.debug("3rd quadrant");
-//                meas_aoa = - (Math.PI - meas_aoa);
-//            }
-//            /* 4th quadrant */
-//            else if (true_y <= b_y && true_x > b_x ) {
-//                log.debug("4th quadrant");
-//                meas_aoa = (meas_aoa);
-//            }
-
-//            if (true_x < b_x) {
-//                meas_aoa = -(Math.PI - meas_aoa);
-//            }
-
-//            if (true_x<b_x) {
-//                meas_aoa = meas_aoa + Math.PI;
-//            }
             if (true_y<b_y && true_x>=b_x) {
                 meas_aoa = (Math.PI- Math.abs(meas_aoa)) + Math.PI;
             }
             log.debug("Meas AOA (adjusted): "+meas_aoa);
 
             Observation obs_e = new Observation(new Long(1005),"ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_e.setAoa(meas_aoa); // aoa in radians
+            obs_e.setMeas(meas_aoa); // aoa in radians
             obs_e.setObservationType(ObservationType.aoa);
             fuzerProcess.addObservation(obs_e);
         }

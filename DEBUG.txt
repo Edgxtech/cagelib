@@ -1,0 +1,222 @@
+15:17:05.165 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, continuing...
+15:17:05.307 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Moving Observer, moved target to: -31.893999999999995,116.01399999999997
+15:17:05.308 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas range: 3283.4935435714824
+15:17:05.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1001, type: range, as: 145936.3969219056
+15:17:05.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,range, ID: 1001
+15:17:05.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:05.309 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:05.309 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:05.309 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas tdoa: -3.862857264243192E-6
+15:17:05.309 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1003, type: tdoa, as: -3.65755882492135E-4
+15:17:05.310 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,tdoa, ID: 1003
+15:17:05.310 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:05.310 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:05.310 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:05.310 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.21322611715377068
+15:17:05.310 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjustted): 0.21322611715377068
+15:17:05.311 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1004, type: aoa, as: 345.39504334588486
+15:17:05.311 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,aoa, ID: 1004
+15:17:05.311 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:05.311 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:05.311 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:05.311 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: -0.34765184764196916
+15:17:05.312 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjusted): 5.935533459537617
+15:17:05.312 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1005, type: aoa, as: 320.2859636963906
+15:17:05.312 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-011,aoa, ID: 1005
+15:17:05.312 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+15:17:05.312 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:05.313 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:06.308 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Moving Observer, moved target to: -31.881999999999994,116.02199999999996
+15:17:06.312 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas range: 4445.2416305092875
+15:17:06.313 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1001, type: range, as: 188130.32210510102
+15:17:06.314 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,range, ID: 1001
+15:17:06.316 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:06.318 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:06.329 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:06.338 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas tdoa: -1.5954729841959116E-6
+15:17:06.339 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1003, type: tdoa, as: -2.2132541810258632E-4
+15:17:06.340 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,tdoa, ID: 1003
+15:17:06.342 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:06.343 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:06.343 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:06.344 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.474716044213654
+15:17:06.344 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjustted): 0.474716044213654
+15:17:06.344 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1004, type: aoa, as: 12.216956594873105
+15:17:06.344 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,aoa, ID: 1004
+15:17:06.344 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:06.344 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:06.345 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:06.345 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: -0.035789155206686324
+15:17:06.346 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjusted): 6.2473961519729
+15:17:06.348 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1005, type: aoa, as: 340.08101639019003                ## THIS is where it is crossing the border
+15:17:06.353 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+15:17:06.353 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:06.354 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:06.881 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual 0.09990391901497592
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual measurement to filter % delta: 1.548363768554042
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; -0.0360472532; 0.0638566658}
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: range, f_est: 4447.201095140942,d: 4445.2416305092875, innov: {-0; -0; -0.0159169253; -0.0079978544}
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: tdoa, f_est: -497.773588658225,d: -1.5954729841959116E-6, innov: {0; 0; -0.0004197463; -0.0066613631}
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 26.67837682218588,d: 0.474716044213654, innov: {0; 0; -0.0212592471; 0.0423090784}
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 357.55079344346944,d: 6.2473961519729, innov: {0; 0; 0.0015486655; 0.0362068049}             ### NOTE: this is where the innovations should be reversed. i.e. we were going around anit-clock, then the new meas naturally caused it wanna go clock, but need to make it go one more anti-clock
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - DISPATCHING RESULT.. From # Observations: 4
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.application.Runner - RAW RESULT:::: GeoId: <GEOID>, Xk1: 407522.61779746175, Xk2: 6472191.468163637, Xk3: -0.036047253209866875, Xk4: 0.06385666580510904
+15:17:06.882 [Thread-1] DEBUG tech.tgo.fuzer.application.Runner - Result: Lat: -31.882318662165346, Lon: 116.02220870179382
+15:17:06.886 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+15:17:06.886 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, continuing...
+15:17:07.306 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Moving Observer, moved target to: -31.869999999999994,116.02999999999996
+15:17:07.306 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas range: 5781.392520714968
+15:17:07.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1001, type: range, as: 254693.5843440347
+15:17:07.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,range, ID: 1001
+15:17:07.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:07.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:07.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:07.307 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas tdoa: -4.908698391579579E-9
+15:17:07.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1003, type: tdoa, as: -9.141386832156842E-5
+15:17:07.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,tdoa, ID: 1003
+15:17:07.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:07.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:07.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:07.308 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.6220476425546869
+15:17:07.308 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjustted): 0.6220476425546869
+15:17:07.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1004, type: aoa, as: 27.19922580058816
+15:17:07.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,aoa, ID: 1004
+15:17:07.308 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:07.309 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:07.309 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:07.309 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.2021023895788615
+15:17:07.309 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjusted): 0.2021023895788615
+15:17:07.309 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1005, type: aoa, as: 357.9494324543182           ## This is where it just crossed the border from 11's observation
+15:17:07.309 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-011,aoa, ID: 1005
+15:17:07.310 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+15:17:07.310 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:07.310 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:08.093 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual 0.09997318549530476
+15:17:08.093 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual measurement to filter % delta: 4.443808633382314
+15:17:08.094 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0442339613; 0.0557392242}
+15:17:08.094 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: range, f_est: 6330.958178751192,d: 5781.392520714968, innov: {-0; -0; -4.2417086914; 2.6397797891}
+15:17:08.094 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: tdoa, f_est: -2098.4719479337355,d: -4.908698391579579E-9, innov: {0; 0; -0.0646090733; -1.0224478595}
+15:17:08.094 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 328.10439432909516,d: 0.6220476425546869, innov: {-0; -0; -14.048180158; -22.573204068}
+15:17:08.094 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: -318.79312079409533,d: 0.2021023895788615, innov: {0; 0; 18.398731884; 21.0116113626}       ## this is where it is haywire
+15:17:08.095 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - DISPATCHING RESULT.. From # Observations: 4
+15:17:08.095 [Thread-1] DEBUG tech.tgo.fuzer.application.Runner - RAW RESULT:::: GeoId: <GEOID>, Xk1: 408923.92256734136, Xk2: 6466849.646992956, Xk3: 0.04423396125693557, Xk4: 0.05573922423836919
+15:17:08.095 [Thread-1] DEBUG tech.tgo.fuzer.application.Runner - Result: Lat: -31.930618542521746, Lon: 116.03652134157085
+15:17:08.098 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+15:17:08.099 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, continuing...
+15:17:08.303 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Moving Observer, moved target to: -31.857999999999993,116.03799999999995
+15:17:08.303 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas range: 7195.464520535761
+15:17:08.304 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1001, type: range, as: 331249.391145468
+15:17:08.304 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,range, ID: 1001
+15:17:08.304 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:08.304 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:08.304 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:08.304 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas tdoa: 1.053778058276014E-6
+15:17:08.304 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1003, type: tdoa, as: -2.8124770074016537E-7
+15:17:08.305 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,tdoa, ID: 1003
+15:17:08.305 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:08.305 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:08.305 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:08.305 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.7128394298366132
+15:17:08.305 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjustted): 0.7128394298366132
+15:17:08.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1004, type: aoa, as: 35.64070457444599
+15:17:08.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,aoa, ID: 1004
+15:17:08.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:17:08.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:08.306 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:08.306 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.3715503744574381
+15:17:08.306 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjusted): 0.3715503744574381
+15:17:08.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1005, type: aoa, as: 11.579613952377516
+15:17:08.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-011,aoa, ID: 1005
+15:17:08.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+15:17:08.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:17:08.307 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:17:09.096 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual 0.0016491706151059529
+15:17:09.096 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual measurement to filter % delta: 0.48585122272986286
+15:17:09.096 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0007761657; -0.0008730049}
+15:17:09.097 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: range, f_est: 7195.451754230029,d: 7195.464520535761, innov: {0; 0; 0.0000877885; 0.000075911}
+15:17:09.097 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: tdoa, f_est: 316.2240634613663,d: 1.053778058276014E-6, innov: {-0; -0; 0.0000108342; 0.0001712291}
+15:17:09.097 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 40.85006790095826,d: 0.7128394298366132, innov: {-0; -0; 0.0004386571; -0.0005072922}
+15:17:09.097 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 21.295503749291164,d: 0.3715503744574381, innov: {-0; -0; 0.0002388859; -0.0006128527}
+15:17:09.098 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - DISPATCHING RESULT.. From # Observations: 4
+15:17:09.098 [Thread-1] DEBUG tech.tgo.fuzer.application.Runner - RAW RESULT:::: GeoId: <GEOID>, Xk1: 408991.6725282057, Xk2: 6474901.170183184, Xk3: 7.761657233637642E-4, Xk4: -8.730048917421888E-4
+15:17:09.098 [Thread-1] DEBUG tech.tgo.fuzer.application.Runner - Result: Lat: -31.857993704728802, Lon: 116.03799355857588
+15:17:09.102 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+15:17:09.103 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, continuing...
+
+
+
+
+NOTE ASSET 11 crosses border:
+15:34:37.437 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.6220476425546869
+15:34:37.437 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjustted): 0.6220476425546869
+15:34:37.437 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1004, type: aoa, as: 0.474716044213654
+15:34:37.437 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,aoa, ID: 1004
+15:34:37.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:34:37.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:37.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:37.438 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.2021023895788615
+15:34:37.438 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjusted): 0.2021023895788615
+15:34:37.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1005, type: aoa, as: 6.2473961519729
+15:34:37.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-011,aoa, ID: 1005
+15:34:37.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+15:34:37.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:37.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:37.660 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual 0.0023640163689974906
+15:34:37.662 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual measurement to filter % delta: 0.12998586165745904
+15:34:37.663 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0010219412; -0.0013420751}
+15:34:37.663 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: range, f_est: 5781.36046569479,d: 5781.392520714968, innov: {0; 0; 0.0002367916; 0.0001698503}
+15:34:37.663 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: tdoa, f_est: -1.0168238458918495,d: -4.908698391579579E-9, innov: {-0; -0; 0.0000127749; 0.0002022974}
+15:34:37.664 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 35.65182626743786,d: 0.6220476425546869, innov: {-0; -0; 0.0005893064; -0.0008215634}
+15:34:37.664 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 11.589637571363028,d: 0.2021023895788615, innov: {-0; -0; 0.0001830684; -0.0008926594}
+15:34:37.664 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - AOA meas Crossed the Zero border: true
+
+NOTE: Asset 10 does, but is not reported -- THIS APPEARS simply due to it wasn't reported at that time because reporting time window not open, then was overritten
+15:34:35.442 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.21322611715377068
+15:34:35.442 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjustted): 0.21322611715377068
+15:34:35.442 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1004, type: aoa, as: 6.028280726454222
+15:34:35.442 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,aoa, ID: 1004
+15:34:35.442 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:34:35.442 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:35.443 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:35.443 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: -0.34765184764196916
+15:34:35.443 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjusted): 5.935533459537617
+15:34:35.443 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1005, type: aoa, as: 5.590044614425044
+15:34:35.443 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-011,aoa, ID: 1005
+15:34:35.443 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+15:34:35.446 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:35.446 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:36.436 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Moving Observer, moved target to: -31.881999999999994,116.02199999999996
+15:34:36.436 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas range: 4445.2416305092875
+15:34:36.436 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1001, type: range, as: 3283.4935435714824
+15:34:36.436 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,range, ID: 1001
+15:34:36.437 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:34:36.437 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:36.437 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:36.437 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas tdoa: -1.5954729841959116E-6
+15:34:36.437 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1003, type: tdoa, as: -3.862857264243192E-6
+15:34:36.437 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,tdoa, ID: 1003
+15:34:36.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:34:36.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:36.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:36.438 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: 0.474716044213654
+15:34:36.438 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjustted): 0.474716044213654
+15:34:36.438 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1004, type: aoa, as: 0.21322611715377068
+15:34:36.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-010,aoa, ID: 1004
+15:34:36.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+15:34:36.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:36.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:36.439 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA: -0.035789155206686324
+15:34:36.439 [Timer-0] DEBUG t.t.f.a.MovingTargetObserver - Meas AOA (adjusted): 6.2473961519729
+15:34:36.439 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting previous observation for: 1005, type: aoa, as: 5.935533459537617
+15:34:36.440 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: ASSET-011,aoa, ID: 1005
+15:34:36.440 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+15:34:36.440 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was running, will update observations list for tracking mode runs only
+15:34:36.440 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Setting OBSERVATIONS in the filter, new size: 4
+15:34:36.637 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual 0.09996423151563327
+15:34:36.642 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual measurement to filter % delta: 3.6869798738365653
+15:34:36.646 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0465345942; 0.0534296373}
+15:34:36.648 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: range, f_est: 3272.6297138825016,d: 4445.2416305092875, innov: {0; 0; -8.4989341852; 6.4347515404}
+15:34:36.651 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: tdoa, f_est: 1613.7922387957874,d: -1.5954729841959116E-6, innov: {-0; -0; 0.032627876; 0.527011323}
+15:34:36.653 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 142.86974304543259,d: 0.474716044213654, innov: {-0; -0; 6.3474626897; 8.3836442329}
+15:34:36.654 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: type: aoa, f_est: 188.05962720542084,d: 6.2473961519729, innov: {0; 0; 2.1653782137; -15.2919774591}
+15:34:36.658 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - DISPATCHING RESULT.. From # Observations: 4

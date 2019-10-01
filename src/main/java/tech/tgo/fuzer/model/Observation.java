@@ -28,20 +28,31 @@ public class Observation {
     int x_lonZone;
     char y_latZone;
 
-    /* Measured Range [m] - used ICW ObservationType.RANGE
-    /* Alternative, if passing [dBm], rudimentary propagation model may be used as follows: [dBm] to [m]
-    /* double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));
-    /* Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]*/
-    double range;
+//    /* Measured Range [m] - used ICW ObservationType.RANGE
+//    /* Alternative, if passing [dBm], rudimentary propagation model may be used as follows: [dBm] to [m]
+//    /* double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));
+//    /* Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]*/
+//    Double range;
+//
+//    /* Measured TDOA [s] - used ICW ObservationType.TDOA */
+//    double tdoa;
+//
+//    /* Measured AOA [radians] - used ICW ObservationType.AOA
+//    /* Valid for 0 -> 2pi */
+//    double aoa;
 
-    /* Measured TDOA [s] - used ICW ObservationType.TDOA */
-    double tdoa;
+    Double meas;
 
-    /* Measured AOA [radians] - used ICW ObservationType.AOA
-    /* Valid for 0 -> 2pi */
-    double aoa;
+    Double meas_prev;
 
     /* Observation Type */
+    /* Measured Range [m] - used ICW ObservationType.RANGE
+    /*      Alternative, if passing [dBm], rudimentary propagation model may be used as follows: [dBm] to [m]
+    /*      double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));
+    /*      Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]
+    /* Measured TDOA [s] - used ICW ObservationType.TDOA
+    /* Measured AOA [radians] - used ICW ObservationType.AOA
+    /*      Valid for 0 -> 2pi */
     ObservationType observationType;
 
     /* Asset Id */
@@ -57,6 +68,8 @@ public class Observation {
     List<double[]> circleGeometry;
     List<double[]> hyperbolaGeometry;
     List<double[]> lineGeometry;
+
+    Boolean crossed_border;
 
     public Observation(Long id, String assetId, double lat, double lon) {
         this.id = id;
@@ -79,30 +92,6 @@ public class Observation {
 
     public void setY(double y) {
         this.y = y;
-    }
-
-    public double getRange() {
-        return range;
-    }
-
-    public void setRange(double range) {
-        this.range = range;
-    }
-
-    public double getTdoa() {
-        return tdoa;
-    }
-
-    public void setTdoa(double tdoa) {
-        this.tdoa = tdoa;
-    }
-
-    public double getAoa() {
-        return aoa;
-    }
-
-    public void setAoa(double aoa) {
-        this.aoa = aoa;
     }
 
     public ObservationType getObservationType() {
@@ -223,5 +212,29 @@ public class Observation {
 
     public void setLon_b(double lon_b) {
         this.lon_b = lon_b;
+    }
+
+    public Double getMeas() {
+        return meas;
+    }
+
+    public void setMeas(Double meas) {
+        this.meas = meas;
+    }
+
+    public Double getMeas_prev() {
+        return meas_prev;
+    }
+
+    public void setMeas_prev(Double meas_prev) {
+        this.meas_prev = meas_prev;
+    }
+
+    public Boolean getCrossed_border() {
+        return crossed_border;
+    }
+
+    public void setCrossed_border(Boolean crossed_border) {
+        this.crossed_border = crossed_border;
     }
 }

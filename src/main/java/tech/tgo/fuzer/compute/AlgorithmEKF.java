@@ -3,7 +3,7 @@
  *
  * @author Timothy Edge (timmyedge)
  */
-package tech.tgo.fuzer.thread;
+package tech.tgo.fuzer.compute;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -68,8 +68,6 @@ public class AlgorithmEKF implements Runnable {
     double yk;
     RealMatrix K;
 
-    boolean restrict_non_aoa = false;
-
     /*
      * Create an algorithm tracker process for the given config, observations and client implemented listener
      */
@@ -116,7 +114,8 @@ public class AlgorithmEKF implements Runnable {
 
         running.set(true);
 
-        Vector<double[]> AOA_rks = new Vector<double[]>(); // DEV - SAFETY FEATURE for getting correct branches
+        //Vector<double[]> rks = new Vector<double[]>(); // DEV - SAFETY FEATURE for getting correct branches
+        Vector<FilterObservationStateDTO> observationStateDTOS = new Vector<FilterObservationStateDTO>(); // DEV - SAFETY FEATURE for getting correct branches
 
         long startTime = Calendar.getInstance().getTimeInMillis();
 
@@ -147,7 +146,7 @@ public class AlgorithmEKF implements Runnable {
             P_innov = new Array2DRowRealMatrix(P_innovd);
 
             /* reset */
-            AOA_rks.removeAllElements();
+            observationStateDTOS.removeAllElements();
 
             /* observations collection is dynamically updated for tracking mode missions */
             Iterator obsIterator = this.observations.values().iterator();
@@ -164,89 +163,51 @@ public class AlgorithmEKF implements Runnable {
 
                 if (obs.getObservationType().equals(ObservationType.range)) {
 
-                    if (!restrict_non_aoa) {
-                        H = recalculateH(obs.getX(), obs.getY(), xk, yk);
+                    H = recalculateH(obs.getX(), obs.getY(), xk, yk);
 
-                        f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2));
+                    f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2));
 
-                        d = obs.getRange();
+                    d = obs.getMeas();
 
-                        AOA_rks.add(new double[]{f_est, d});
-
-                        log.trace("RANGE innovation: " + f_est + ", vs d: " + d);
-                    }
+                    log.trace("RANGE innovation: " + f_est + ", vs d: " + d);
                 } else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 
-                    if (!restrict_non_aoa) {
-                        H = recalculateH_TDOA(obs.getX(), obs.getY(), obs.getXb(), obs.getYb(), xk, yk);
+                    H = recalculateH_TDOA(obs.getX(), obs.getY(), obs.getXb(), obs.getYb(), xk, yk);
 
-                        f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2)) - Math.sqrt(Math.pow((obs.getXb() - xk), 2) + Math.pow(obs.getYb() - yk, 2));
+                    f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2)) - Math.sqrt(Math.pow((obs.getXb() - xk), 2) + Math.pow(obs.getYb() - yk, 2));
 
-                        d = obs.getTdoa() * Helpers.SPEED_OF_LIGHT;
+                    d = obs.getMeas() * Helpers.SPEED_OF_LIGHT;
 
-                        AOA_rks.add(new double[]{f_est, d});
+                    log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
 
-                        log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
-                    }
                 } else if (obs.getObservationType().equals(ObservationType.aoa)) {
 
                     H = recalculateH_AOA(obs.getX(), obs.getY(), xk, yk);
 
                     f_est = Math.atan((obs.getY() - yk)/(obs.getX() - xk))*180/Math.PI;
-                    //f_est = Math.atan((yk - obs.getY()) / (xk - obs.getX())) * 180 / Math.PI;
 
-                    if (xk < obs.getX()) {
+                    if (xk<obs.getX()) {
                         f_est = f_est + 180;
                     }
 
-                    // TODO, need something which says if both AOA is forcing filter in a way opposite to any other meas, need to let AOA go for a bit
-
-//                    /* 2nd quadrant */
-//                    if (yk > obs.getY() && xk < obs.getX() ) {
-//                        f_est = f_est + 180;
-//                    }
-//                    /* 3rd quadrant */
-//                    else if (yk <= obs.getY() && xk < obs.getX() ) {
-//                        f_est = - (180 - f_est);
-//                    }
-//                    /* 4th quadrant */
-//                    else if (yk <= obs.getY() && xk > obs.getX() ) {
-//                        f_est = (f_est);
-//                    }
-
-
-
-
-//                    // This seems to work well for 4th quadrant
-//                    if (xk < obs.getX()) {
-//                        f_est = -(180 - f_est);
-//                    }
-
-                    // This for second quad???
-//                    if (yk > obs.getY() && xk < obs.getX() ) {
-//                        f_est = f_est + Math.PI;
-//                    }
-
-
                     if (yk<obs.getY() && xk>=obs.getX()) {
-                        f_est = (180 - Math.abs(f_est)) + 180;
-                        //f_est = 360 - f_est;
+                        f_est = 360 - Math.abs(f_est);
                     }
 
-                    d = obs.getAoa() * 180 / Math.PI;
+                    d = obs.getMeas() * 180 / Math.PI;
 
                     log.trace("AOA innovation: " + f_est + ", vs d: " + d);
 
-                    AOA_rks.add(new double[]{f_est, d});
+                    /* Check for 0-360 degree border crossing */
+                    if ((d > 0 && d < 180) && (obs.getMeas_prev()!=null && obs.getMeas_prev() > Math.PI)) {
+                        obs.setCrossed_border(true);
+                    }
                 }
 
-                double rk = d - f_est;
-
-                // ORIG FILTER EQNS
                 RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
                 RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
 
-                /* Scaling factor, to reduce impact of TDOA and range measures vs AOA measures */
+                /* Measurement balancer */
                 if (obs.getObservationType().equals(ObservationType.range)) {
                     K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(0.1);
                 }
@@ -254,92 +215,62 @@ public class AlgorithmEKF implements Runnable {
                     K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(0.1);
                 }
                 else {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse);
+                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
+
+                    if (obs.getCrossed_border()!=null && obs.getCrossed_border()) {
+                        /* guide over */
+                        f_est = 0;
+                        Pinit.scalarMultiply(1000.0);
+                    }
                 }
-                //K = Pk.multiply(H.transpose()).multiply(Inverse); //--- original
+
+                double rk = d - f_est;
 
                 double[] HXk = H.operate(Xk).toArray();
-                innov = K.scalarMultiply(rk - HXk[0]).getColumnVector(0).add(innov);
-                log.trace("Innov: "+innov);
+                RealVector innov_ = K.scalarMultiply(rk - HXk[0]).getColumnVector(0);
+                innov = innov_.add(innov);
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
 
-
-                // TODO, attempt normalising the measurements
-//                RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
-//                RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
-//                K = Pk.multiply(H.transpose()).multiply(Inverse);
-//
-//                double[] HXk = H.operate(Xk).toArray();
-//                innov = K.scalarMultiply(rk - HXk[0]).getColumnVector(0).add(innov);
-//                log.trace("Innov: "+innov);
-//
-//                P_innov = K.multiply(H).multiply(Pk).add(P_innov);
-
-
-                // ATTEMPT AT TRYING TO MATCH MATLAB EQNS
-//                RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
-//                RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
-//                K = Pk.multiply(H.transpose()).multiply(Inverse);
-//
-//                double[] HXk = H.operate(Xk).toArray();
-//                innov = K.scalarMultiply(rk - HXk[0]).getColumnVector(0).add(innov);
-//                log.trace("Innov: " + innov);
-//
-//                P_innov = (K.transpose()).multiply(H).multiply(Pk).add(P_innov);
-
-                // MATLAB EQNS
-//                K(i,:) = Pk*H(i,:)'*inv(H(i,:)*Pk*H(i,:)' + Rk(i));          %Pk*H(i,:)'*inv(Rk); T% WORKS SINGLE SENSOR%
-//
-//                innov = innov + K(i,:)*(r(i,:) - H(i,:)*Xk);
-//
-//            %P_innov = P_innov + H(i,:)'*inv(Rk(i))*H(i,:);
-//                P_innov = P_innov + K(i,:)'*H(i,:)*Pk;
-//            }
-
-
-
-                // NOTE: Normally this is done after all observation innov's are added together
-                //    Doing it here might be required IOT un-normalise the scaling
-//                Xk = Xk.add(innov);
-//                Pk = (eye.multiply(Pk)).subtract(P_innov);
+                observationStateDTOS.add(new FilterObservationStateDTO(obs, f_est, innov_));
             }
 
-
-            // NOTE: Normally this is executed here
             Xk = Xk.add(innov);
             Pk = (eye.multiply(Pk)).subtract(P_innov);
-            //log.debug("X: "+Xk.getEntry(0)+","+Xk.getEntry(1)+","+Xk.getEntry(2)+","+Xk.getEntry(3));
 
             if ((Calendar.getInstance().getTimeInMillis() - startTime) > this.geoMission.getDispatchResultsPeriod()) {
 
-                //restrict_non_aoa = false;
+                /* A measure of consistency between types of observations */
+                double residual_rk = 0.0;
+                for (FilterObservationStateDTO obs_state: observationStateDTOS) {
+                    if (obs_state.getObs().getObservationType().equals(ObservationType.range)) {
+                        residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 1000;
+                    }
+                    else if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa)) {
+                        residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 1000;
+                    }
+                    else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
+                        residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 360;
+                    }
+                }
+
+                // TODO, gradually increase R here??
 
                 /* If filter had adequately processed latest observations - prevent dispatching spurious results */
-                double residual = Math.abs(Xk.getEntry(2) + Xk.getEntry(3));
+                double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
+                //log.debug("Residual Rk: "+residual_rk);
                 if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
-                    log.debug("Residual: "+residual);
+                    log.debug("Residual "+residual);
+                    log.debug("Residual measurement to filter % delta: "+residual_rk);
+                    log.debug("Residual Innovation: "+innov);
 
-                    // TODO, if there is an AOA with rk still looks ~ opposite sector, try giving it a kick to the correct branch????
-                    // i.e. if the filter thinks it converged but looks like its on the wrong branch since at least rks are sustantially off
-                    for (double[] rk_data : AOA_rks) {
-                        // TODO, should be if all AOA measurements report strange
-                        log.debug("Checking rk_data, f_est/d: "+rk_data[0]+","+rk_data[1]);
-//                        if ((Math.abs(rk_data[1]-rk_data[0])) > 100) {
-//                            log.debug("Trying again since: at least one AOA measurement was indicating substantially different even though filter has converged");
-//
-////                            // kick it to direct other side (similar distance) of the first asset
-////                            Observation firstObs = this.observations.values().iterator().next();
-////                            log.debug("Obs: "+(firstObs==null));
-////                            log.debug("Obs X: "+firstObs.getX());
-////                            log.debug("Filter Xk_x: "+Xk.getEntry(0));
-////                            double newEasting = firstObs.getX() + (firstObs.getX() - Xk.getEntry(0));
-////                            double newNorthing = firstObs.getY() + (firstObs.getY() - Xk.getEntry(1));
-////                            Xk.setEntry(0,newEasting);
-////                            Xk.setEntry(1,newNorthing);
-////                            Pk = Pinit.scalarMultiply(1000.0);
-//                            restrict_non_aoa = true; // just until the next dispatch time period
-//                        }
+                    if (log.isDebugEnabled()) {
+                        for (FilterObservationStateDTO obs_state : observationStateDTOS) {
+                            log.debug("Observation utilisation: type: "+obs_state.getObs().getObservationType().name()+", f_est: " + obs_state.getF_est() + ",d: " + obs_state.getObs().getMeas()+", innov: "+obs_state.getInnov());
+                            if (obs_state.getObs().getObservationType().equals(ObservationType.aoa) && obs_state.getObs().getCrossed_border() != null) {
+                                log.debug("AOA meas Crossed the Zero border: "+obs_state.getObs().getCrossed_border());
+                            }
+                        }
                     }
 
                     log.debug("DISPATCHING RESULT.. From # Observations: " + this.observations.size());
@@ -378,23 +309,12 @@ public class AlgorithmEKF implements Runnable {
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow(y-Xk2,2));
         double R2 = Math.sqrt(Math.pow((x2-Xk1),2) + Math.pow(y2-Xk2,2));
 
-//        double dfdx = -(x-Xk1)/R1 - (-x2+Xk1)/R2;
-//        double dfdy = -(y-Xk2)/R1 - (-y2+Xk2)/R2;
         double dfdx = -(x+Xk1)/R1 - (-x2+Xk1)/R2;
         double dfdy = -(y+Xk2)/R1 - (-y2+Xk2)/R2;
 
         double[][] jacobianData = {{0, 0, dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
         return H;
-
-        // MATLAB version
-//        r(i,:) = f_tdoa_meas(i,:) - f_est(i,:);
-//
-//        R1 = sqrt((x(1)-Xk(1))^2 + (y(1)-Xk(2))^2);
-//        R2 = sqrt((x(i+1)-Xk(1))^2 + (y(i+1)-Xk(2))^2);
-//
-//        dfdx(i) = -(x(1)+Xk(1))/R1 - (-x(i+1)+Xk(1))/R2;
-//        dfdy(i) = -(y(1)+Xk(2))/R1 - (-y(i+1)+Xk(2))/R2;
     }
 
     public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {

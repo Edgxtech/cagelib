@@ -34,7 +34,7 @@ public class ObservationSetAdder extends TimerTask {
 
         try {
             Observation obs = new Observation(new Long(1001), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs.setRange(7297.319277260829); // 1000
+            obs.setMeas(7297.319277260829); // 1000
             obs.setObservationType(ObservationType.range);
             fuzerProcess.addObservation(obs);
         }
@@ -42,7 +42,7 @@ public class ObservationSetAdder extends TimerTask {
 
         try {
             Observation obs_b = new Observation(new Long(1002), "ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_b.setRange(5854.150068401644); //range in metres, 800
+            obs_b.setMeas(5854.150068401644); //range in metres, 800
             obs_b.setObservationType(ObservationType.range);
             fuzerProcess.addObservation(obs_b);
         } catch (Exception e) { e.printStackTrace(); }
@@ -52,7 +52,7 @@ public class ObservationSetAdder extends TimerTask {
             obs_c.setAssetId_b("ASSET-011");
             obs_c.setLat_b(asset_b_coords[0]);
             obs_c.setLon_b(asset_b_coords[1]);
-            obs_c.setTdoa(4.813894313709471E-6); // tdoa in seconds, 0.000001
+            obs_c.setMeas(4.813894313709471E-6); // tdoa in seconds, 0.000001
             obs_c.setObservationType(ObservationType.tdoa);
             fuzerProcess.addObservation(obs_c);
         }
@@ -60,7 +60,7 @@ public class ObservationSetAdder extends TimerTask {
 
         try {
             Observation obs_d = new Observation(new Long(1004),"ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs_d.setAoa(1.194647512344934); // aoa in radians
+            obs_d.setMeas(1.194647512344934); // aoa in radians
             obs_d.setObservationType(ObservationType.aoa);
             fuzerProcess.addObservation(obs_d);
         }
@@ -68,7 +68,7 @@ public class ObservationSetAdder extends TimerTask {
 
         try {
             Observation obs_e = new Observation(new Long(1005),"ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_e.setAoa(0.8981865734042553); // aoa in radians
+            obs_e.setMeas(0.8981865734042553); // aoa in radians
             obs_e.setObservationType(ObservationType.aoa);
             fuzerProcess.addObservation(obs_e);
         }

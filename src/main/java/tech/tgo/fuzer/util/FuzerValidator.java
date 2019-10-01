@@ -43,10 +43,10 @@ public class FuzerValidator {
             throw new ObservationException("No observation type was specified");
         }
         if (observation.getObservationType().equals(ObservationType.range)) {
-            if (observation.getRange()==0.0) {
+            if (observation.getMeas()==0.0) {
                 throw new ObservationException("No observation range value was specified for observation type "+observation.getObservationType().name());
             }
-            if (observation.getRange()<0) {
+            if (observation.getMeas()<0) {
                 throw new ObservationException("Range value should be positive for observation type "+observation.getObservationType().name());
             }
         }
@@ -62,18 +62,17 @@ public class FuzerValidator {
                 throw new ObservationException("No (second) Asset Id was specified");
             }
 
-            if (observation.getTdoa()==0.0) {
+            if (observation.getMeas()==0.0) {
                 throw new ObservationException("No observation tdoa value was specified for observation type "+observation.getObservationType().name());
             }
         }
         else if (observation.getObservationType().equals(ObservationType.aoa)) {
-            if (observation.getAoa()==0.0) {
+            if (observation.getMeas()==0.0) {
                 throw new ObservationException("No observation aoa value was specified for observation type "+observation.getObservationType().name());
             }
-            // TODO, change this to +- pi
-//            if (observation.getAoa()<0 || observation.getAoa()>2*Math.PI) {
-//                throw new ObservationException("AOA value should be between 0 and 2*pi for observation type "+observation.getObservationType().name());
-//            }
+            if (observation.getMeas()<0 || observation.getMeas()>2*Math.PI) {
+                throw new ObservationException("AOA value should be between 0 and 2*pi for observation type "+observation.getObservationType().name());
+            }
         }
     }
 }

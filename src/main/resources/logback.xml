@@ -24,7 +24,7 @@
     </appender>
 
     <logger name="tech.tgo.fuzer" level="DEBUG" />
-    <logger name="tech.tgo.fuzer.thread.AlgorithmEKF" level="DEBUG" />
+    <logger name="tech.tgo.fuzer.compute.AlgorithmEKF" level="DEBUG" />
 
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />
