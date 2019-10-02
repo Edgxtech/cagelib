@@ -1,19 +1,14 @@
-package tech.tgo.fuzer.application;
+package tech.tgo.fuzer.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.FuzerProcess;
 import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
-import tech.tgo.fuzer.model.Target;
-import tech.tgo.fuzer.util.Helpers;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.TimerTask;
 
-/* Just to simulate receiving new observations following a target */
+/* Simulate receiving new observations from following a target */
 public class MovingTargetObserver extends TimerTask {
 
     private static final Logger log = LoggerFactory.getLogger(MovingTargetObserver.class);
@@ -23,29 +18,32 @@ public class MovingTargetObserver extends TimerTask {
     double true_lat; double true_lon;
 
     /* Some common asset coords to reuse */
-    double[] asset_a_coords = new double[]{-31.9, 115.98};
-    double[] asset_b_coords = new double[]{-31.88, 115.97};
+    double[] asset_a_coords; // = new double[]{-31.9, 115.98};
+    double[] asset_b_coords;// = new double[]{-31.88, 115.97};
 
 //    double range_rand_factor = 5; /* Guide: 50 [m] */
 //    double tdoa_rand_factor = 0.0000001; /* Guide: 0.0000001 [sec] */
 //    double aoa_rand_factor = 0.001; /* Guide: 0.1 [radians] */
-    double range_rand_factor = 300; /* Guide: 50 [m] */
-    double tdoa_rand_factor = 0.0000001; /* Guide: 0.0000001 [sec] */
-    double aoa_rand_factor = 0.2; /* Guide: 0.1 [radians] */
+    double range_rand_factor; // = 0; /* Guide: 50 [m] */
+    double tdoa_rand_factor; // = 0.0000001; /* Guide: 0.0000001 [sec] */
+    double aoa_rand_factor; // = 0; /* Guide: 0.1 [radians] */
+
+    double lat_move; // = 0.001;
+    double lon_move; // = 0.001;
 
     @Override
     public void run() {
 
-        // Generate lat,lon path
-        // at fixed rate, add new observations suite (one of each type)
-        // move from previous point according to some movement model
-        true_lat = true_lat + 0.012;
-        true_lon = true_lon - 0.006;
+        // Generate lat,lon path of movement according to simple movement model
+        true_lat = true_lat + lat_move;
+        true_lon = true_lon + lon_move;
         log.debug("Moving Observer, moved target to: "+true_lat+","+true_lon);
 
         // update GeoMission::Target::TrueLocation
         fuzerProcess.getGeoMission().getTarget().setTrue_current_loc(new Double[]{true_lat,true_lon});
 
+
+        // TODO, generate a set of various assets and observations from a number of assets and number of each type of measurement
         double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(true_lat, true_lon);
         double true_y = utm_coords[0];
         double true_x = utm_coords[1];
@@ -156,5 +154,61 @@ public class MovingTargetObserver extends TimerTask {
 
     public void setTrue_lon(double true_lon) {
         this.true_lon = true_lon;
+    }
+
+    public double[] getAsset_a_coords() {
+        return asset_a_coords;
+    }
+
+    public void setAsset_a_coords(double[] asset_a_coords) {
+        this.asset_a_coords = asset_a_coords;
+    }
+
+    public double[] getAsset_b_coords() {
+        return asset_b_coords;
+    }
+
+    public void setAsset_b_coords(double[] asset_b_coords) {
+        this.asset_b_coords = asset_b_coords;
+    }
+
+    public double getRange_rand_factor() {
+        return range_rand_factor;
+    }
+
+    public void setRange_rand_factor(double range_rand_factor) {
+        this.range_rand_factor = range_rand_factor;
+    }
+
+    public double getTdoa_rand_factor() {
+        return tdoa_rand_factor;
+    }
+
+    public void setTdoa_rand_factor(double tdoa_rand_factor) {
+        this.tdoa_rand_factor = tdoa_rand_factor;
+    }
+
+    public double getAoa_rand_factor() {
+        return aoa_rand_factor;
+    }
+
+    public void setAoa_rand_factor(double aoa_rand_factor) {
+        this.aoa_rand_factor = aoa_rand_factor;
+    }
+
+    public double getLat_move() {
+        return lat_move;
+    }
+
+    public void setLat_move(double lat_move) {
+        this.lat_move = lat_move;
+    }
+
+    public double getLon_move() {
+        return lon_move;
+    }
+
+    public void setLon_move(double lon_move) {
+        this.lon_move = lon_move;
     }
 }

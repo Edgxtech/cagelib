@@ -200,7 +200,8 @@ public class AlgorithmEKF implements Runnable {
 
                     /* Check for 0-360 degree border crossing */
                     if ((d > 0 && d < 180) && (obs.getMeas_prev()!=null && obs.getMeas_prev() > Math.PI)) {
-                        obs.setCrossed_border(true);
+                        //obs.setCrossed_border(true);
+                        d = 2*Math.PI + d; // temporarily treat it as an angle > 360 to aid passage over the boundary
                     }
                 }
 
@@ -259,6 +260,9 @@ public class AlgorithmEKF implements Runnable {
                 /* If filter had adequately processed latest observations - prevent dispatching spurious results */
                 double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
                 //log.debug("Residual Rk: "+residual_rk);
+
+                // TODO, i think comparing to residual_rk will be better, but needs to scale with the
+
                 if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
                     log.debug("Residual "+residual);
                     log.debug("Residual measurement to filter % delta: "+residual_rk);

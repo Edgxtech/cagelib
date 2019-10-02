@@ -274,6 +274,8 @@ public class FuzerProcess implements Serializable {
         algorithmEKF.stopThread();
     }
 
+    /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
+    /* For Fixer - add observations (one per asset) then start, monitor output in result() callback */
     public void start() throws Exception {
         Iterator it = this.geoMission.observations.values().iterator();
         if (!it.hasNext() && this.geoMission.getFuzerMode().equals(FuzerMode.fix)) {
