@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
-public class MovingTargetITs implements FuzerListener {
+public class TrackingModeITs implements FuzerListener {
 
-    private static final Logger log = LoggerFactory.getLogger(MovingTargetITs.class);
+    private static final Logger log = LoggerFactory.getLogger(TrackingModeITs.class);
 
     Map<String,GeoMission> fuzerMissions = new HashMap<String,GeoMission>();
 
@@ -131,10 +131,42 @@ public class MovingTargetITs implements FuzerListener {
         movingTargetObserver.setTrue_lat(-31.929670455929934);  /// LEFT LEFT
         movingTargetObserver.setTrue_lon(115.79549188891419);
         movingTargetObserver.setAoa_rand_factor(0.1);
+        movingTargetObserver.setRange_rand_factor(200);
+        movingTargetObserver.setTdoa_rand_factor(0.0000001);
+        movingTargetObserver.setLat_move(-0.005);
+        movingTargetObserver.setLon_move(0.005);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        log.debug("Creating new observer for # assets: "+assets.keySet().size());
+        movingTargetObserver.setTestAssets(assets);
+        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+
+        try {
+            fuzerProcess.start();
+
+            Thread.sleep(40000);
+
+            timer.cancel();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testStationaryTarget() {
+        movingTargetObserver.setTrue_lat(-31.929670455929934);  /// LEFT LEFT
+        movingTargetObserver.setTrue_lon(115.79549188891419);
+        movingTargetObserver.setAoa_rand_factor(0.1);
         movingTargetObserver.setRange_rand_factor(50);
         movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setLat_move(0.005);
-        movingTargetObserver.setLon_move(0.005);
+        movingTargetObserver.setLat_move(0.0001);
+        movingTargetObserver.setLon_move(0.0001);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
