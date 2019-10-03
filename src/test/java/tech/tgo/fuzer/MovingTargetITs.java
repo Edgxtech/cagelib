@@ -9,10 +9,12 @@ import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.Target;
 import tech.tgo.fuzer.util.ConfigurationException;
+import tech.tgo.fuzer.util.TestAsset;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -32,6 +34,13 @@ public class MovingTargetITs implements FuzerListener {
     /* Some common asset coords to reuse */
     double[] asset_a_coords = new double[]{-31.9, 115.98};
     double[] asset_b_coords = new double[]{-31.88, 115.97};
+    double[] asset_c_coords = new double[]{-31.78, 115.90};
+    double[] asset_d_coords = new double[]{-32.0, 115.85};
+
+    TestAsset asset_a = new TestAsset();
+    TestAsset asset_b = new TestAsset();
+    TestAsset asset_c = new TestAsset();
+    TestAsset asset_d = new TestAsset();
 
     @Before
     public void configure() {
@@ -76,6 +85,35 @@ public class MovingTargetITs implements FuzerListener {
 
         /* Client side needs to manage geomission references for callback response */
         fuzerMissions.put(geoMission.getGeoId(), geoMission);
+
+        /* Create some reusable test assets */
+        asset_a.setId("A");
+        asset_a.setProvide_range(true);
+        asset_a.setProvide_tdoa(true);
+        asset_a.setProvide_aoa(true);
+        asset_a.setCurrent_loc(asset_a_coords);
+
+        asset_b.setId("B");
+        asset_b.setProvide_range(true);
+        asset_b.setProvide_tdoa(true);
+        asset_b.setProvide_aoa(true);
+        asset_b.setCurrent_loc(asset_b_coords);
+
+        asset_c.setId("C");
+        asset_c.setProvide_range(true);
+        asset_c.setProvide_tdoa(true);
+        asset_c.setProvide_aoa(true);
+        asset_c.setCurrent_loc(asset_c_coords);
+
+        asset_d.setId("D");
+        asset_d.setProvide_range(true);
+        asset_d.setProvide_tdoa(true);
+        asset_d.setProvide_aoa(true);
+        asset_d.setCurrent_loc(asset_d_coords);
+
+        asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"B","C","D"}));
+        asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C","D"}));
+        asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{"D"}));
     }
 
     /* Show output */
@@ -97,14 +135,21 @@ public class MovingTargetITs implements FuzerListener {
         movingTargetObserver.setTdoa_rand_factor(0.0000001);
         movingTargetObserver.setLat_move(0.005);
         movingTargetObserver.setLon_move(0.005);
-        movingTargetObserver.setAsset_a_coords(asset_a_coords);
-        movingTargetObserver.setAsset_b_coords(asset_b_coords);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        log.debug("Creating new observer for # assets: "+assets.keySet().size());
+        movingTargetObserver.setTestAssets(assets);
         timer.scheduleAtFixedRate(movingTargetObserver,0,999);
 
         try {
             fuzerProcess.start();
 
-            Thread.sleep(20000);
+            Thread.sleep(40000);
 
             timer.cancel();
         }
@@ -117,11 +162,47 @@ public class MovingTargetITs implements FuzerListener {
     public void testMoverSouthWest() {
         movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
         movingTargetObserver.setTrue_lon(116.08);
+        movingTargetObserver.setAoa_rand_factor(0.1);
+        movingTargetObserver.setRange_rand_factor(50);
+        movingTargetObserver.setTdoa_rand_factor(0.0000001);
+        movingTargetObserver.setLat_move(-0.005);
+        movingTargetObserver.setLon_move(-0.005);
+        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+
+        try {
+            fuzerProcess.start();
+
+            Thread.sleep(10000);
+
+            timer.cancel();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testMoverNorth() {
         movingTargetObserver.setTrue_lat(-31.99); // BOTTOM
         movingTargetObserver.setTrue_lon(115.95);
+        movingTargetObserver.setAoa_rand_factor(0.1);
+        movingTargetObserver.setRange_rand_factor(50);
+        movingTargetObserver.setTdoa_rand_factor(0.0000001);
+        movingTargetObserver.setLat_move(+0.005);
+        movingTargetObserver.setLon_move(+0.000);
+//        movingTargetObserver.setAsset_a_coords(asset_a_coords);
+//        movingTargetObserver.setAsset_b_coords(asset_b_coords);
+        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+
+        try {
+            fuzerProcess.start();
+
+            Thread.sleep(10000);
+
+            timer.cancel();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

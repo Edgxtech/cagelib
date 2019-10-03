@@ -28,19 +28,14 @@ public class Observation {
     int x_lonZone;
     char y_latZone;
 
-//    /* Measured Range [m] - used ICW ObservationType.RANGE
-//    /* Alternative, if passing [dBm], rudimentary propagation model may be used as follows: [dBm] to [m]
-//    /* double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));
-//    /* Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]*/
-//    Double range;
-//
-//    /* Measured TDOA [s] - used ICW ObservationType.TDOA */
-//    double tdoa;
-//
-//    /* Measured AOA [radians] - used ICW ObservationType.AOA
-//    /* Valid for 0 -> 2pi */
-//    double aoa;
-
+    /* Either: Range, TDOA or AOA measurement
+    /* Measured Range [m] - used ICW ObservationType.RANGE
+    /*          Alternative, if passing [dBm], rudimentary propagation model may be used as follows: [dBm] to [m]
+    /*          double d = Math.pow(10,((25-r[i] - 20*Math.log10(2.4*Math.pow(10, 9)) + 147.55)/20));
+    /*          Note 25 = 20dBm transmitter + 5 dB gain on the receive antenna  [dBm]
+    /* Measured TDOA [s] - used ICW ObservationType.TDOA
+    /* Measured AOA [radians] - used ICW ObservationType.AOA
+    /*          Valid for 0 -> 2pi */
     Double meas;
 
     Double meas_prev;

@@ -6,7 +6,7 @@ import tech.tgo.fuzer.FuzerProcess;
 import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
 
-import java.util.TimerTask;
+import java.util.*;
 
 /* Simulate receiving new observations from following a target */
 public class MovingTargetObserver extends TimerTask {
@@ -17,19 +17,17 @@ public class MovingTargetObserver extends TimerTask {
 
     double true_lat; double true_lon;
 
-    /* Some common asset coords to reuse */
-    double[] asset_a_coords; // = new double[]{-31.9, 115.98};
-    double[] asset_b_coords;// = new double[]{-31.88, 115.97};
+    Map<String,TestAsset> testAssets = new HashMap<String,TestAsset>();
 
-//    double range_rand_factor = 5; /* Guide: 50 [m] */
-//    double tdoa_rand_factor = 0.0000001; /* Guide: 0.0000001 [sec] */
-//    double aoa_rand_factor = 0.001; /* Guide: 0.1 [radians] */
     double range_rand_factor; // = 0; /* Guide: 50 [m] */
     double tdoa_rand_factor; // = 0.0000001; /* Guide: 0.0000001 [sec] */
     double aoa_rand_factor; // = 0; /* Guide: 0.1 [radians] */
 
     double lat_move; // = 0.001;
     double lon_move; // = 0.001;
+
+    /* Similar mechanism to maintain observation ids for different assets to targets should be implemented in client logic */
+    Map<String,Long> assetToObservationIdMapping = new HashMap<String,Long>();
 
     @Override
     public void run() {
@@ -42,94 +40,174 @@ public class MovingTargetObserver extends TimerTask {
         // update GeoMission::Target::TrueLocation
         fuzerProcess.getGeoMission().getTarget().setTrue_current_loc(new Double[]{true_lat,true_lon});
 
-
-        // TODO, generate a set of various assets and observations from a number of assets and number of each type of measurement
         double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(true_lat, true_lon);
         double true_y = utm_coords[0];
         double true_x = utm_coords[1];
 
-        utm_coords = Helpers.convertLatLngToUtmNthingEasting(asset_a_coords[0], asset_a_coords[1]);
-        double a_y = utm_coords[0];
-        double a_x = utm_coords[1];
+        /* for each asset, generate relevant observations */
+        log.debug("Regenerating observations from # assets: "+testAssets.keySet().size());
+        for (TestAsset asset : testAssets.values()) {
+            utm_coords = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+            double a_y = utm_coords[0];
+            double a_x = utm_coords[1];
 
-        utm_coords = Helpers.convertLatLngToUtmNthingEasting(asset_b_coords[0], asset_b_coords[1]);
-        double b_y = utm_coords[0];
-        double b_x = utm_coords[1];
+            try {
+                if (asset.getProvide_range()) {
+                    Long obsId = assetToObservationIdMapping.get(asset.getId()+"_"+ObservationType.range.name());
+                    if (obsId==null)
+                    {
+                        obsId = new Random().nextLong();
+                        assetToObservationIdMapping.put(asset.getId()+"_"+ObservationType.range.name(),obsId);
+                    }
+                    //double meas_range = Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2)) + Math.random()*range_rand_factor; orig
+                    double meas_range = ObservationTestHelpers.getRangeMeasurement(a_y, a_x, true_y, true_x, range_rand_factor);
+                    log.debug("Meas range: " + meas_range);
 
-        try {
-            double meas_range = Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2)) + Math.random()*range_rand_factor;
-            log.debug("Meas range: "+meas_range);
+                    //Observation obs = new Observation(new Long(1001), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);  orig
+                    Observation obs = new Observation(obsId, asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+                    obs.setMeas(meas_range);
+                    obs.setObservationType(ObservationType.range);
+                    fuzerProcess.addObservation(obs);
+                }
 
-            Observation obs = new Observation(new Long(1001), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs.setMeas(meas_range);
-            obs.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs);
-        }
-        catch (Exception e) { e.printStackTrace(); }
+                if (asset.getProvide_tdoa() && asset.getTdoa_asset_ids() != null && !asset.getTdoa_asset_ids().isEmpty()) {
+                    /* Second asset that is providing shared tdoa measurement */
+                    for (String secondary_asset_id : asset.getTdoa_asset_ids()) {
+                        Long obsId = assetToObservationIdMapping.get(asset.getId()+":"+secondary_asset_id+"_"+ObservationType.tdoa.name());
+                        if (obsId==null)
+                        {
+                            obsId = new Random().nextLong();
+                            assetToObservationIdMapping.put(asset.getId()+":"+secondary_asset_id+"_"+ObservationType.tdoa.name(),obsId);
+                        }
 
-        try {
-            double meas_range = Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)) + Math.random()*range_rand_factor;
-            log.debug("Meas range: "+meas_range);
+                        TestAsset asset1 = testAssets.get(secondary_asset_id);
+                        utm_coords = Helpers.convertLatLngToUtmNthingEasting(asset1.getCurrent_loc()[0], asset1.getCurrent_loc()[1]);
+                        double b_y = utm_coords[0];
+                        double b_x = utm_coords[1];
 
-            Observation obs_b = new Observation(new Long(1002), "ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_b.setMeas(meas_range); //range in metres
-            obs_b.setObservationType(ObservationType.range);
-            fuzerProcess.addObservation(obs_b);
-        } catch (Exception e) { e.printStackTrace(); }
+//                    double meas_tdoa = (Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2))
+//                            - Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)))/Helpers.SPEED_OF_LIGHT
+//                            + Math.random()*tdoa_rand_factor;
+                        double meas_tdoa = ObservationTestHelpers.getTdoaMeasurement(a_y, a_x, b_y, b_x, true_y, true_x, tdoa_rand_factor);
+                        log.debug("Meas tdoa: "+meas_tdoa);
 
-        try {
-            double meas_tdoa = (Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2))
-                    - Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)))/Helpers.SPEED_OF_LIGHT
-                    + Math.random()*tdoa_rand_factor;
-            log.debug("Meas tdoa: "+meas_tdoa);
+                        Observation obs_c = new Observation(obsId, asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+                        obs_c.setAssetId_b(testAssets.get(secondary_asset_id).getId());
+                        obs_c.setLat_b(asset1.getCurrent_loc()[0]);
+                        obs_c.setLon_b(asset1.getCurrent_loc()[1]);
+                        obs_c.setMeas(meas_tdoa); // tdoa in seconds
+                        obs_c.setObservationType(ObservationType.tdoa);
+                        fuzerProcess.addObservation(obs_c);
+                    }
+                }
 
-            Observation obs_c = new Observation(new Long(1003), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs_c.setAssetId_b("ASSET-011");
-            obs_c.setLat_b(asset_b_coords[0]);
-            obs_c.setLon_b(asset_b_coords[1]);
-            obs_c.setMeas(meas_tdoa); // tdoa in seconds
-            obs_c.setObservationType(ObservationType.tdoa);
-            fuzerProcess.addObservation(obs_c);
-        }
-        catch (Exception e) { e.printStackTrace(); }
+                if (asset.getProvide_aoa()) {
+                    Long obsId = assetToObservationIdMapping.get(asset.getId()+"_"+ObservationType.aoa.name());
+                    if (obsId==null)
+                    {
+                        obsId = new Random().nextLong();
+                        assetToObservationIdMapping.put(asset.getId()+"_"+ObservationType.aoa.name(),obsId);
+                    }
+                    //double meas_aoa = Math.atan((a_y-true_y)/(a_x-true_x)) + Math.random()*aoa_rand_factor;;
+                    double meas_aoa = ObservationTestHelpers.getAoaMeasurement(a_y, a_x, true_y, true_x, aoa_rand_factor);
+                    log.debug("Meas AOA: "+meas_aoa);
 
-        try {
-            double meas_aoa = Math.atan((a_y-true_y)/(a_x-true_x)) + Math.random()*aoa_rand_factor;;
-            log.debug("Meas AOA: "+meas_aoa);
-
-            if (true_x < a_x) {
-                meas_aoa = meas_aoa + Math.PI;
+                    Observation obs_d = new Observation(obsId,asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+                    obs_d.setMeas(meas_aoa); // aoa in radians
+                    obs_d.setObservationType(ObservationType.aoa);
+                    fuzerProcess.addObservation(obs_d);
+                }
             }
-            if (true_y<a_y && true_x>=a_x) {
-                meas_aoa = (Math.PI- Math.abs(meas_aoa)) + Math.PI;
-            }
-            log.debug("Meas AOA (adjusted): "+meas_aoa);
-
-            Observation obs_d = new Observation(new Long(1004),"ASSET-010", asset_a_coords[0], asset_a_coords[1]);
-            obs_d.setMeas(meas_aoa); // aoa in radians
-            obs_d.setObservationType(ObservationType.aoa);
-            fuzerProcess.addObservation(obs_d);
+            catch (Exception e) {
+                log.error("Couldnt add all observations for test asset: "+asset.getId());
+                e.printStackTrace(); }
         }
-        catch (Exception e) { e.printStackTrace(); }
 
-        try {
-            double meas_aoa = Math.atan((b_y-true_y)/(b_x-true_x)) + Math.random()*aoa_rand_factor;;
-            log.debug("Meas AOA: "+meas_aoa);
 
-            if (true_x < b_x) {
-                meas_aoa = meas_aoa + Math.PI;
-            }
-            if (true_y<b_y && true_x>=b_x) {
-                meas_aoa = (Math.PI- Math.abs(meas_aoa)) + Math.PI;
-            }
-            log.debug("Meas AOA (adjusted): "+meas_aoa);
-
-            Observation obs_e = new Observation(new Long(1005),"ASSET-011", asset_b_coords[0], asset_b_coords[1]);
-            obs_e.setMeas(meas_aoa); // aoa in radians
-            obs_e.setObservationType(ObservationType.aoa);
-            fuzerProcess.addObservation(obs_e);
-        }
-        catch (Exception e) { e.printStackTrace(); }
+        // ORIGINAL
+//        utm_coords = Helpers.convertLatLngToUtmNthingEasting(asset_a_coords[0], asset_a_coords[1]);
+//        double a_y = utm_coords[0];
+//        double a_x = utm_coords[1];
+//
+//        utm_coords = Helpers.convertLatLngToUtmNthingEasting(asset_b_coords[0], asset_b_coords[1]);
+//        double b_y = utm_coords[0];
+//        double b_x = utm_coords[1];
+//
+//        try {
+//            //double meas_range = Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2)) + Math.random()*range_rand_factor;
+//            double meas_range = ObservationTestHelpers.getRangeMeasurement(a_y,a_x,true_y,true_x,range_rand_factor);
+//            log.debug("Meas range: "+meas_range);
+//
+//            Observation obs = new Observation(new Long(1001), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);
+//            obs.setMeas(meas_range);
+//            obs.setObservationType(ObservationType.range);
+//            fuzerProcess.addObservation(obs);
+//        }
+//        catch (Exception e) { e.printStackTrace(); }
+//
+//        try {
+//            double meas_range = Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)) + Math.random()*range_rand_factor;
+//            log.debug("Meas range: "+meas_range);
+//
+//            Observation obs_b = new Observation(new Long(1002), "ASSET-011", asset_b_coords[0], asset_b_coords[1]);
+//            obs_b.setMeas(meas_range); //range in metres
+//            obs_b.setObservationType(ObservationType.range);
+//            fuzerProcess.addObservation(obs_b);
+//        } catch (Exception e) { e.printStackTrace(); }
+//
+//        try {
+//            double meas_tdoa = (Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2))
+//                    - Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)))/Helpers.SPEED_OF_LIGHT
+//                    + Math.random()*tdoa_rand_factor;
+//            log.debug("Meas tdoa: "+meas_tdoa);
+//
+//            Observation obs_c = new Observation(new Long(1003), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);
+//            obs_c.setAssetId_b("ASSET-011");
+//            obs_c.setLat_b(asset_b_coords[0]);
+//            obs_c.setLon_b(asset_b_coords[1]);
+//            obs_c.setMeas(meas_tdoa); // tdoa in seconds
+//            obs_c.setObservationType(ObservationType.tdoa);
+//            fuzerProcess.addObservation(obs_c);
+//        }
+//        catch (Exception e) { e.printStackTrace(); }
+//
+//        try {
+//            double meas_aoa = Math.atan((a_y-true_y)/(a_x-true_x)) + Math.random()*aoa_rand_factor;;
+//            log.debug("Meas AOA: "+meas_aoa);
+//
+//            if (true_x < a_x) {
+//                meas_aoa = meas_aoa + Math.PI;
+//            }
+//            if (true_y<a_y && true_x>=a_x) {
+//                meas_aoa = (Math.PI- Math.abs(meas_aoa)) + Math.PI;
+//            }
+//            log.debug("Meas AOA (adjusted): "+meas_aoa);
+//
+//            Observation obs_d = new Observation(new Long(1004),"ASSET-010", asset_a_coords[0], asset_a_coords[1]);
+//            obs_d.setMeas(meas_aoa); // aoa in radians
+//            obs_d.setObservationType(ObservationType.aoa);
+//            fuzerProcess.addObservation(obs_d);
+//        }
+//        catch (Exception e) { e.printStackTrace(); }
+//
+//        try {
+//            double meas_aoa = Math.atan((b_y-true_y)/(b_x-true_x)) + Math.random()*aoa_rand_factor;;
+//            log.debug("Meas AOA: "+meas_aoa);
+//
+//            if (true_x < b_x) {
+//                meas_aoa = meas_aoa + Math.PI;
+//            }
+//            if (true_y<b_y && true_x>=b_x) {
+//                meas_aoa = (Math.PI- Math.abs(meas_aoa)) + Math.PI;
+//            }
+//            log.debug("Meas AOA (adjusted): "+meas_aoa);
+//
+//            Observation obs_e = new Observation(new Long(1005),"ASSET-011", asset_b_coords[0], asset_b_coords[1]);
+//            obs_e.setMeas(meas_aoa); // aoa in radians
+//            obs_e.setObservationType(ObservationType.aoa);
+//            fuzerProcess.addObservation(obs_e);
+//        }
+//        catch (Exception e) { e.printStackTrace(); }
     }
 
     public FuzerProcess getFuzerProcess() {
@@ -154,22 +232,6 @@ public class MovingTargetObserver extends TimerTask {
 
     public void setTrue_lon(double true_lon) {
         this.true_lon = true_lon;
-    }
-
-    public double[] getAsset_a_coords() {
-        return asset_a_coords;
-    }
-
-    public void setAsset_a_coords(double[] asset_a_coords) {
-        this.asset_a_coords = asset_a_coords;
-    }
-
-    public double[] getAsset_b_coords() {
-        return asset_b_coords;
-    }
-
-    public void setAsset_b_coords(double[] asset_b_coords) {
-        this.asset_b_coords = asset_b_coords;
     }
 
     public double getRange_rand_factor() {
@@ -210,5 +272,13 @@ public class MovingTargetObserver extends TimerTask {
 
     public void setLon_move(double lon_move) {
         this.lon_move = lon_move;
+    }
+
+    public Map<String, TestAsset> getTestAssets() {
+        return testAssets;
+    }
+
+    public void setTestAssets(Map<String, TestAsset> testAssets) {
+        this.testAssets = testAssets;
     }
 }

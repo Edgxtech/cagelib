@@ -2,7 +2,13 @@ package tech.tgo.fuzer.model;
 
 public class Asset {
     String id;
+
+    /* Location in lat,lon */
     double[] current_loc;
+
+    public Asset() {
+
+    }
 
     public Asset(String id, double[] current_loc) {
         this.id = id;

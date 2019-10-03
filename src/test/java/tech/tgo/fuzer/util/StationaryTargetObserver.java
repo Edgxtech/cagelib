@@ -1,11 +1,10 @@
-package tech.tgo.fuzer.application;
+package tech.tgo.fuzer.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.FuzerProcess;
 import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
-import tech.tgo.fuzer.util.Helpers;
 
 import java.util.TimerTask;
 
