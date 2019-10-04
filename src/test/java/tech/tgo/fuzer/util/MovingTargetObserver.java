@@ -52,7 +52,7 @@ public class MovingTargetObserver extends TimerTask {
             double a_x = utm_coords[1];
 
             try {
-                if (asset.getProvide_range()) {
+                if (asset.getProvide_range()!=null && asset.getProvide_range()) {
                     Long obsId = assetToObservationIdMapping.get(asset.getId()+"_"+ObservationType.range.name());
                     if (obsId==null)
                     {
@@ -61,7 +61,7 @@ public class MovingTargetObserver extends TimerTask {
                     }
                     //double meas_range = Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2)) + Math.random()*range_rand_factor; orig
                     double meas_range = ObservationTestHelpers.getRangeMeasurement(a_y, a_x, true_y, true_x, range_rand_factor);
-                    log.debug("Meas range: " + meas_range);
+                    log.debug("Asset: "+asset.getId()+", Meas range: " + meas_range);
 
                     //Observation obs = new Observation(new Long(1001), "ASSET-010", asset_a_coords[0], asset_a_coords[1]);  orig
                     Observation obs = new Observation(obsId, asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
@@ -70,7 +70,7 @@ public class MovingTargetObserver extends TimerTask {
                     fuzerProcess.addObservation(obs);
                 }
 
-                if (asset.getProvide_tdoa() && asset.getTdoa_asset_ids() != null && !asset.getTdoa_asset_ids().isEmpty()) {
+                if (asset.getProvide_tdoa()!=null && asset.getProvide_tdoa() && asset.getTdoa_asset_ids() != null && !asset.getTdoa_asset_ids().isEmpty()) {
                     /* Second asset that is providing shared tdoa measurement */
                     for (String secondary_asset_id : asset.getTdoa_asset_ids()) {
                         Long obsId = assetToObservationIdMapping.get(asset.getId()+":"+secondary_asset_id+"_"+ObservationType.tdoa.name());
@@ -89,7 +89,7 @@ public class MovingTargetObserver extends TimerTask {
 //                            - Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)))/Helpers.SPEED_OF_LIGHT
 //                            + Math.random()*tdoa_rand_factor;
                         double meas_tdoa = ObservationTestHelpers.getTdoaMeasurement(a_y, a_x, b_y, b_x, true_y, true_x, tdoa_rand_factor);
-                        log.debug("Meas tdoa: "+meas_tdoa);
+                        log.debug("Asset: "+asset.getId()+", Meas tdoa: "+meas_tdoa);
 
                         Observation obs_c = new Observation(obsId, asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
                         obs_c.setAssetId_b(testAssets.get(secondary_asset_id).getId());
@@ -101,7 +101,7 @@ public class MovingTargetObserver extends TimerTask {
                     }
                 }
 
-                if (asset.getProvide_aoa()) {
+                if (asset.getProvide_aoa()!=null && asset.getProvide_aoa()) {
                     Long obsId = assetToObservationIdMapping.get(asset.getId()+"_"+ObservationType.aoa.name());
                     if (obsId==null)
                     {
@@ -110,7 +110,7 @@ public class MovingTargetObserver extends TimerTask {
                     }
                     //double meas_aoa = Math.atan((a_y-true_y)/(a_x-true_x)) + Math.random()*aoa_rand_factor;;
                     double meas_aoa = ObservationTestHelpers.getAoaMeasurement(a_y, a_x, true_y, true_x, aoa_rand_factor);
-                    log.debug("Meas AOA: "+meas_aoa);
+                    log.debug("Asset: "+asset.getId()+", Meas AOA: "+meas_aoa);
 
                     Observation obs_d = new Observation(obsId,asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
                     obs_d.setMeas(meas_aoa); // aoa in radians
@@ -119,7 +119,7 @@ public class MovingTargetObserver extends TimerTask {
                 }
             }
             catch (Exception e) {
-                log.error("Couldnt add all observations for test asset: "+asset.getId());
+                log.error("Couldn't add all observations for test asset: "+asset.getId());
                 e.printStackTrace(); }
         }
 

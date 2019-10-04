@@ -148,19 +148,19 @@ public class FuzerProcess implements Serializable {
         if (this.getGeoMission().getObservations().get(obs.getId()) != null) {
             Observation prev_obs = this.getGeoMission().getObservations().get(obs.getId());
             if (prev_obs.getMeas()!=null) {
-                log.debug("Setting previous observation for: "+prev_obs.getId()+", type: "+prev_obs.getObservationType().name()+", as: "+prev_obs.getMeas());
+                log.trace("Setting previous observation for: "+prev_obs.getId()+", type: "+prev_obs.getObservationType().name()+", as: "+prev_obs.getMeas());
                 obs.setMeas_prev(prev_obs.getMeas());
             }
         }
 
-        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+", ID: "+obs.getId());
+        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+","+obs.getMeas()+",ID:"+obs.getId());
         this.geoMission.getObservations().put(obs.getId(), obs);
 
         Object[] zones = Helpers.getUtmLatZoneLonZone(obs.getLat(), obs.getLon());
         obs.setY_latZone((char)zones[0]);
         obs.setX_lonZone((int)zones[1]);
 
-        /* Rudimentary here - use zones attached to the most recent observation. improvements to come */
+        /* Rudimentary - use zones attached to the most recent observation */
         this.geoMission.setLatZone(obs.getY_latZone());
         this.geoMission.setLonZone(obs.getX_lonZone());
 
@@ -188,7 +188,6 @@ public class FuzerProcess implements Serializable {
             if (obs.getObservationType().equals(ObservationType.range)) {
                 List<double[]> measurementCircle = new ArrayList<double[]>();
                 for (double theta = (1 / 2) * Math.PI; theta <= (5 / 2) * Math.PI; theta += 0.2) {
-                    //UTMRef utmMeas = new UTMRef(obs.getRange() * Math.cos(theta) + obs.getX(), obs.getRange() * Math.sin(theta) + obs.getY(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
                     UTMRef utmMeas = new UTMRef(obs.getMeas() * Math.cos(theta) + obs.getX(), obs.getMeas() * Math.sin(theta) + obs.getY(), this.geoMission.getLatZone(), this.geoMission.getLonZone());
                     LatLng ltln = utmMeas.toLatLng();
                     double[] measPoint = {ltln.getLat(), ltln.getLng()};
@@ -202,7 +201,6 @@ public class FuzerProcess implements Serializable {
             if (obs.getObservationType().equals(ObservationType.tdoa)) {
                 List<double[]> measurementHyperbola = new ArrayList<double[]>();
                 double c = Math.sqrt(Math.pow((obs.getX()-obs.getXb()),2)+Math.pow((obs.getYb()-obs.getY()),2))/2;
-                //double a=(obs.getTdoa()* Helpers.SPEED_OF_LIGHT)/2; double b=Math.sqrt(Math.abs(Math.pow(c,2)-Math.pow(a,2)));
                 double a=(obs.getMeas()* Helpers.SPEED_OF_LIGHT)/2; double b=Math.sqrt(Math.abs(Math.pow(c,2)-Math.pow(a,2)));
                 double ca = (obs.getXb()-obs.getX())/(2*c); double sa = (obs.getYb()-obs.getY())/(2*c); //# COS and SIN of rot angle
                 for (double t = -2; t<= 2; t += 0.1) {
@@ -224,12 +222,9 @@ public class FuzerProcess implements Serializable {
             /* AOA MEASUREMENT */
             if (obs.getObservationType().equals(ObservationType.aoa)) {
                 List<double[]> measurementLine = new ArrayList<double[]>();
-                //double b = obs.getY() - Math.tan(obs.getAoa())*obs.getX();
                 double b = obs.getY() - Math.tan(obs.getMeas())*obs.getX();
                 double fromVal=0; double toVal=0;
-                //double x_run = Math.abs(Math.cos(obs.getAoa()))*5000;
                 double x_run = Math.abs(Math.cos(obs.getMeas()))*5000;
-                //if (obs.getAoa()>Math.PI/2 && obs.getAoa()<3*Math.PI/2) { // negative-x plane projection
                 if (obs.getMeas()>Math.PI/2 && obs.getMeas()<3*Math.PI/2) { // negative-x plane projection
                     fromVal=-x_run; toVal=0;
                 }
@@ -238,7 +233,6 @@ public class FuzerProcess implements Serializable {
                 }
 
                 for (double t = obs.getX()+fromVal; t<= obs.getX()+toVal; t += 100) {
-                    //double y = Math.tan(obs.getAoa())*t + b;
                     double y = Math.tan(obs.getMeas())*t + b;
                     UTMRef utmMeas = new UTMRef(t, y, this.geoMission.getLatZone(), this.geoMission.getLonZone());
                     LatLng ltln = utmMeas.toLatLng();
@@ -252,13 +246,14 @@ public class FuzerProcess implements Serializable {
 
         /* Update the live observations - if a 'tracking' mission type */
         if (algorithmEKF !=null && algorithmEKF.isRunning()) {
-            log.debug("Algorithm was running, will update observations list for tracking mode runs only");
+            log.trace("Algorithm was running, will update observations list for tracking mode runs only");
             if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
 
-                // TODO, do this in batches to avoid filter drift mid process
+
+                // TODO, do this in batches to avoid filter drift mid process??
 
 
-                log.debug("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
+                log.trace("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
                 algorithmEKF.setObservations(this.geoMission.observations);
             }
             else {
@@ -283,6 +278,7 @@ public class FuzerProcess implements Serializable {
         }
 
         algorithmEKF = new AlgorithmEKF(this.actionListener, this.geoMission.observations, this.geoMission);
+        algorithmEKF.initialiseFilter();
         Thread thread = new Thread(algorithmEKF);
         thread.start();
     }

@@ -3,12 +3,12 @@ package tech.tgo.fuzer.compute;
 import org.apache.commons.math3.linear.RealVector;
 import tech.tgo.fuzer.model.Observation;
 
-public class FilterObservationStateDTO {
+public class FilterStateDTO {
     Observation obs;
     double f_est;
     RealVector innov;
 
-    public FilterObservationStateDTO(Observation obs, double f_est, RealVector innov) {
+    public FilterStateDTO(Observation obs, double f_est, RealVector innov) {
         this.obs = obs;
         this.f_est = f_est;
         this.innov = innov;

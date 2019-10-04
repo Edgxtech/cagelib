@@ -13,10 +13,7 @@ import org.apache.commons.math3.linear.LUDecomposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.fuzer.FuzerListener;
-import tech.tgo.fuzer.model.GeoMission;
-import tech.tgo.fuzer.model.FuzerMode;
-import tech.tgo.fuzer.model.Observation;
-import tech.tgo.fuzer.model.ObservationType;
+import tech.tgo.fuzer.model.*;
 import tech.tgo.fuzer.util.Helpers;
 import tech.tgo.fuzer.util.KmlFileHelpers;
 
@@ -76,19 +73,30 @@ public class AlgorithmEKF implements Runnable {
         this.fuzerListener = fuzerListener;
         this.observations = observations;
         this.geoMission = geoMission;
+    }
 
+    public void initialiseFilter() {
         /* Initialise filter configurable properties */
         double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}}; // Smaller for trusted measurements. Guide: {0.01 -> 0.1}
         Rk = new Array2DRowRealMatrix(measurementNoiseData);
 
         /* Initialise filter state */
-        log.debug("Finding rudimentary start point between first two observations");
-        double[] start_x_y = findRudimentaryStartPoint(this.observations.values(), 5000);
+//        Random rand = new Random();
+//        List<Observation> obsList = new ArrayList<Observation>(this.observations.values());
+//        Observation randomObs_a = obsList.get(rand.nextInt(obsList.size()));
+//        obsList.remove(randomObs_a);
+//        Observation randomObs_b = obsList.get(rand.nextInt(obsList.size()));
+//        log.debug("Finding rudimentary start point between two random observations: "+randomObs_a.ge);
+        Random rand = new Random();
+        List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
+        Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
+        assetList.remove(randAssetA);
+        Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
+        log.debug("Finding rudimentary start point between two random observations: "+randAssetA.getId()+","+randAssetB.getId());
+
+        double[] start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, 5000);
         log.debug("Filter start point: "+start_x_y[0]+","+start_x_y[1]);
         double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
-        //double[] initStateData = {406911, 6503338, 0.1, 0.1};  // here temp
-        //double[] initStateData = {404032,6469090,1,1}; // goes to wrong branch
-        //double[] initStateData = {397775.4666593331,6392539,1,1};
 
         log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
         double[] latLonStart = Helpers.convertUtmNthingEastingToLatLng(initStateData[0], initStateData[1], geoMission.getLatZone(), geoMission.getLonZone());
@@ -114,8 +122,7 @@ public class AlgorithmEKF implements Runnable {
 
         running.set(true);
 
-        //Vector<double[]> rks = new Vector<double[]>(); // DEV - SAFETY FEATURE for getting correct branches
-        Vector<FilterObservationStateDTO> observationStateDTOS = new Vector<FilterObservationStateDTO>(); // DEV - SAFETY FEATURE for getting correct branches
+        Vector<FilterStateDTO> filterStateDTOs = new Vector<FilterStateDTO>();
 
         long startTime = Calendar.getInstance().getTimeInMillis();
 
@@ -146,7 +153,7 @@ public class AlgorithmEKF implements Runnable {
             P_innov = new Array2DRowRealMatrix(P_innovd);
 
             /* reset */
-            observationStateDTOS.removeAllElements();
+            filterStateDTOs.removeAllElements();
 
             /* observations collection is dynamically updated for tracking mode missions */
             Iterator obsIterator = this.observations.values().iterator();
@@ -178,6 +185,13 @@ public class AlgorithmEKF implements Runnable {
 
                     d = obs.getMeas() * Helpers.SPEED_OF_LIGHT;
 
+//                    // TEMP    DEVELOPMENTAL
+//                    if (d<0) {
+//                        //f_est = Math.sqrt(Math.pow((obs.getXb() - xk), 2) + Math.pow(obs.getYb() - yk, 2)) - Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2));  NOPE
+//                        //H = H.scalarMultiply(-1); NOPE
+//                        obs.setCrossed_border(true);
+//                    }
+
                     log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
 
                 } else if (obs.getObservationType().equals(ObservationType.aoa)) {
@@ -197,12 +211,6 @@ public class AlgorithmEKF implements Runnable {
                     d = obs.getMeas() * 180 / Math.PI;
 
                     log.trace("AOA innovation: " + f_est + ", vs d: " + d);
-
-                    /* Check for 0-360 degree border crossing */
-                    if ((d > 0 && d < 180) && (obs.getMeas_prev()!=null && obs.getMeas_prev() > Math.PI)) {
-                        //obs.setCrossed_border(true);
-                        d = 2*Math.PI + d; // temporarily treat it as an angle > 360 to aid passage over the boundary
-                    }
                 }
 
                 RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
@@ -210,22 +218,20 @@ public class AlgorithmEKF implements Runnable {
 
                 /* Measurement balancer */
                 if (obs.getObservationType().equals(ObservationType.range)) {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(0.1);
+                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(0.1);
+                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
                 }
                 else {
                     K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
-
-                    if (obs.getCrossed_border()!=null && obs.getCrossed_border()) {
-                        /* guide over */
-                        f_est = 0;
-                        Pinit.scalarMultiply(1000.0);
-                    }
                 }
 
                 double rk = d - f_est;
+
+                if (obs.getObservationType().equals(ObservationType.aoa)) {
+                    rk = Math.abs(rk); // Always innovate anticlockwise
+                }
 
                 double[] HXk = H.operate(Xk).toArray();
                 RealVector innov_ = K.scalarMultiply(rk - HXk[0]).getColumnVector(0);
@@ -233,7 +239,7 @@ public class AlgorithmEKF implements Runnable {
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
 
-                observationStateDTOS.add(new FilterObservationStateDTO(obs, f_est, innov_));
+                filterStateDTOs.add(new FilterStateDTO(obs, f_est, innov_));
             }
 
             Xk = Xk.add(innov);
@@ -243,7 +249,7 @@ public class AlgorithmEKF implements Runnable {
 
                 /* A measure of consistency between types of observations */
                 double residual_rk = 0.0;
-                for (FilterObservationStateDTO obs_state: observationStateDTOS) {
+                for (FilterStateDTO obs_state: filterStateDTOs) {
                     if (obs_state.getObs().getObservationType().equals(ObservationType.range)) {
                         residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 1000;
                     }
@@ -254,33 +260,44 @@ public class AlgorithmEKF implements Runnable {
                         residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 360;
                     }
                 }
+                // TODO, divide resid_rk by # obervations since its proportional?
+                residual_rk = residual_rk / this.observations.size();
+
 
                 // TODO, gradually increase R here??
 
                 /* If filter had adequately processed latest observations - prevent dispatching spurious results */
                 double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
-                //log.debug("Residual Rk: "+residual_rk);
-
-                // TODO, i think comparing to residual_rk will be better, but needs to scale with the
+                //log.debug("Residual: "+residual);
 
                 if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
-                    log.debug("Residual "+residual);
-                    log.debug("Residual measurement to filter % delta: "+residual_rk);
+                    log.debug("Dispatching Result From # Observations: " + this.observations.size());
+                    log.debug("Residual Movements: "+residual);
+                    log.debug("Residual Measurement Delta: "+residual_rk);
                     log.debug("Residual Innovation: "+innov);
 
                     if (log.isDebugEnabled()) {
-                        for (FilterObservationStateDTO obs_state : observationStateDTOS) {
+                        for (FilterStateDTO obs_state : filterStateDTOs) {
                             log.debug("Observation utilisation: type: "+obs_state.getObs().getObservationType().name()+", f_est: " + obs_state.getF_est() + ",d: " + obs_state.getObs().getMeas()+", innov: "+obs_state.getInnov());
-                            if (obs_state.getObs().getObservationType().equals(ObservationType.aoa) && obs_state.getObs().getCrossed_border() != null) {
+
+                            //DEPRECATE THIS:  TMEP
+                            if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa) && obs_state.getObs().getCrossed_border() != null) { /// TODO deprecate
                                 log.debug("AOA meas Crossed the Zero border: "+obs_state.getObs().getCrossed_border());
+                                // TODO, consider reset covariances?
+                                //reinitialiseFilter();
                             }
                         }
                     }
 
-                    log.debug("DISPATCHING RESULT.. From # Observations: " + this.observations.size());
                     startTime = Calendar.getInstance().getTimeInMillis();
 
-                    dispatchResult(Xk);
+                    //if (residual_rk < 100) {
+                        dispatchResult(Xk);
+//                    }
+//                    else {
+//                        log.debug("Reinitialising filter and not dispatching result since residual_rk >  threshold: "+residual_rk);
+//                        reinitialiseFilter();
+//                    }
 
                     if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
                         if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
@@ -323,9 +340,7 @@ public class AlgorithmEKF implements Runnable {
 
     public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {
 
-        double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));   /// NOTE: using like this the filter converges on AOA much faster
-        //double R1 = (Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));   // NOTE: Can speed up the rate of convergence towards measurement by multiplying by i.e. 0.1 (10 times speed increase)
-
+        double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));   // Note: better performance using sqrt
 
         double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose linearisation
         double dfdy = -(x-Xk1)/R1;
@@ -335,25 +350,37 @@ public class AlgorithmEKF implements Runnable {
         return H;
     }
 
-    public double[] findRudimentaryStartPoint(Collection<Observation> observations, double addition) {
+    public double[] findRudimentaryStartPoint(Asset asset_a, Asset asset_b, double addition) {
         double x_init=0; double y_init=0;
-        Iterator it = observations.iterator();
-        if (observations.size()==1) {
-            Observation obs = (Observation)it.next();
-            x_init = obs.getX() + addition;
-            y_init = obs.getY() - addition;
+        double[] asset_a_utm = Helpers.convertLatLngToUtmNthingEasting(asset_a.getCurrent_loc()[0],asset_a.getCurrent_loc()[1]);
+        double[] asset_b_utm = Helpers.convertLatLngToUtmNthingEasting(asset_b.getCurrent_loc()[0],asset_b.getCurrent_loc()[1]);
+        if (asset_b == null) {
+            x_init = asset_a_utm[1] - addition;
+            y_init = asset_a_utm[0] + addition;
         }
-        else if (observations.size()>1) {
-            Observation obs_a = (Observation)it.next();
-            Observation obs_b = (Observation)it.next();
-            x_init = obs_a.getX();
-            y_init = obs_a.getY();
-            double x_n = obs_b.getX();
-            double y_n = obs_b.getY();
+        else {
+            x_init = asset_a_utm[1];
+            y_init = asset_a_utm[0];
+            double x_n = asset_b_utm[1];
+            double y_n = asset_b_utm[0];
             x_init = x_init + (x_init - x_n) / 2;
             y_init = y_init + (y_init - y_n) / 2;
         }
         return new double[]{x_init,y_init};
+        //return new double[]{x_init,y_init};
+//        if (asset_b == null) {
+//            x_init = asset_b.getCurrent_loc()[1] + addition;
+//            y_init = obs_b.getY() - addition;
+//        }
+//        else {
+//            x_init = obs_a.getX();
+//            y_init = obs_a.getY();
+//            double x_n = obs_b.getX();
+//            double y_n = obs_b.getY();
+//            x_init = x_init + (x_init - x_n) / 2;
+//            y_init = y_init + (y_init - y_n) / 2;
+//        }
+//        return new double[]{x_init,y_init};
     }
 
     public boolean isRunning() {
@@ -384,13 +411,29 @@ public class AlgorithmEKF implements Runnable {
         }
     }
 
+    public void reinitialiseFilter() {
+        /* Select two assets by random and use their middle point */
+        Random rand = new Random();
+        List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
+        Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
+        assetList.remove(randAssetA);
+        Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
+        log.debug("Finding rudimentary start point between two random observations: "+randAssetA.getId()+","+randAssetB.getId());
+
+        double[] start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, -500);
+        log.debug("(Re) Filter start point: "+start_x_y[0]+","+start_x_y[1]);
+        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
+        log.info("(Re) Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
+        double[] latLonStart = Helpers.convertUtmNthingEastingToLatLng(initStateData[0], initStateData[1], geoMission.getLatZone(), geoMission.getLonZone());
+        log.info("(Re) Init start point: "+latLonStart[0]+","+latLonStart[1]);
+        RealVector Xinit = new ArrayRealVector(initStateData);
+        Xk = Xinit;
+    }
+
     public void resetCovariances(){
         log.debug("Resetting covariances, from: "+Pk);
         Pk = Pinit.scalarMultiply(1000.0);
         log.debug("Resetting covariances, to: "+Pk);
-
-
-        // TODO< reset Xk3/Xk4???
 
 //                    double[] start_x_y = findRudimentaryStartPoint(this.observations.values(), -500);
 //                    log.debug(")Re) Filter start point: "+start_x_y[0]+","+start_x_y[1]);
