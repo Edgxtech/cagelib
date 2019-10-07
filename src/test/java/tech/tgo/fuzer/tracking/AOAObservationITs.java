@@ -1,9 +1,11 @@
-package tech.tgo.fuzer;
+package tech.tgo.fuzer.tracking;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.tgo.fuzer.FuzerListener;
+import tech.tgo.fuzer.FuzerProcess;
 import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.Target;
@@ -14,14 +16,13 @@ import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
-public class TDOA_AOAObservationITs implements FuzerListener {
+public class AOAObservationITs implements FuzerListener {
 
-    private static final Logger log = LoggerFactory.getLogger(TDOA_AOAObservationITs.class);
+    private static final Logger log = LoggerFactory.getLogger(AOAObservationITs.class);
 
     Map<String,GeoMission> fuzerMissions = new HashMap<String,GeoMission>();
 
@@ -89,27 +90,19 @@ public class TDOA_AOAObservationITs implements FuzerListener {
         /* Create some reusable test assets */
         asset_a.setId("A");
         asset_a.setProvide_aoa(true);
-        asset_a.setProvide_tdoa(true);
         asset_a.setCurrent_loc(asset_a_coords);
 
         asset_b.setId("B");
         asset_b.setProvide_aoa(true);
-        asset_b.setProvide_tdoa(true);
         asset_b.setCurrent_loc(asset_b_coords);
 
         asset_c.setId("C");
         asset_c.setProvide_aoa(true);
-        asset_c.setProvide_tdoa(true);
         asset_c.setCurrent_loc(asset_c_coords);
 
         asset_d.setId("D");
         asset_d.setProvide_aoa(true);
-        asset_d.setProvide_tdoa(true);
         asset_d.setCurrent_loc(asset_d_coords);
-
-        asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"B","C","D"}));
-        asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C","D"}));
-        asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{"D"}));
     }
 
     /* Result callback */
@@ -126,7 +119,7 @@ public class TDOA_AOAObservationITs implements FuzerListener {
     public void testMoverNorthEast() {
         movingTargetObserver.setTrue_lat(-31.98);  // BOTTOM -31.920000000000012,116.01999999999994
         movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
+        movingTargetObserver.setAoa_rand_factor(0.1);
         movingTargetObserver.setLat_move(+0.005); // MOVE NE
         movingTargetObserver.setLon_move(+0.005);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
@@ -155,15 +148,13 @@ public class TDOA_AOAObservationITs implements FuzerListener {
     public void testMoverNorthEast_TwoAssets() {
         movingTargetObserver.setTrue_lat(-31.98);  // BOTTOM -31.920000000000012,116.01999999999994
         movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
+        movingTargetObserver.setAoa_rand_factor(0.1);
         movingTargetObserver.setLat_move(+0.005); // MOVE NE
         movingTargetObserver.setLon_move(+0.005);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
             put(asset_b.getId(), asset_b);
-            asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"B"}));
-            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{}));
         }};
         movingTargetObserver.setTestAssets(assets);
         timer.scheduleAtFixedRate(movingTargetObserver,0,999);

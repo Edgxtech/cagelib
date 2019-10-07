@@ -29,7 +29,9 @@ public class GeoMission {
     /*  - Output filename
     /*  - Which artefacts to show: Geo result, measurements and CEPs */
     Boolean outputKml = false;
+    Boolean outputFilterState = false;
     String outputKmlFilename = null;
+    String outputFilterStateKmlFilename = null;
     public Boolean showCEPs = false;
     public Boolean showMeas = false;
     public Boolean showGEOs = false;
@@ -214,5 +216,21 @@ public class GeoMission {
 
     public void setFilterMeasurementError(Double filterMeasurementError) {
         this.filterMeasurementError = filterMeasurementError;
+    }
+
+    public Boolean getOutputFilterState() {
+        return outputFilterState;
+    }
+
+    public void setOutputFilterState(Boolean outputFilterState) {
+        this.outputFilterState = outputFilterState;
+    }
+
+    public String getOutputFilterStateKmlFilename() {
+        return outputFilterStateKmlFilename;
+    }
+
+    public void setOutputFilterStateKmlFilename(String outputFilterStateKmlFilename) {
+        this.outputFilterStateKmlFilename = outputFilterStateKmlFilename;
     }
 }

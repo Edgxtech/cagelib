@@ -1,40 +1,26 @@
 package tech.tgo.fuzer.compute;
 
 import org.apache.commons.math3.linear.RealVector;
-import tech.tgo.fuzer.model.Observation;
+
+import java.util.List;
 
 public class FilterStateDTO {
-    Observation obs;
-    double f_est;
-    RealVector innov;
+    List<FilterObservationDTO> filterObservationDTOs;
+    RealVector Xk;
 
-    public FilterStateDTO(Observation obs, double f_est, RealVector innov) {
-        this.obs = obs;
-        this.f_est = f_est;
-        this.innov = innov;
+    public List<FilterObservationDTO> getFilterObservationDTOs() {
+        return filterObservationDTOs;
     }
 
-    public Observation getObs() {
-        return obs;
+    public void setFilterObservationDTOs(List<FilterObservationDTO> filterObservationDTOs) {
+        this.filterObservationDTOs = filterObservationDTOs;
     }
 
-    public void setObs(Observation obs) {
-        this.obs = obs;
+    public RealVector getXk() {
+        return Xk;
     }
 
-    public double getF_est() {
-        return f_est;
-    }
-
-    public void setF_est(double f_est) {
-        this.f_est = f_est;
-    }
-
-    public RealVector getInnov() {
-        return innov;
-    }
-
-    public void setInnov(RealVector innov) {
-        this.innov = innov;
+    public void setXk(RealVector xk) {
+        Xk = xk;
     }
 }

@@ -55,6 +55,12 @@ public class FuzerProcess implements Serializable {
             kmlOutput.createNewFile();
         }
 
+        if (geoMission.getOutputFilterState()) {
+            log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
+            File kmlFilterStateOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
+            kmlFilterStateOutput.createNewFile();
+        }
+
         /* Extract results dispatch period */
         if (geoMission.getDispatchResultsPeriod()==null) {
             if (geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period") != null && !geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period").isEmpty()) {
