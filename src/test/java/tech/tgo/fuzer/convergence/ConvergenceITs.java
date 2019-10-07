@@ -92,15 +92,15 @@ public class ConvergenceITs implements FuzerListener {
 
         /* Create some reusable test assets */
         asset_a.setId("A");
-        asset_a.setProvide_range(true);
+        //asset_a.setProvide_range(true);
         //asset_a.setProvide_tdoa(true);
-        asset_a.setProvide_aoa(true);
+        //asset_a.setProvide_aoa(true);
         asset_a.setCurrent_loc(asset_a_coords);
 
         asset_b.setId("B");
-        //asset_b.setProvide_range(true);
-        //asset_b.setProvide_tdoa(true);
-        asset_b.setProvide_aoa(true);
+        asset_b.setProvide_range(true);
+        asset_b.setProvide_tdoa(true);
+        //asset_b.setProvide_aoa(true);
         asset_b.setCurrent_loc(asset_b_coords);
 
         asset_c.setId("C");
@@ -135,8 +135,8 @@ public class ConvergenceITs implements FuzerListener {
         movingTargetObserver.setTrue_lat(-31.98);  // LEFT   -31.92, 115.79549
         movingTargetObserver.setTrue_lon(115.80);
 //        movingTargetObserver.setRange_rand_factor(500);
-        movingTargetObserver.setAoa_rand_factor(0.0);
-        movingTargetObserver.setRange_rand_factor(0);
+        movingTargetObserver.setAoa_rand_factor(0.1);
+        movingTargetObserver.setRange_rand_factor(500);
         movingTargetObserver.setTdoa_rand_factor(0.0000001);
         movingTargetObserver.setLat_move(0.000); // NO MOVEMENT
         movingTargetObserver.setLon_move(0.000);
@@ -144,10 +144,10 @@ public class ConvergenceITs implements FuzerListener {
         {{
             put(asset_a.getId(), asset_a);
 
-            //put(asset_b.getId(), asset_b);
+            put(asset_b.getId(), asset_b);
 
 
-            //put(asset_c.getId(), asset_c);
+            put(asset_c.getId(), asset_c);
 
             put(asset_d.getId(), asset_d);
 
@@ -183,8 +183,8 @@ public class ConvergenceITs implements FuzerListener {
 //            put(asset_c.getId(), asset_c);
 
 
-            //put(asset_b.getId(), asset_b);
-            //put(asset_d.getId(), asset_d);
+            put(asset_b.getId(), asset_b);
+            put(asset_d.getId(), asset_d);
         }};
         movingTargetObserver.setTestAssets(assets);
         timer.scheduleAtFixedRate(movingTargetObserver,0,999);

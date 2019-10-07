@@ -248,9 +248,9 @@ public class AlgorithmEKF implements Runnable {
                 double rk = d - f_est;
 
                 // TODO uncommetn to fix o-360 border crossing bug
-//                if (obs.getObservationType().equals(ObservationType.aoa)) {
-//                    rk = Math.abs(rk); // Always innovate anticlockwise
-//                }
+                if (obs.getObservationType().equals(ObservationType.aoa)) {
+                    rk = Math.abs(rk); // Always innovate anticlockwise
+                }
 
 
 
