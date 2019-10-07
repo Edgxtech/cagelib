@@ -173,12 +173,22 @@ public class KmlFileExporter {
                 coords3.appendChild(doc.createTextNode(latLon[1] + "," + latLon[0] + ",0 \n"));
             }
 
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            log.error(e.getMessage());
+        }
+    }
+
+    public void writeCurrentExports(GeoMission geoMission) {
+        try {
             Source src = new DOMSource(doc);
             Result dest = new StreamResult(new File("output/filterState.kml"));
             aTransformer.transform(src, dest);
         }
-        catch (Exception e)
-        {
+        catch(Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());
         }

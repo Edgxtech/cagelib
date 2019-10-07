@@ -92,15 +92,15 @@ public class TrackingModeITs implements FuzerListener {
 
         /* Create some reusable test assets */
         asset_a.setId("A");
-        asset_a.setProvide_range(true);
+        //asset_a.setProvide_range(true);
         //asset_a.setProvide_tdoa(true);
-        asset_a.setProvide_aoa(true);
+        //asset_a.setProvide_aoa(true);
         asset_a.setCurrent_loc(asset_a_coords);
 
         asset_b.setId("B");
         asset_b.setProvide_range(true);
         //asset_b.setProvide_tdoa(true);
-        asset_b.setProvide_aoa(true);
+        //asset_b.setProvide_aoa(true);
         asset_b.setCurrent_loc(asset_b_coords);
 
         asset_c.setId("C");

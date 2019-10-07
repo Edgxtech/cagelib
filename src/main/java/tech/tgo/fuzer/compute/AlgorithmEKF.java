@@ -65,6 +65,8 @@ public class AlgorithmEKF implements Runnable {
     double yk;
     RealMatrix K;
 
+    KmlFileExporter kmlFileExporter = null;
+
     /*
      * Create an algorithm tracker process for the given config, observations and client implemented listener
      */
@@ -90,7 +92,7 @@ public class AlgorithmEKF implements Runnable {
             Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
             log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
 
-            start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, 5000);
+            start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, -5000);
         }
         else {
             Asset asset = assetList.get(0);
@@ -128,14 +130,11 @@ public class AlgorithmEKF implements Runnable {
         dispatchResult(Xk);
 
         Vector<FilterObservationDTO> filterObservationDTOs = new Vector<FilterObservationDTO>();
-        //List<FilterStateDTO> filterStateDTOS = new ArrayList<FilterStateDTO>();  DEPRECATED
 
         FilterStateDTO filterStateDTO = new FilterStateDTO();
 
         long startTime = Calendar.getInstance().getTimeInMillis();
 
-        //ProvisionFilterStateExportDTO provisionFilterStateExportDTO = null;
-        KmlFileExporter kmlFileExporter = null;
         if (this.geoMission.getOutputFilterState()) {
             kmlFileExporter = new KmlFileExporter();
             kmlFileExporter.provisionFilterStateExport();
@@ -195,7 +194,8 @@ public class AlgorithmEKF implements Runnable {
                     d = obs.getMeas();
 
                     log.trace("RANGE innovation: " + f_est + ", vs d: " + d);
-                } else if (obs.getObservationType().equals(ObservationType.tdoa)) {
+                }
+                else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 
                     H = recalculateH_TDOA(obs.getX(), obs.getY(), obs.getXb(), obs.getYb(), xk, yk);
 
@@ -211,8 +211,8 @@ public class AlgorithmEKF implements Runnable {
 //                    }
 
                     log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
-
-                } else if (obs.getObservationType().equals(ObservationType.aoa)) {
+                }
+                else if (obs.getObservationType().equals(ObservationType.aoa)) {
 
                     H = recalculateH_AOA(obs.getX(), obs.getY(), xk, yk);
 
@@ -236,7 +236,7 @@ public class AlgorithmEKF implements Runnable {
 
                 /* Measurement balancer */
                 if (obs.getObservationType().equals(ObservationType.range)) {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(0.1);
+                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
                     K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
@@ -247,12 +247,24 @@ public class AlgorithmEKF implements Runnable {
 
                 double rk = d - f_est;
 
-                if (obs.getObservationType().equals(ObservationType.aoa)) {
-                    rk = Math.abs(rk); // Always innovate anticlockwise
-                }
+                // TODO uncommetn to fix o-360 border crossing bug
+//                if (obs.getObservationType().equals(ObservationType.aoa)) {
+//                    rk = Math.abs(rk); // Always innovate anticlockwise
+//                }
+
+
 
                 double[] HXk = H.operate(Xk).toArray();
                 RealVector innov_ = K.scalarMultiply(rk - HXk[0]).getColumnVector(0);
+
+                // TEMP test
+//                if (obs.getObservationType().equals(ObservationType.range)) {
+//                    if (Math.abs(innov_.getEntry(3)) < 5E-10) {
+//                        innov_.setEntry(3,0);
+//                        innov_.setEntry(2,0);
+//                    }
+//                }
+
                 innov = innov_.add(innov);
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
@@ -316,6 +328,7 @@ public class AlgorithmEKF implements Runnable {
                     if (log.isDebugEnabled()) {
                         for (FilterObservationDTO obs_state : filterObservationDTOs) {
                             log.debug("Observation utilisation: type: "+obs_state.getObs().getObservationType().name()+", f_est: " + obs_state.getF_est() + ",d: " + obs_state.getObs().getMeas()+", innov: "+obs_state.getInnov());
+                            log.debug("Innov: "+obs_state.getInnov().getEntry(3));
 
                             //DEPRECATE THIS:  TMEP
                             if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa) && obs_state.getObs().getCrossed_border() != null) { /// TODO deprecate
@@ -329,7 +342,7 @@ public class AlgorithmEKF implements Runnable {
                     startTime = Calendar.getInstance().getTimeInMillis();
 
                     //if (residual_rk < 100) {
-                        dispatchResult(Xk);
+                    dispatchResult(Xk);
 //                    }
 //                    else {
 //                        log.debug("Reinitialising filter and not dispatching result since residual_rk >  threshold: "+residual_rk);
@@ -428,6 +441,10 @@ public class AlgorithmEKF implements Runnable {
 //        double cep = (Math.abs(Xk3)+Math.abs(Xk4))/2;
         double cep = 1500;
         this.geoMission.getTarget().setCurrent_cep(cep);
+
+        if (this.geoMission.getOutputFilterState() && kmlFileExporter!=null) {
+            kmlFileExporter.writeCurrentExports(this.geoMission);
+        }
 
         if (this.geoMission.getOutputKml()) {
             KmlFileHelpers.exportGeoMissionToKml(this.geoMission);
