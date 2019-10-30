@@ -66,6 +66,15 @@ public class GeoMission {
     /* Optional to override default - filter measurement error parameter (Rk) - Default: 0.1 */
     public Double filterMeasurementError;
 
+    public double[][] filterProcessNoise;
+
+    /* NOTE: purely for R&D, these should not be used as they skew results unreliably */
+    public Double filterAOABias;
+
+    public Double filterTDOABias;
+
+    public Double filterRangeBias;
+
     public FuzerMode getFuzerMode() {
         return fuzerMode;
     }
@@ -232,5 +241,37 @@ public class GeoMission {
 
     public void setOutputFilterStateKmlFilename(String outputFilterStateKmlFilename) {
         this.outputFilterStateKmlFilename = outputFilterStateKmlFilename;
+    }
+
+    public Double getFilterAOABias() {
+        return filterAOABias;
+    }
+
+    public void setFilterAOABias(Double filterAOABias) {
+        this.filterAOABias = filterAOABias;
+    }
+
+    public Double getFilterTDOABias() {
+        return filterTDOABias;
+    }
+
+    public void setFilterTDOABias(Double filterTDOABias) {
+        this.filterTDOABias = filterTDOABias;
+    }
+
+    public Double getFilterRangeBias() {
+        return filterRangeBias;
+    }
+
+    public void setFilterRangeBias(Double filterRangeBias) {
+        this.filterRangeBias = filterRangeBias;
+    }
+
+    public double[][] getFilterProcessNoise() {
+        return filterProcessNoise;
+    }
+
+    public void setFilterProcessNoise(double[][] filterProcessNoise) {
+        this.filterProcessNoise = filterProcessNoise;
     }
 }

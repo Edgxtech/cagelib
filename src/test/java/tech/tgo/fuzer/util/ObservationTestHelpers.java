@@ -15,7 +15,6 @@ public class ObservationTestHelpers {
         return (Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2))
                 - Math.sqrt(Math.pow(b_y-true_y,2) + Math.pow(b_x-true_x,2)))/Helpers.SPEED_OF_LIGHT
                 + (Math.random()-0.5)*tdoa_rand_factor;
-
     }
 
     public static double getAoaMeasurement(double a_y, double a_x, double true_y, double true_x, double aoa_rand_factor) {

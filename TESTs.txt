@@ -1,0 +1,791 @@
+Tracking:
+1. single asset, a/t/r
+2. 2 assets, a/t/r
+3. 3 assets, a/t/r
+
+ - move in different directions + static
+ - different artificial noise
+ - different range biases
+ - different measurement noise params?
+
+
+
+
+09:40:20.405 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+09:40:20.406 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Pk: Array2DRowRealMatrix{{2110.7750229237,-4.3898663751,0.0,0.0},{-4.3898663751,2106.6990725854,0.0,0.0},{0.0,0.0,0.0095198998,-0.000741251},{0.0,0.0,-0.000741251,0.0088174596}}
+09:40:20.406 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+09:40:20.407 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 6
+09:40:21.299 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 6
+09:40:21.301 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 2.3293325832012457E-4
+09:40:21.303 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 8.001922813526464
+09:40:21.321 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0001426649; -0.0000902683}
+09:40:21.324 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est(adj): -5.015686198195103E-5,d: -5.015692468768086E-5, innov: {-0; -0; 0.00011497; 0.0000376083}
+09:40:21.325 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est(adj): 3.2556560443293815E-5,d: 3.255660282499189E-5, innov: {0; 0; -0.0002359311; -0.0004356288}
+09:40:21.331 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est(adj): -7.921638361944928E-6,d: -7.921652671302218E-6, innov: {-0; -0; 0.0000056226; 0.0000013735}
+09:40:21.332 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est(adj): -4.22352236200061E-5,d: -4.2235272016378645E-5, innov: {-0; -0; 0.0000697725; 0.0000243976}
+09:40:21.340 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est(adj): -1.7600301538657214E-5,d: -1.7600321862688975E-5, innov: {-0; -0; 0.0001468815; 0.0002178821}
+09:40:21.340 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est(adj): -9.678663176712286E-6,d: -9.678669191386759E-6, innov: {-0; -0; 0.0000413493; 0.000064099}
+09:40:21.341 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 405521.9065563987, Xk2: 6461344.545247188, Xk3: 1.4266493183561076E-4, Xk4: -9.02683264845138E-5
+09:40:21.341 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Result: Lat: -31.979999253340956, Lon: 115.9999986423076
+09:40:21.364 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+09:40:21.365 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Pk: Array2DRowRealMatrix{{2158.6380713462,-6.2071024687,0.0,0.0},{-6.2071024687,2152.8399250865,0.0,0.0},{0.0,0.0,0.0095200473,-0.0007410702},{0.0,0.0,-0.0007410702,0.008817716}}
+09:40:21.365 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+09:40:21.366 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 6
+09:40:21.409 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Moving Observer, moved target to: -31.98,116.0
+09:40:21.410 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Regenerating observations from # assets: 4
+09:40:21.410 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: B, Meas tdoa: -7.921652671302218E-6
+09:40:21.410 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-7.921652671302218E-6,ID:-1190586712807273026
+09:40:21.411 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+09:40:21.411 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: C, Meas tdoa: -5.015692468768086E-5
+09:40:21.411 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-5.015692468768086E-5,ID:-181155666161258633
+09:40:21.411 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+09:40:21.412 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: D, Meas tdoa: -1.7600321862688975E-5
+09:40:21.412 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.7600321862688975E-5,ID:-6412483894691559351
+09:40:21.412 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+09:40:21.413 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: C, Meas tdoa: -4.2235272016378645E-5
+09:40:21.413 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-4.2235272016378645E-5,ID:-5812696576320382427
+09:40:21.413 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+09:40:21.413 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: D, Meas tdoa: -9.678669191386759E-6
+09:40:21.414 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-9.678669191386759E-6,ID:-9117372942154469081
+09:40:21.414 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+09:40:21.414 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, 2nd Asset: D, Meas tdoa: 3.255660282499189E-5
+09:40:21.415 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,tdoa,3.255660282499189E-5,ID:-8627028113107797104
+09:40:21.417 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+09:40:22.261 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 6
+09:40:22.262 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 3.402611056931543E-5
+09:40:22.265 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 8.001931096417598
+09:40:22.266 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0000208401; -0.000013186}
+09:40:22.267 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est(adj): -5.015691552745381E-5,d: -5.015692468768086E-5, innov: {-0; -0; 0.0000167945; 0.0000054938}
+09:40:22.267 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est(adj): 3.255659663376681E-5,d: 3.255660282499189E-5, innov: {0; 0; -0.0000344653; -0.0000636374}
+09:40:22.268 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est(adj): -7.921650580977799E-6,d: -7.921652671302218E-6, innov: {-0; -0; 0.0000008213; 0.0000002006}
+09:40:22.268 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est(adj): -4.223526494647601E-5,d: -4.2235272016378645E-5, innov: {-0; -0; 0.0000101923; 0.000003564}
+09:40:22.271 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est(adj): -1.7600318893686998E-5,d: -1.7600321862688975E-5, innov: {-0; -0; 0.0000214567; 0.0000318287}
+09:40:22.272 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est(adj): -9.678668312709199E-6,d: -9.678669191386759E-6, innov: {-0; -0; 0.0000060406; 0.0000093641}
+09:40:22.272 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 405522.01674784033, Xk2: 6461344.475525907, Xk3: 2.084008483459864E-5, Xk4: -1.3186025734716794E-5
+09:40:22.273 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Result: Lat: -31.97999989144818, Lon: 115.99999980165319
+09:40:22.284 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+09:40:22.286 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Pk: Array2DRowRealMatrix{{2192.5834438157,-7.4958111369,0.0,0.0},{-7.4958111369,2185.5639507892,0.0,0.0},{0.0,0.0,0.0095200563,-0.0007410592},{0.0,0.0,-0.0007410592,0.0088177315}}
+09:40:22.288 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+09:40:22.289 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 6
+09:40:23.173 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 6
+09:40:23.173 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 9.366188508719763E-7
+09:40:23.173 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 8.001932474400382
+09:40:23.174 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0000005736; -0.000000363}
+09:40:23.174 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est(adj): -5.015692443553472E-5,d: -5.015692468768086E-5, innov: {-0; -0; 0.0000004623; 0.0000001512}
+09:40:23.174 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est(adj): 3.255660265456975E-5,d: 3.255660282499189E-5, innov: {0; 0; -0.0000009487; -0.0000017517}
+09:40:23.175 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est(adj): -7.921652613763666E-6,d: -7.921652671302218E-6, innov: {-0; -0; 0.0000000226; 0.0000000055}
+09:40:23.175 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est(adj): -4.2235271821771056E-5,d: -4.2235272016378645E-5, innov: {-0; -0; 0.0000002806; 0.0000000981}
+09:40:23.176 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est(adj): -1.760032178096497E-5,d: -1.7600321862688975E-5, innov: {-0; -0; 0.0000005906; 0.0000008761}
+09:40:23.176 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est(adj): -9.678669167201301E-6,d: -9.678669191386759E-6, innov: {-0; -0; 0.0000001663; 0.0000002577}
+09:40:23.176 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 405522.035080277, Xk2: 6461344.463926469, Xk3: 5.736177870837169E-7, Xk4: -3.6300106378825945E-7
+09:40:23.176 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Result: Lat: -31.979999997609237, Lon: 115.99999999453233
+09:40:23.188 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+09:40:23.188 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Pk: Array2DRowRealMatrix{{2255.9845902952,-9.9027670918,0.0,0.0},{-9.9027670918,2246.6839491191,0.0,0.0},{0.0,0.0,0.0095200578,-0.0007410574},{0.0,0.0,-0.0007410574,0.0088177341}}
+09:40:23.188 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+09:40:23.188 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 6
+09:40:24.081 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 6
+09:40:24.090 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 7.72673842328392E-10
+09:40:24.092 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 8.001932513375683
+09:40:24.094 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0.0000000003; -0.0000000005}
+09:40:24.110 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est(adj): -5.015692468749216E-5,d: -5.015692468768086E-5, innov: {-0; -0; 0.0000000003; 0.0000000001}
+09:40:24.131 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est(adj): 3.255660282485836E-5,d: 3.255660282499189E-5, innov: {0; 0; -0.0000000007; -0.0000000014}
+09:40:24.134 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est(adj): -7.92165267125914E-6,d: -7.921652671302218E-6, innov: {-0; -0; 0; 0}
+09:40:24.136 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est(adj): -4.2235272016233016E-5,d: -4.2235272016378645E-5, innov: {-0; -0; 0.0000000002; 0.0000000001}
+09:40:24.137 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est(adj): -1.7600321862633792E-5,d: -1.7600321862688975E-5, innov: {-0; -0; 0.0000000004; 0.0000000006}
+09:40:24.137 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est(adj): -9.678669191374653E-6,d: -9.678669191386759E-6, innov: {-0; -0; 0.0000000001; 0.0000000001}
+09:40:24.137 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 405522.03559879574, Xk2: 6461344.463598389, Xk3: 3.1158559754941317E-10, Xk4: -4.6108824477897873E-10
+09:40:24.137 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Result: Lat: -31.98000000061191, Lon: 115.99999999998776
+09:40:24.141 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+09:40:24.142 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Pk: Array2DRowRealMatrix{{2383.9971294948,-14.7626213041,0.0,0.0},{-14.7626213041,2370.0906499127,0.0,0.0},{0.0,0.0,0.0095200578,-0.0007410574},{0.0,0.0,-0.0007410574,0.0088177342}}
+09:40:24.142 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+09:40:24.142 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 6
+09:40:25.054 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 6
+09:40:25.058 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 4.909434099742847E-10
+09:40:25.058 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 8.001932513389661
+09:40:25.063 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0; -0.0000000005}
+09:40:25.072 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est(adj): -5.015692468758119E-5,d: -5.015692468768086E-5, innov: {-0; -0; 0.0000000002; 0.0000000001}
+09:40:25.099 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est(adj): 3.2556602824914455E-5,d: 3.255660282499189E-5, innov: {0; 0; -0.0000000004; -0.0000000008}
+09:40:25.102 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est(adj): -7.921652671279441E-6,d: -7.921652671302218E-6, innov: {-0; -0; 0; 0}
+09:40:25.102 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est(adj): -4.223527201630175E-5,d: -4.2235272016378645E-5, innov: {-0; -0; 0.0000000001; 0}
+09:40:25.102 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est(adj): -1.760032186266673E-5,d: -1.7600321862688975E-5, innov: {-0; -0; 0.0000000002; 0.0000000002}
+09:40:25.102 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est(adj): -9.678669191387292E-6,d: -9.678669191386759E-6, innov: {0; 0; -0; -0}
+09:40:25.102 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 405522.0355989785, Xk2: 6461344.463598275, Xk3: 2.860644057096854E-11, Xk4: -4.623369694033161E-10
+09:40:25.103 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Result: Lat: -31.980000000612957, Lon: 115.9999999999897
+09:40:25.110 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+09:40:25.112 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Pk: Array2DRowRealMatrix{{2480.0358140097,-18.4086235144,0.0,0.0},{-18.4086235144,2462.6739021597,0.0,0.0},{0.0,0.0,0.0095200578,-0.0007410574},{0.0,0.0,-0.0007410574,0.0088177342}}
+09:40:25.114 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+09:40:25.115 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 6
+09:40:26.003 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 6
+09:40:26.004 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 4.909434099742847E-10
+09:40:26.004 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 8.001932513389661
+09:40:26.005 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 0; -0.0000000005}
+09:40:26.005 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est(adj): -5.015692468758119E-5,d: -5.015692468768086E-5, innov: {-0; -0; 0.0000000002; 0.0000000001}
+09:40:26.005 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est(adj): 3.2556602824914455E-5,d: 3.255660282499189E-5, innov: {0; 0; -0.0000000004; -0.0000000008}
+09:40:26.005 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est(adj): -7.921652671279441E-6,d: -7.921652671302218E-6, innov: {-0; -0; 0; 0}
+09:40:26.005 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est(adj): -4.223527201630175E-5,d: -4.2235272016378645E-5, innov: {-0; -0; 0.0000000001; 0}
+09:40:26.005 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est(adj): -1.760032186266673E-5,d: -1.7600321862688975E-5, innov: {-0; -0; 0.0000000002; 0.0000000002}
+09:40:26.005 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est(adj): -9.678669191387292E-6,d: -9.678669191386759E-6, innov: {0; 0; -0; -0}
+09:40:26.005 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 405522.0355989785, Xk2: 6461344.463598275, Xk3: 2.860644057096854E-11, Xk4: -4.623369694033161E-10
+09:40:26.005 [Thread-1] DEBUG t.t.f.tracking.TDOAObservationITs - Result: Lat: -31.980000000612957, Lon: 115.9999999999897
+09:40:26.010 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+09:40:26.010 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Pk: Array2DRowRealMatrix{{2579.2562679506,-22.1754180744,0.0,0.0},{-22.1754180744,2558.3244450807,0.0,0.0},{0.0,0.0,0.0095200578,-0.0007410574},{0.0,0.0,-0.0007410574,0.0088177342}}
+09:40:26.010 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+09:40:26.010 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 6
+09:40:26.409 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Moving Observer, moved target to: -31.98,116.0
+09:40:26.411 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Regenerating observations from # assets: 4
+09:40:26.413 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: B, Meas tdoa: -7.921652671302218E-6
+09:40:26.414 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-7.921652671302218E-6,ID:-1190586712807273026
+09:40:26.415 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+09:40:26.424 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: C, Meas tdoa: -5.015692468768086E-5
+09:40:26.424 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-5.015692468768086E-5,ID:-181155666161258633
+09:40:26.424 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+09:40:26.424 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: D, Meas tdoa: -1.7600321862688975E-5
+09:40:26.425 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.7600321862688975E-5,ID:-6412483894691559351
+09:40:26.425 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+09:40:26.425 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: C, Meas tdoa: -4.2235272016378645E-5
+09:40:26.426 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-4.2235272016378645E-5,ID:-5812696576320382427
+09:40:26.426 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+09:40:26.427 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: D, Meas tdoa: -9.678669191386759E-6
+09:40:26.427 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-9.678669191386759E-6,ID:-9117372942154469081
+09:40:26.427 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+09:40:26.428 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, 2nd Asset: D, Meas tdoa: 3.255660282499189E-5
+09:40:26.428 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,tdoa,3.255660282499189E-5,ID:-8627028113107797104
+09:40:26.428 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+       STARTS DIVERGING AND GOING BONKERS HERE --- why???
+09:40:26.909 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual not low enough to export result: 8.705841939769776
+09:40:26.919 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual not low enough to export result: 8.705903266846768
+09:40:26.920 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual not low enough to export result: 8.705964593677493
+09:40:26.921 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual not low enough to export result: 8.706025920262203
+09:40:26.922 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual not low enough to export result: 8.706087246600369
+
+
+
+
+
+17:33:13.328 [main] DEBUG t.t.f.t.TDOA_AOAObservationITs - Configured Geo Mission, continuing
+17:33:13.336 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Moving Observer, moved target to: -31.98,115.8
+17:33:13.342 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Regenerating observations from # assets: 4
+17:33:13.344 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: B, Meas tdoa: -1.0813955516830535E-6
+17:33:13.345 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.0813955516830535E-6,ID:-7786788111006951863
+17:33:13.346 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+                                                           Asset:6470194.755756934,403548.8617473827
+17:33:13.347 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.347 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: C, Meas tdoa: -1.6354058970537142E-5
+17:33:13.348 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.6354058970537142E-5,ID:-8683565055504651408
+17:33:13.348 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:13.349 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.349 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: D, Meas tdoa: 4.657270879496716E-5
+17:33:13.349 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,4.657270879496716E-5,ID:-1131578722523545436
+17:33:13.349 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:13.350 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.350 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.45969286483895544
+17:33:13.351 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.6012855184287487
+17:33:13.351 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, Meas AOA: 3.6012855184287487
+17:33:13.351 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,aoa,3.6012855184287487,ID:3437115302445534294
+17:33:13.351 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:13.352 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.352 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: C, Meas tdoa: -1.5282221934560475E-5
+17:33:13.352 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-1.5282221934560475E-5,ID:8221960429805826983
+17:33:13.352 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:13.353 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.353 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: D, Meas tdoa: 4.77455256408134E-5
+17:33:13.353 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,4.77455256408134E-5,ID:8988572771454432241
+17:33:13.354 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:13.354 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.354 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.6252217785162191
+17:33:13.355 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.7668144321060124
+17:33:13.355 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, Meas AOA: 3.7668144321060124
+17:33:13.355 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,aoa,3.7668144321060124,ID:-1211588217614895450
+17:33:13.355 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:13.356 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.356 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, 2nd Asset: D, Meas tdoa: 6.301995640077589E-5
+17:33:13.357 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,tdoa,6.301995640077589E-5,ID:-343628937536129323
+17:33:13.357 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:13.357 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.358 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 1.2250943020204812
+17:33:13.358 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 4.366686955610274
+17:33:13.358 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, Meas AOA: 4.366686955610274
+17:33:13.358 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,aoa,4.366686955610274,ID:-165511813452013097
+17:33:13.359 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:13.359 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.359 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: -0.44895898277135426
+17:33:13.359 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 2.692633670818439
+17:33:13.359 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: D, Meas AOA: 2.692633670818439
+17:33:13.360 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: D,aoa,2.692633670818439,ID:8622012440987468837
+17:33:13.360 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6458986.57259736,391373.1312996647
+17:33:13.360 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Algorithm was not running, observation will be available for future runs
+17:33:13.365 [main] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Finding rudimentary start point between two random observations: B,D
+17:33:13.366 [main] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Filter start point: 409679.0,6491248.0
+17:33:13.366 [main] INFO  tech.tgo.fuzer.compute.AlgorithmEKF - Init State Data Easting/Northing: 409679.0,6491248.0,1,1
+17:33:13.367 [main] INFO  tech.tgo.fuzer.compute.AlgorithmEKF - Init start point: -31.71058589709563,116.04677228580502
+17:33:13.405 [Thread-1] INFO  tech.tgo.fuzer.compute.AlgorithmEKF - Running for # observations:10
+17:33:13.406 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 409679.0, Xk2: 6491248.0, Xk3: 1.0, Xk4: 1.0
+17:33:13.406 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -31.71058589709563, Lon: 116.04677228580502
+17:33:13.532 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:13.831 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:13.833 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 99.60628958331867
+17:33:13.839 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 7.781309594697907
+17:33:13.856 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; -72.584680694; 27.0216088893}
+17:33:13.865 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 13170.32858272174,d: 13962.146845361422, innov: {0; 0; -13.4652271607; 1.7948015322}
+17:33:13.867 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 250.83944773095232,d: 1.1292625574309356E9, innov: {0; 0; 1.0670010786; -0.3707455761}
+17:33:13.868 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 14888.98095584321,d: 14313.748490361473, innov: {-0; -0; 8.7202599313; -0.8937291138}
+17:33:13.869 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 265.97243917422145,d: 1.309099815738941E9, innov: {0; 0; 0.5077656867; -0.0357518874}
+17:33:13.870 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -9524.72263254875,d: -4581.4948774634, innov: {0; 0; -42.410425769; 8.7010255368}
+17:33:13.870 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -1718.6523731214693,d: -324.19423050932863, innov: {0; 0; -2.6375230964; 1.0072301966}
+17:33:13.870 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -11243.37500567022,d: -4902.82353705428, innov: {0; 0; -66.2875581523; 15.7119938865}
+17:33:13.871 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 247.3583506338739,d: 1.079638237529559E9, innov: {0; 0; 1.2212423297; -0.509395998}
+17:33:13.876 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 24413.70358839196,d: 18892.90763244144, innov: {-0; -0; 36.7598262056; 1.1004784499}
+17:33:13.877 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 277.4570625834503,d: 8.072312666682227E8, innov: {0; 0; 3.9399582525; 0.5157018626}
+17:33:13.877 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 393164.65703565086, Xk2: 6445299.329791773, Xk3: -72.58468069398046, Xk4: 27.021608889338218
+17:33:13.877 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.12362885859238, Lon: 115.86744274849312
+17:33:13.929 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:13.930 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:13.930 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:13.931 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2002.3999847502,-0.009560101,0.0,0.0},{-0.009560101,2002.4835276338,0.0,0.0},{0.0,0.0,0.008572864,0.0002268473},{0.0,0.0,0.0002268473,0.0099051855}}
+17:33:13.932 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:13.978 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:13.978 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 75.7082912859584
+17:33:13.978 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 7.867359043672261
+17:33:13.978 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; -54.6928632402; 21.0154280458}
+17:33:13.978 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15186.727076955136,d: 13962.146845361422, innov: {-0; -0; 13.5761288322; -5.4530662537}
+17:33:13.979 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 241.721975588789,d: 1.1292625574309356E9, innov: {0; 0; 0.7357596309; -0.3958018055}
+17:33:13.979 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 16607.43987016751,d: 14313.748490361473, innov: {-0; -0; 20.8996136316; -7.5640934421}
+17:33:13.979 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 259.2468347932412,d: 1.309099815738941E9, innov: {0; 0; 0.2869391157; -0.0544935163}
+17:33:13.980 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -8233.543379120409,d: -4581.4948774634, innov: {0; 0; -34.8510511151; 12.3520808042}
+17:33:13.980 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -1420.712793212373,d: -324.19423050932863, innov: {0; 0; -2.1890044358; 1.2773682785}
+17:33:13.980 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -9654.256172332782,d: -4902.82353705428, innov: {0; 0; -54.7157519344; 21.5561700432}
+17:33:13.980 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 237.7476136115557,d: 1.079638237529559E9, innov: {0; 0; 0.8568676161; -0.5406931006}
+17:33:13.981 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 24840.983249287918,d: 18892.90763244144, innov: {-0; -0; -2.5862723575; 0.5090018022}
+17:33:13.981 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 258.48510743622364,d: 8.072312666682227E8, innov: {0; 0; 3.2939077761; -0.671044764}
+17:33:13.981 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 388940.00208031887, Xk2: 6447043.251249574, Xk3: -54.6928632401721, Xk4: 21.015428045786294
+17:33:13.982 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.10749064481489, Lon: 115.82286721297044
+17:33:14.020 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:14.020 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:14.020 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:14.021 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2001.3727268476,0.0255282947,0.0,0.0},{0.0255282947,2001.4593765275,0.0,0.0},{0.0,0.0,0.0087673927,0.0004524788},{0.0,0.0,0.0004524788,0.0097923494}}
+17:33:14.021 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:14.088 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:14.088 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 98.89995145104868
+17:33:14.088 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 6.647364654142558
+17:33:14.089 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; -44.1925718426; 54.7073796084}
+17:33:14.089 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 16258.00517745493,d: 13962.146845361422, innov: {-0; -0; -6.0244482083; 10.0184649351}
+17:33:14.089 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 219.84145076831857,d: 1.1292625574309356E9, innov: {0; 0; 0.0830567155; -0.0995412455}
+17:33:14.089 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 16840.67692013394,d: 14313.748490361473, innov: {-0; -0; -10.5987860748; 16.1727512836}
+17:33:14.089 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 241.36722315399197,d: 1.309099815738941E9, innov: {0; 0; 0.2498783658; -0.1364236045}
+17:33:14.090 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -4318.5173910714,d: -4581.4948774634, innov: {-0; -0; 2.5183630649; -2.0682875196}
+17:33:14.090 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -582.6717426790092,d: -324.19423050932863, innov: {0; 0; -0.4071847985; 0.5283084536}
+17:33:14.090 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -4901.189133750409,d: -4902.82353705428, innov: {-0; -0; 0.0181773051; -0.0161467856}
+17:33:14.090 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 215.40380941589768,d: 1.079638237529559E9, innov: {0; 0; 0.1694153848; -0.2383570414}
+17:33:14.090 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 21159.19431120534,d: 18892.90763244144, innov: {-0; -0; -30.958267176; 32.0563764861}
+17:33:14.091 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 206.6360771058709,d: 8.072312666682227E8, innov: {0; 0; 0.7572235787; -1.5097653533}
+17:33:14.091 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 379164.8616868926, Xk2: 6452863.50878084, Xk3: -44.192571842643964, Xk4: 54.70737960840471
+17:33:14.092 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.053989910986736, Lon: 115.72001299271106
+17:33:14.111 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:14.112 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:14.113 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:14.115 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2002.6172523524,0.083269561,0.0,0.0},{0.083269561,2002.6844170401,0.0,0.0},{0.0,0.0,0.0093162423,0.0007029668},{0.0,0.0,0.0007029668,0.009135555}}
+17:33:14.170 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:14.201 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:14.203 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 38.64452798661108
+17:33:14.203 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 6.2454767801048225
+17:33:14.205 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; -9.6223608942; 29.0221670924}
+17:33:14.206 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15873.700741085968,d: 13962.146845361422, innov: {-0; -0; -6.1555995163; 13.2190858622}
+17:33:14.208 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 216.07628102919463,d: 1.1292625574309356E9, innov: {0; 0; 0.0048193945; -0.0066147898}
+17:33:14.208 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 16299.612477574248,d: 14313.748490361473, innov: {-0; -0; -9.2851860981; 18.0423247228}
+17:33:14.208 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 238.42350861072484,d: 1.309099815738941E9, innov: {0; 0; 0.32344177; -0.1987998145}
+17:33:14.209 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3589.6253543295534,d: -4581.4948774634, innov: {-0; -0; 9.3625699164; -8.6547024819}
+17:33:14.209 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -425.91173648828044,d: -324.19423050932863, innov: {0; 0; -0.1489373238; 0.2223630211}
+17:33:14.210 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -4015.537090817834,d: -4902.82353705428, innov: {-0; -0; 9.6473202935; -9.6515187057}
+17:33:14.210 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 211.55156229430514,d: 1.079638237529559E9, innov: {0; 0; 0.0879947398; -0.1433047243}
+17:33:14.210 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19889.237831903803,d: 18892.90763244144, innov: {-0; -0; -13.9076359626; 17.5436190561}
+17:33:14.210 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 198.38746184832536,d: 8.072312666682227E8, innov: {0; 0; 0.4488518924; -1.3502850536}
+17:33:14.211 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 378122.2352281345, Xk2: 6454581.806535416, Xk3: -9.622360894177007, Xk4: 29.02216709243407
+17:33:14.211 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.038379814620626, Lon: 115.70918858156713
+17:33:14.246 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:14.247 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:14.266 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:14.270 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.7846212607,0.0279612298,0.0,0.0},{0.0279612298,2000.771956697,0.0,0.0},{0.0,0.0,0.0094012972,0.0006937323},{0.0,0.0,0.0006937323,0.0089822654}}
+17:33:14.273 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:14.316 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:14.317 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 19.259633515385097
+17:33:14.317 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 6.068396838616417
+17:33:14.317 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 6.0580009177; 13.2016325977}
+17:33:14.317 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15648.151856022218,d: 13962.146845361422, innov: {-0; -0; -5.6868068225; 13.9469483967}
+17:33:14.317 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 214.5291029430779,d: 1.1292625574309356E9, innov: {0; 0; 0.0236506032; -0.0343744233}
+17:33:14.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 16007.691962282857,d: 14313.748490361473, innov: {-0; -0; -8.1245197083; 17.8306993913}
+17:33:14.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 237.51255739884712,d: 1.309099815738941E9, innov: {0; 0; 0.3450272448; -0.2197003022}
+17:33:14.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3320.8395975084313,d: -4581.4948774634, innov: {-0; -0; 11.9852275496; -11.565581961}
+17:33:14.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -359.54010626063973,d: -324.19423050932863, innov: {0; 0; -0.0506948765; 0.0804529324}
+17:33:14.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3680.379703769071,d: -4902.82353705428, innov: {-0; -0; 13.3358796812; -13.9515379611}
+17:33:14.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 209.9024682429614,d: 1.079638237529559E9, innov: {0; 0; 0.0573144193; -0.0996628945}
+17:33:14.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19328.53155979129,d: 18892.90763244144, innov: {-0; -0; -6.1508572414; 8.4696562964}
+17:33:14.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 194.4634566028685,d: 8.072312666682227E8, innov: {0; 0; 0.3237800683; -1.255266877}
+17:33:14.319 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 378110.6747082623, Xk2: 6455565.691205597, Xk3: 6.058000917705005, Xk4: 13.20163259768009
+17:33:14.319 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.02950445190989, Lon: 115.70919068570863
+17:33:14.332 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Moving Observer, moved target to: -31.98,115.8
+17:33:14.333 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Regenerating observations from # assets: 4
+17:33:14.333 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: B, Meas tdoa: -1.0898589463946658E-6
+                                                           Adding observation: A,tdoa,-1.0813955516830535E-6,ID:-7786788111006951863
+17:33:14.333 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.0898589463946658E-6,ID:-7786788111006951863
+17:33:14.334 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:14.334 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: C, Meas tdoa: -1.6412342579257413E-5
+17:33:14.335 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.6412342579257413E-5,ID:-8683565055504651408
+17:33:14.335 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:14.336 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: D, Meas tdoa: 4.656820834266351E-5
+17:33:14.336 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,4.656820834266351E-5,ID:-1131578722523545436
+17:33:14.336 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:14.337 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.47873983573825646
+17:33:14.337 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.6203324893280495
+17:33:14.337 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, Meas AOA: 3.6203324893280495
+17:33:14.337 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,aoa,3.6203324893280495,ID:3437115302445534294
+17:33:14.342 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:14.346 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: C, Meas tdoa: -1.5272050496825785E-5
+17:33:14.346 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-1.5272050496825785E-5,ID:8221960429805826983
+17:33:14.348 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:14.353 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: D, Meas tdoa: 4.7730493533753584E-5
+17:33:14.358 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,4.7730493533753584E-5,ID:8988572771454432241
+17:33:14.358 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:14.360 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.5895712110072856
+17:33:14.364 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.731163864597079
+17:33:14.367 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, Meas AOA: 3.731163864597079
+17:33:14.369 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,aoa,3.731163864597079,ID:-1211588217614895450
+17:33:14.370 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:14.375 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, 2nd Asset: D, Meas tdoa: 6.300619336795628E-5
+17:33:14.376 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,tdoa,6.300619336795628E-5,ID:-343628937536129323
+17:33:14.380 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:14.381 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 1.189997002391572
+17:33:14.382 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 4.331589655981365
+17:33:14.383 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, Meas AOA: 4.331589655981365
+17:33:14.383 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,aoa,4.331589655981365,ID:-165511813452013097
+17:33:14.383 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:14.384 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: -0.42555986369826115
+17:33:14.384 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 2.716032789891532
+17:33:14.384 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: D, Meas AOA: 2.716032789891532
+17:33:14.384 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: D,aoa,2.716032789891532,ID:8622012440987468837
+17:33:14.384 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6458986.57259736,391373.1312996647
+17:33:14.389 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:14.389 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:14.389 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:14.389 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.961602103,0.0337731709,0.0,0.0},{0.0337731709,2000.937987395,0.0,0.0},{0.0,0.0,0.0094314624,0.0006865581},{0.0,0.0,0.0006865581,0.0089074281}}
+17:33:14.390 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:14.427 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:14.429 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 19.362153723523765
+17:33:14.429 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 6.035627414412151
+17:33:14.429 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 8.8059530173; 10.5562007063}
+17:33:14.429 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15587.822809403535,d: 13960.7976437032, innov: {-0; -0; -5.5746768259; 14.1790132213}
+17:33:14.429 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 214.24350898938417,d: 1.1185747861683373E9, innov: {0; 0; 0.0084146552; -0.0123615865}
+17:33:14.429 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15934.268985707096,d: 14309.241978037093, innov: {-0; -0; -7.8878004423; 17.8796112311}
+17:33:14.430 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 237.5146245641513,d: 1.2985779100140278E9, innov: {0; 0; 0.2902603907; -0.1848121224}
+17:33:14.430 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3290.9654549027473,d: -4578.445557143524, innov: {-0; -0; 12.3601155716; -11.9865449514}
+17:33:14.430 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -346.4461763035615,d: -326.7314924129471, innov: {0; 0; -0.0283795366; 0.0455914418}
+17:33:14.430 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3637.411631206309,d: -4920.2965233736395, innov: {-0; -0; 14.1200937432; -14.8603510153}
+17:33:14.430 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 209.55896095297294,d: 1.0853483757529147E9, innov: {0; 0; 0.0338828781; -0.0597442502}
+17:33:14.430 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19225.234440609842,d: 18888.78157900291, innov: {-0; -0; -4.7974816486; 6.7405433686}
+17:33:14.430 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 193.3669652776123,d: 8.142461460901799E8, innov: {0; 0; 0.281524232; -1.1847446307}
+17:33:14.431 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 378314.4463819908, Xk2: 6455883.51042883, Xk3: 8.80595301725735, Xk4: 10.556200706266415
+17:33:14.431 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.026659831811436, Lon: 115.71138830481158
+17:33:14.630 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:14.630 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:14.630 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:14.631 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.5152712381,0.0178407956,0.0,0.0},{0.0178407956,2000.5013100983,0.0,0.0},{0.0,0.0,0.0094347606,0.0006860686},{0.0,0.0,0.0006860686,0.0088867818}}
+17:33:14.631 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:14.641 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:14.642 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 19.368779429375667
+17:33:14.642 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 6.034789980517477
+17:33:14.643 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 8.8737021848; 10.4950772446}
+17:33:14.644 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15585.961116453174,d: 13960.7976437032, innov: {-0; -0; -5.5714647652; 14.1871067248}
+17:33:14.645 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 214.23614552443567,d: 1.1185747861683373E9, innov: {0; 0; 0.0082794302; -0.0121662947}
+17:33:14.645 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15932.054985208455,d: 14309.241978037093, innov: {-0; -0; -7.8807037989; 17.8814986298}
+17:33:14.645 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 237.5177119912747,d: 1.2985779100140278E9, innov: {0; 0; 0.2901863354; -0.1847429952}
+17:33:14.645 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3290.5508290094294,d: -4578.445557143524, innov: {-0; -0; 12.3690653616; -11.9961199129}
+17:33:14.646 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -346.0938687552807,d: -326.7314924129471, innov: {0; 0; -0.0278788236; 0.0448017979}
+17:33:14.646 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3636.64469776471,d: -4920.2965233736395, innov: {-0; -0; 14.133862364; -14.8765240654}
+17:33:14.646 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 209.54940123302757,d: 1.0853483757529147E9, innov: {0; 0; 0.0337208254; -0.0594816351}
+17:33:14.649 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19222.605814217884,d: 18888.78157900291, innov: {-0; -0; -4.7618998268; 6.6945180299}
+17:33:14.649 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 193.33178623525606,d: 8.142461460901799E8, innov: {0; 0; 0.2805350826; -1.1838130345}
+17:33:14.649 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 378323.25233500806, Xk2: 6455894.066629536, Xk3: 8.873702184773636, Xk4: 10.495077244602031
+17:33:14.650 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.026565567732376, Lon: 115.71148287000759
+17:33:14.665 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:14.665 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:14.666 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:14.666 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.01,0.0,0.0,0.0},{0.0,2000.01,0.0,0.0},{0.0,0.0,0.0094348057,0.0006860758},{0.0,0.0,0.0006860758,0.0088861231}}
+17:33:14.666 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:14.792 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:14.793 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 20.69975195260712
+17:33:14.793 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.9964740572447734
+17:33:14.793 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 11.5309870534; 9.1687648992}
+17:33:14.793 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15448.929214591915,d: 13960.7976437032, innov: {-0; -0; -5.3627604744; 14.9217566623}
+17:33:14.793 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.89631594788747,d: 1.1185747861683373E9, innov: {0; 0; 0.0020935718; -0.0031159963}
+17:33:14.794 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15776.44211125283,d: 14309.241978037093, innov: {-0; -0; -7.446012882; 18.2296506123}
+17:33:14.794 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 238.13652030428176,d: 1.2985779100140278E9, innov: {0; 0; 0.2752111234; -0.17106055}
+17:33:14.794 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3327.4766371236,d: -4578.445557143524, innov: {-0; -0; 12.5257613144; -12.0890525716}
+17:33:14.794 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -327.51289666091543,d: -326.7314924129471, innov: {0; 0; -0.0011614003; 0.0018992124}
+17:33:14.795 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3654.9895337845155,d: -4920.2965233736395, innov: {-0; -0; 14.5025086373; -15.2469273819}
+17:33:14.795 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 208.99665873108768,d: 1.0853483757529147E9, innov: {0; 0; 0.0245019938; -0.0442088467}
+17:33:14.795 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19103.918748376433,d: 18888.78157900291, innov: {-0; -0; -3.1952089989; 4.6773408826}
+17:33:14.795 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 190.53940728174456,d: 8.142461460901799E8, innov: {0; 0; 0.2060541683; -1.1075171238}
+17:33:14.795 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 379259.582954254, Xk2: 6456732.840284375, Xk3: 11.53098705337535, Xk4: 9.16876489923177
+17:33:14.795 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.01910057441721, Lon: 115.72150127638758
+17:33:14.944 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:14.946 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:14.955 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:14.966 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2001.7201539041,0.0605035021,0.0,0.0},{0.0605035021,2001.6696568872,0.0,0.0},{0.0,0.0,0.0094304403,0.0006896718},{0.0,0.0,0.0006896718,0.008833691}}
+17:33:15.010 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.012 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.014 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 20.718436925770277
+17:33:15.028 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.996191434946959
+17:33:15.030 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 11.5467083537; 9.1717285721}
+17:33:15.031 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15447.410718342147,d: 13960.7976437032, innov: {-0; -0; -5.3601992142; 14.9298387624}
+17:33:15.032 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.89390894027136,d: 1.1185747861683373E9, innov: {0; 0; 0.0020501414; -0.003051633}
+17:33:15.033 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15774.769106858123,d: 14309.241978037093, innov: {-0; -0; -7.4412605229; 18.2337184371}
+17:33:15.034 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 238.14555513978468,d: 1.2985779100140278E9, innov: {0; 0; 0.274990542; -0.1708633359}
+17:33:15.034 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3328.2873386767424,d: -4578.445557143524, innov: {-0; -0; 12.5240949902; -12.0860452968}
+17:33:15.035 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -327.3583885159751,d: -326.7314924129471, innov: {0; 0; -0.0009321518; 0.0015245492}
+17:33:15.035 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3655.6457271927175,d: -4920.2965233736395, innov: {-0; -0; 14.5022454729; -15.2455798658}
+17:33:15.036 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 208.99164315750733,d: 1.0853483757529147E9, innov: {0; 0; 0.0244197057; -0.0440694729}
+17:33:15.036 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19103.056445534865,d: 18888.78157900291, innov: {-0; -0; -3.183944355; 4.6628695028}
+17:33:15.036 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 190.5072647563738,d: 8.142461460901799E8, innov: {0; 0; 0.2052437454; -1.106613075}
+17:33:15.036 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 379271.11394130735, Xk2: 6456742.009049274, Xk3: 11.546708353670988, Xk4: 9.171728572099287
+17:33:15.036 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.01901910704905, Lon: 115.72162449838099
+17:33:15.056 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:15.057 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:15.057 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:15.057 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.01,0.0,0.0,0.0},{0.0,2000.01,0.0,0.0},{0.0,0.0,0.009430344,0.0006897286},{0.0,0.0,0.0006897286,0.0088330782}}
+17:33:15.057 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.152 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.153 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 21.095731749227006
+17:33:15.153 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.990640046005444
+17:33:15.153 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 11.8496944346; 9.2460373146}
+17:33:15.154 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15416.381374781824,d: 13960.7976437032, innov: {-0; -0; -5.3047299957; 15.0882915406}
+17:33:15.156 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.84769427849113,d: 1.1185747861683373E9, innov: {0; 0; 0.0012173253; -0.0018151485}
+17:33:15.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15740.706488998352,d: 14309.241978037093, innov: {-0; -0; -7.3412152318; 18.3094840658}
+17:33:15.170 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 238.33229023627496,d: 1.2985779100140278E9, innov: {0; 0; 0.2704191237; -0.1668037952}
+17:33:15.174 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3345.427859540443,d: -4578.445557143524, innov: {-0; -0; 12.4825885012; -12.0164634378}
+17:33:15.178 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -324.32511421652816,d: -326.7314924129471, innov: {-0; -0; 0.0036094455; -0.0059202083}
+17:33:15.179 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3669.752973756971,d: -4920.2965233736395, innov: {-0; -0; 14.4874138408; -15.2067897745}
+17:33:15.182 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 208.89214152715786,d: 1.0853483757529147E9, innov: {0; 0; 0.0227923159; -0.0413015969}
+17:33:15.210 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19086.134348538795,d: 18888.78157900291, innov: {-0; -0; -2.9612876236; 4.3753348306}
+17:33:15.212 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 189.84908926611516,d: 8.142461460901799E8, innov: {0; 0; 0.1888867333; -1.087979161}
+17:33:15.213 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 379504.9571964976, Xk2: 6456926.109753071, Xk3: 11.849694434592019, Xk4: 9.246037314634988
+17:33:15.213 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.01738353362932, Lon: 115.72412310881396
+17:33:15.230 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:15.241 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:15.241 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:15.241 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.3791574551,0.0131158791,0.0,0.0},{0.0131158791,2000.3677098122,0.0,0.0},{0.0,0.0,0.0094282949,0.0006909021},{0.0,0.0,0.0006909021,0.0088204613}}
+17:33:15.241 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 22.034812246733377
+17:33:15.318 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.976988350470277
+17:33:15.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 12.5692599487; 9.465552298}
+17:33:15.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15332.016107841282,d: 13960.7976437032, innov: {-0; -0; -5.122177607; 15.4434348536}
+17:33:15.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.74468254406702,d: 1.1185747861683373E9, innov: {0; 0; 0.0006318208; -0.0009457767}
+17:33:15.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15649.074160275479,d: 14309.241978037093, innov: {-0; -0; -7.0377019853; 18.4312522391}
+17:33:15.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 238.84809178495468,d: 1.2985779100140278E9, innov: {0; 0; 0.2576703559; -0.1557552604}
+17:33:15.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3395.485977737342,d: -4578.445557143524, innov: {-0; -0; 12.3124821688; -11.767548985}
+17:33:15.319 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -317.0580524341967,d: -326.7314924129471, innov: {-0; -0; 0.0148533948; -0.0245303371}
+17:33:15.320 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3712.544030171539,d: -4920.2965233736395, innov: {-0; -0; 14.3745781249; -15.0174117436}
+17:33:15.320 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 208.64607023583034,d: 1.0853483757529147E9, innov: {0; 0; 0.0188093711; -0.0344329218}
+17:33:15.320 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 19044.56013801282,d: 18888.78157900291, innov: {-0; -0; -2.3964530452; 3.6274749976}
+17:33:15.320 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 188.05255642627287,d: 8.142461460901799E8, innov: {0; 0; 0.14656735; -1.0359847677}
+17:33:15.320 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 380115.1684957598, Xk2: 6457393.83704201, Xk3: 12.569259948744438, Xk4: 9.465552297988939
+17:33:15.320 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.01322965965058, Lon: 115.73064121246682
+17:33:15.344 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Moving Observer, moved target to: -31.98,115.8
+17:33:15.344 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Regenerating observations from # assets: 4
+17:33:15.345 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: B, Meas tdoa: -1.1369889203727133E-6
+17:33:15.345 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.1369889203727133E-6,ID:-7786788111006951863
+17:33:15.345 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:15.345 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: C, Meas tdoa: -1.6364639775280728E-5
+17:33:15.345 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.6364639775280728E-5,ID:-8683565055504651408
+17:33:15.346 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:15.346 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: D, Meas tdoa: 4.658766976126464E-5
+17:33:15.346 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,4.658766976126464E-5,ID:-1131578722523545436
+17:33:15.346 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:15.348 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.4922259653168264
+17:33:15.348 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.6338186189066195
+17:33:15.348 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, Meas AOA: 3.6338186189066195
+17:33:15.349 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,aoa,3.6338186189066195,ID:3437115302445534294
+17:33:15.349 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:15.349 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: C, Meas tdoa: -1.528431272685566E-5
+17:33:15.349 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-1.528431272685566E-5,ID:8221960429805826983
+17:33:15.349 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:15.350 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: D, Meas tdoa: 4.7766033288253064E-5
+17:33:15.350 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,4.7766033288253064E-5,ID:8988572771454432241
+17:33:15.350 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:15.350 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.6126220462852955
+17:33:15.350 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.7542146998750887
+17:33:15.351 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, Meas AOA: 3.7542146998750887
+17:33:15.351 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,aoa,3.7542146998750887,ID:-1211588217614895450
+17:33:15.351 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:15.351 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, 2nd Asset: D, Meas tdoa: 6.295825444466604E-5
+17:33:15.351 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,tdoa,6.295825444466604E-5,ID:-343628937536129323
+17:33:15.351 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:15.352 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 1.1359642395220504
+17:33:15.352 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 4.277556893111844
+17:33:15.352 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, Meas AOA: 4.277556893111844
+17:33:15.352 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,aoa,4.277556893111844,ID:-165511813452013097
+17:33:15.352 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:15.352 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: -0.46126090291669236
+17:33:15.353 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 2.680331750673101
+17:33:15.353 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: D, Meas AOA: 2.680331750673101
+17:33:15.353 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: D,aoa,2.680331750673101,ID:8622012440987468837
+17:33:15.353 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6458986.57259736,391373.1312996647
+17:33:15.374 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:15.374 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:15.374 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:15.375 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.9618424602,0.0339309879,0.0,0.0},{0.0339309879,2000.9313648516,0.0,0.0},{0.0,0.0,0.0094221716,0.0006940925},{0.0,0.0,0.0006940925,0.0087853093}}
+17:33:15.375 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.442 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.443 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 22.990105932710758
+17:33:15.443 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.955455507799365
+17:33:15.443 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 13.4193340269; 9.5707719058}
+17:33:15.444 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15188.377689175564,d: 13966.6320302218, innov: {-0; -0; -4.6829699374; 15.6655624964}
+17:33:15.444 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.61706780383483,d: 1.125485252735285E9, innov: {0; 0; 0.0264959411; -0.0398538356}
+17:33:15.444 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15495.31185278018,d: 14319.89652839521, innov: {-0; -0; -6.3519266784; 18.1301304854}
+17:33:15.444 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 239.70242380042896,d: 1.2823792952208428E9, innov: {0; 0; 0.1499430053; -0.087611109}
+17:33:15.444 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3483.2841067095796,d: -4582.121681224741, innov: {-0; -0; 11.942575179; -11.2699654783}
+17:33:15.445 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -306.9341636046156,d: -340.860703157302, innov: {-0; -0; 0.0540688555; -0.0901557777}
+17:33:15.445 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3790.2182703141953,d: -4905.995582515977, innov: {-0; -0; 13.8523912552; -14.3471102298}
+17:33:15.445 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 208.28744124446732,d: 1.0893914156881807E9, innov: {0; 0; 0.0012989447; -0.0024136694}
+17:33:15.445 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 18978.595959489758,d: 18874.409851355857, innov: {-0; -0; -1.6608809942; 2.622115264}
+17:33:15.446 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 184.99895048019252,d: 8.035432437897321E8, innov: {0; 0; 0.0883384561; -1.0099262404}
+17:33:15.446 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 381043.0744913096, Xk2: 6458083.0004027, Xk3: 13.419334026935925, Xk4: 9.570771905774833
+17:33:15.446 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.00711160238277, Lon: 115.74054900015378
+17:33:15.454 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:15.483 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:15.483 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:15.501 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2001.3886039211,0.0494476496,0.0,0.0},{0.0494476496,2001.341624847,0.0,0.0},{0.0,0.0,0.0094109701,0.0006989348},{0.0,0.0,0.0006989348,0.0087230331}}
+17:33:15.502 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.552 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.552 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 23.536373079241535
+17:33:15.552 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.939838488911874
+17:33:15.552 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 14.0617591646; 9.4746139146}
+17:33:15.552 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 15052.020415766563,d: 13966.6320302218, innov: {-0; -0; -4.1918378647; 15.6027096179}
+17:33:15.552 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.57176716724814,d: 1.125485252735285E9, innov: {0; 0; 0.0272724998; -0.0410923272}
+17:33:15.552 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15352.613571885742,d: 14319.89652839521, innov: {-0; -0; -5.6643988855; 17.6320020045}
+17:33:15.553 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 240.54129410734785,d: 1.2823792952208428E9, innov: {0; 0; 0.1276478953; -0.0720983072}
+17:33:15.553 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3578.2770531605565,d: -4582.121681224741, innov: {-0; -0; 11.3414469704; -10.5551689909}
+17:33:15.553 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -300.5931561191792,d: -340.860703157302, innov: {-0; -0; 0.0664541575; -0.1114785821}
+17:33:15.553 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -3878.8702092797357,d: -4905.995582515977, innov: {-0; -0; 13.2458120556; -13.5807857526}
+17:33:15.553 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 208.02791829590018,d: 1.0893914156881807E9, innov: {0; 0; 0.0026458815; -0.0049703353}
+17:33:15.553 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 18930.890625046297,d: 18874.409851355857, innov: {-0; -0; -0.9261137073; 1.5235053023}
+17:33:15.553 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 182.04815965715662,d: 8.035432437897321E8, innov: {0; 0; 0.0328301618; -0.9180087148}
+17:33:15.554 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 381854.6366194157, Xk2: 6458646.168725993, Xk3: 14.061759164626059, Xk4: 9.474613914615475
+17:33:15.554 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -32.00211702772796, Lon: 115.74920860029077
+17:33:15.584 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:15.585 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:15.588 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:15.589 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2001.1354899101,0.0406596457,0.0,0.0},{0.0406596457,2001.0941668032,0.0,0.0},{0.0,0.0,0.0093985121,0.0007030884},{0.0,0.0,0.0007030884,0.0086598688}}
+17:33:15.589 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.751 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.751 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 23.277968187885534
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.923662982856199
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 14.3525364359; 8.925431752}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14868.54746522744,d: 13966.6320302218, innov: {-0; -0; -3.4167517399; 14.9299130328}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.601358040393,d: 1.125485252735285E9, innov: {0; 0; 0.026765463; -0.0402831889}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15164.62181188445,d: 14319.89652839521, innov: {-0; -0; -4.630048867; 16.3613710624}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 241.67563354447097,d: 1.2823792952208428E9, innov: {0; 0; 0.0968394957; -0.0521958317}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3716.7562751242804,d: -4582.121681224741, innov: {-0; -0; 10.2590715373; -9.3551872815}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -296.0743466570093,d: -340.860703157302, innov: {-0; -0; 0.077352909; -0.1303244241}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -4012.8306217812897,d: -4905.995582515977, innov: {-0; -0; 12.0780251842; -12.1932436813}
+17:33:15.752 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 207.78039126770864,d: 1.0893914156881807E9, innov: {0; 0; 0.0063459442; -0.0120461452}
+17:33:15.753 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 18881.37808700873,d: 18874.409851355857, innov: {-0; -0; -0.1175654638; 0.2049660326}
+17:33:15.753 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 178.00024706160582,d: 8.035432437897321E8, innov: {0; 0; -0.0274980268; -0.7875378231}
+17:33:15.762 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 382838.6680724122, Xk2: 6459284.565774649, Xk3: 14.352536435907194, Xk4: 8.925431751978339
+17:33:15.762 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -31.996461153560414, Lon: 115.75970185512944
+17:33:15.785 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:15.786 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:15.786 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:15.786 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2001.328491194,0.0479554311,0.0,0.0},{0.0479554311,2001.2758769227,0.0,0.0},{0.0,0.0,0.009379871,0.0007070871},{0.0,0.0,0.0007070871,0.0085684122}}
+17:33:15.786 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.864 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.865 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 22.759052567565803
+17:33:15.867 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.918213376676972
+17:33:15.868 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 14.236037934; 8.5230146335}
+17:33:15.868 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14787.793332845475,d: 13966.6320302218, innov: {-0; -0; -3.0476304708; 14.4068608942}
+17:33:15.869 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 213.64549434814006,d: 1.125485252735285E9, innov: {0; 0; 0.0260076526; -0.0390773117}
+17:33:15.869 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 15083.251267834661,d: 14319.89652839521, innov: {-0; -0; -4.1490255866; 15.5778508436}
+17:33:15.870 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 242.17740639082677,d: 1.2823792952208428E9, innov: {0; 0; 0.0829778409; -0.0437910779}
+17:33:15.870 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -3781.4134009123336,d: -4582.121681224741, innov: {-0; -0; 9.6834626377; -8.7461653697}
+17:33:15.870 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -295.45793498918647,d: -340.860703157302, innov: {-0; -0; 0.0799759755; -0.1348248244}
+17:33:15.871 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -4076.87133590152,d: -4905.995582515977, innov: {-0; -0; 11.4354426038; -11.4587337974}
+17:33:15.872 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 207.7060149120595,d: 1.0893914156881807E9, innov: {0; 0; 0.0074457909; -0.0141785251}
+17:33:15.872 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 18864.664668746995,d: 18874.409851355857, innov: {0; 0; 0.1659423442; -0.2971627662}
+17:33:15.873 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 176.18253194102124,d: 8.035432437897321E8, innov: {0; 0; -0.0485608541; -0.7277634319}
+17:33:15.874 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 383239.3580279283, Xk2: 6459529.307997627, Xk3: 14.236037934036782, Xk4: 8.523014633529023
+17:33:15.881 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -31.99429503883648, Lon: 115.76397242283038
+17:33:15.892 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:15.893 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:15.893 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:15.893 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2000.5331387297,0.0191057189,0.0,0.0},{0.0191057189,2000.5107764058,0.0,0.0},{0.0,0.0,0.0093710234,0.0007080613},{0.0,0.0,0.0007080613,0.0085255823}}
+17:33:15.893 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:15.975 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:15.976 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 13.5886988643847
+17:33:15.977 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.907130820102477
+17:33:16.064 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 9.3496142703; 4.2390845941}
+17:33:16.065 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14307.617549318622,d: 13966.6320302218, innov: {-0; -0; -0.881825913; 8.1344860357}
+17:33:16.065 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 214.29226192992076,d: 1.125485252735285E9, innov: {0; 0; 0.0146923185; -0.0215443831}
+17:33:16.065 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 14616.132249207856,d: 14319.89652839521, innov: {-0; -0; -1.3349165208; 7.9826932461}
+17:33:16.065 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 245.22334514961486,d: 1.2823792952208428E9, innov: {0; 0; 0.0040239258; -0.0018573255}
+17:33:16.065 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -4214.480685512732,d: -4582.121681224741, innov: {-0; -0; 4.9419388361; -4.1825047228}
+17:33:16.066 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -308.5146998892342,d: -340.860703157302, innov: {-0; -0; 0.0640028243; -0.106578495}
+17:33:16.066 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -4522.995385401966,d: -4905.995582515977, innov: {-0; -0; 5.8742794144; -5.5839758539}
+17:33:16.067 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 207.67929767475735,d: 1.0893914156881807E9, innov: {0; 0; 0.0078395253; -0.0149452135}
+17:33:16.067 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 18830.612934720586,d: 18874.409851355857, innov: {0; 0; 0.7542914411; -1.6206054273}
+17:33:16.067 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 164.69477655407601,d: 8.035432437897321E8, innov: {0; 0; -0.0947115814; -0.3460832667}
+17:33:16.067 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 385332.93543020077, Xk2: 6460639.575090243, Xk3: 9.349614270261423, Xk4: 4.239084594123278
+17:33:16.067 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -31.984494592408115, Lon: 115.78626262036202
+17:33:16.084 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:16.086 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:16.087 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:16.089 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2003.2592390504,0.1185146484,0.0,0.0},{0.1185146484,2003.0978266039,0.0,0.0},{0.0,0.0,0.0093099314,0.0006977025},{0.0,0.0,0.0006977025,0.0082326026}}
+17:33:16.091 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 6.007003251137582
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.914771417579719
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 4.33555217; 1.6714510811}
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14101.372786620595,d: 13966.6320302218, innov: {-0; -0; -0.2250722562; 3.6114832136}
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 214.78472398284845,d: 1.125485252735285E9, innov: {0; 0; 0.0058141445; -0.0083702186}
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 14424.685559773035,d: 14319.89652839521, innov: {-0; -0; -0.3862045254; 3.1399595213}
+17:33:16.168 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 246.5887361074722,d: 1.2823792952208428E9, innov: {0; 0; 0.0444859834; -0.0192611882}
+17:33:16.169 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -4429.596631768232,d: -4582.121681224741, innov: {-0; -0; 2.1341878773; -1.7476381172}
+17:33:16.169 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -323.31277315244006,d: -340.860703157302, innov: {-0; -0; 0.0365528911; -0.0600271295}
+17:33:16.169 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -4752.909404920672,d: -4905.995582515977, innov: {-0; -0; 2.4467101135; -2.262436896}
+17:33:16.169 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 207.8930494994775,d: 1.0893914156881807E9, innov: {0; 0; 0.0046694865; -0.0088217129}
+17:33:16.169 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 18854.282191541268,d: 18874.409851355857, innov: {0; 0; 0.339213276; -0.8024840899}
+17:33:16.169 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 159.23921889555263,d: 8.035432437897321E8, innov: {0; 0; -0.0648048205; -0.1709523015}
+17:33:16.169 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 386129.44643114234, Xk2: 6460974.355469045, Xk3: 4.33555217002894, Xk4: 1.671451081108642
+17:33:16.169 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -31.981555275382807, Lon: 115.79473147457128
+17:33:16.174 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:16.175 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:16.175 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:16.177 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2002.2672250706,0.0805810691,0.0,0.0},{0.0805810691,2002.1335845074,0.0,0.0},{0.0,0.0,0.0092781708,0.0006800588},{0.0,0.0,0.0006800588,0.0080829149}}
+17:33:16.177 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:16.271 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:16.272 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 3.103402368539274
+17:33:16.272 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 5.918917023090326
+17:33:16.275 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 2.276473868; 0.8269285005}
+17:33:16.275 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14036.435027003463,d: 13966.6320302218, innov: {-0; -0; -0.091757231; 1.9379000582}
+17:33:16.275 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 214.96932010554252,d: 1.125485252735285E9, innov: {0; 0; 0.0024282104; -0.0034717991}
+17:33:16.275 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 14365.6562590496,d: 14319.89652839521, innov: {-0; -0; -0.1538206126; 1.4159044207}
+17:33:16.275 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 247.02862851080556,d: 1.2823792952208428E9, innov: {0; 0; 0.0576973539; -0.0244570573}
+17:33:16.276 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -4501.480739537212,d: -4582.121681224741, innov: {-0; -0; 1.1420595896; -0.9248554726}
+17:33:16.276 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -329.2212320461367,d: -340.860703157302, innov: {-0; -0; 0.0246497888; -0.0402563114}
+17:33:16.276 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -4830.7019715833485,d: -4905.995582515977, innov: {-0; -0; 1.2185659975; -1.1162317609}
+17:33:16.276 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 207.99070949606806,d: 1.0893914156881807E9, innov: {0; 0; 0.0032059804; -0.0060319316}
+17:33:16.276 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 18867.13699858681,d: 18874.409851355857, innov: {0; 0; 0.1212250631; -0.2966115617}
+17:33:16.276 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 157.43101340020166,d: 8.035432437897321E8, innov: {0; 0; -0.0477802723; -0.1149600836}
+17:33:16.276 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: 386371.93511748064, Xk2: 6461065.194217485, Xk3: 2.276473868032902, Xk4: 0.8269285005063721
+17:33:16.277 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -31.980760270511986, Lon: 115.79730831259639
+17:33:16.314 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:16.314 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:16.314 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:16.315 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2001.4361410298,0.0500056221,0.0,0.0},{0.0500056221,2001.3460773567,0.0,0.0},{0.0,0.0,0.0092672499,0.0006720664},{0.0,0.0,0.0006720664,0.0080323305}}
+17:33:16.315 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:16.331 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Moving Observer, moved target to: -31.98,115.8
+17:33:16.332 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Regenerating observations from # assets: 4
+17:33:16.332 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: B, Meas tdoa: -1.1076443866492625E-6
+17:33:16.333 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.1076443866492625E-6,ID:-7786788111006951863
+                                                           Adding observation: A,tdoa,-1.0813955516830535E-6,ID:-7786788111006951863
+17:33:16.334 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:16.335 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: C, Meas tdoa: -1.6423495556543346E-5
+17:33:16.335 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,-1.6423495556543346E-5,ID:-8683565055504651408
+17:33:16.335 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:16.340 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, 2nd Asset: D, Meas tdoa: 4.659144965511542E-5
+17:33:16.341 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,tdoa,4.659144965511542E-5,ID:-1131578722523545436
+17:33:16.341 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:16.341 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.4789696874600087
+17:33:16.341 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.620562341049802
+17:33:16.341 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: A, Meas AOA: 3.620562341049802
+17:33:16.342 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: A,aoa,3.620562341049802,ID:3437115302445534294
+17:33:16.342 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6470194.755756934,403548.8617473827
+17:33:16.342 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: C, Meas tdoa: -1.5313129657281582E-5
+17:33:16.342 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,-1.5313129657281582E-5,ID:8221960429805826983
+17:33:16.342 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:16.343 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, 2nd Asset: D, Meas tdoa: 4.767535400142258E-5
+17:33:16.343 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,tdoa,4.767535400142258E-5,ID:8988572771454432241
+17:33:16.344 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:16.344 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.5953231733971438
+17:33:16.367 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.736915826986937
+17:33:16.368 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, Meas AOA: 3.736915826986937
+17:33:16.369 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,aoa,3.736915826986937,ID:-1211588217614895450
+17:33:16.369 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+            17:33:13.354 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 0.6252217785162191
+            17:33:13.355 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 3.7668144321060124
+            17:33:13.355 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: B, Meas AOA: 3.7668144321060124
+            17:33:13.355 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: B,aoa,3.7668144321060124,ID:-1211588217614895450
+            17:33:13.355 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6472402.785234601,402582.1603572105
+17:33:16.370 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, 2nd Asset: D, Meas tdoa: 6.299572525354998E-5
+17:33:16.370 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,tdoa,6.299572525354998E-5,ID:-343628937536129323
+17:33:16.371 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:16.372 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: 1.2254632986903116
+17:33:16.372 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 4.367055952280104
+17:33:16.372 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: C, Meas AOA: 4.367055952280104
+17:33:16.373 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: C,aoa,4.367055952280104,ID:-165511813452013097
+17:33:16.373 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6483422.641654336,395848.9273345535
+17:33:16.374 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA: -0.4138883193590583
+17:33:16.374 [Timer-0] DEBUG t.t.f.util.ObservationTestHelpers - Meas AOA (adjusted): 2.7277043342307348
+17:33:16.375 [Timer-0] DEBUG t.t.fuzer.util.MovingTargetObserver - Asset: D, Meas AOA: 2.7277043342307348
+17:33:16.375 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Adding observation: D,aoa,2.7277043342307348,ID:8622012440987468837
+17:33:16.375 [Timer-0] DEBUG tech.tgo.fuzer.FuzerProcess - Asset:6458986.57259736,391373.1312996647
+17:33:16.377 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:16.377 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 4.84019328505813
+17:33:16.377 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 7.861776865175132
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 3.6954595289; -1.1447337562}
+         GOES BONKERS HERE
+[Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14308.323429732118,d: 13967.765213890303, innov: {-0; -0; 0.0538985769; -0.0166906673}
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 252.7053865649895,d: 1.1202991811115165E9, innov: {0; 0; 1.18873914; -0.3701284165}
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 16128.396842144663,d: 14292.71156210661, innov: {-0; -0; 0.2356126883; -0.0728403756}
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 253.03431452410007,d: 1.3092104381575832E9, innov: {0; 0; 0.0870223596; -0.0265484264}
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -8547.802285310347,d: -4590.760779629143, innov: {0; 0; -0.7236355881; 0.2230362631}
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -1820.0734124125447,d: -332.0634332634848, innov: {0; 0; -0.0445124669; 0.0138824528}
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -10367.875697722891,d: -4923.640101848207, innov: {0; 0; -1.1584617966; 0.3576530984}
+17:33:16.378 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 252.65152536152834,d: 1.0854172835655544E9, innov: {0; 0; 1.3919998072; -0.4348519395}
+17:33:16.379 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 24676.19912745501,d: 18885.64331725442, innov: {-0; -0; -0.3157106955; 0.0966109532}
+17:33:16.379 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 252.93630895292097,d: 8.177451870562855E8, innov: {0; 0; 2.980507504; -0.9148566984}
+17:33:16.379 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: -97434.96305759519, Xk2: 4866500.890661541, Xk3: 3.695459528860326, Xk4: -1.1447337561978046
+17:33:16.379 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -46.09298093218016, Lon: 109.27053977164279
+17:33:16.396 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:16.398 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:16.399 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:16.400 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2001.0940126617,0.0279778354,0.0,0.0},{0.0279778354,2001.0932840755,0.0,0.0},{0.0,0.0,0.008822073,0.0003639081},{0.0,0.0,0.0003639081,0.0098875636}}
+17:33:16.402 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:16.496 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:16.497 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 4.843175687647409
+17:33:16.497 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 7.86244702503611
+17:33:16.497 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 3.6996762149; -1.1434994727}
+17:33:16.497 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14303.145616612397,d: 13967.765213890303, innov: {-0; -0; 0.0531461675; -0.0164214294}
+17:33:16.499 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 252.7408542384544,d: 1.1202991811115165E9, innov: {0; 0; 1.1900606338; -0.3697319363}
+17:33:16.500 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 16124.197436923627,d: 14292.71156210661, innov: {-0; -0; 0.235468357; -0.0726353205}
+17:33:16.502 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 253.06960251033493,d: 1.3092104381575832E9, innov: {0; 0; 0.0881276804; -0.0268263156}
+17:33:16.504 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -8553.777872022009,d: -4590.760779629143, innov: {0; 0; -0.7244701676; 0.2228037609}
+17:33:16.506 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -1821.0518203112297,d: -332.0634332634848, innov: {0; 0; -0.044518595; 0.0138541147}
+17:33:16.526 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -10374.829692333238,d: -4923.640101848207, innov: {0; 0; -1.1595016517; 0.3571896725}
+17:33:16.527 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 252.68703140307298,d: 1.0854172835655544E9, innov: {0; 0; 1.3933624805; -0.4343300851}
+17:33:16.528 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 24677.975308945635,d: 18885.64331725442, innov: {-0; -0; -0.3141819653; 0.0959299952}
+17:33:16.532 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 252.97211989780033,d: 8.177451870562855E8, innov: {0; 0; 2.9821832754; -0.9133319292}
+17:33:16.533 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: -96440.31953164982, Xk2: 4866193.122552472, Xk3: 3.6996762149123956, Xk4: -1.1434994727350132
+17:33:16.534 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -46.09659253287309, Lon: 109.2829047095848
+17:33:16.599 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:16.599 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+17:33:16.599 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - # Staged observations: 10
+17:33:16.599 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, from: Array2DRowRealMatrix{{2005.0542551523,0.0974388484,0.0,0.0},{0.0974388484,2005.339927467,0.0,0.0},{0.0,0.0,0.0088216222,0.0003632473},{0.0,0.0,0.0003632473,0.0098880144}}
+17:33:16.603 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Resetting covariances, to: Array2DRowRealMatrix{{1000.0,0.0,0.0,0.0},{0.0,1000.0,0.0,0.0},{0.0,0.0,1000.0,0.0},{0.0,0.0,0.0,1000.0}}
+17:33:16.635 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Dispatching Result From # Observations: 10
+17:33:16.635 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Movements: 4.843197861728073
+17:33:16.635 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Measurement Delta: 7.862451999069838
+17:33:16.635 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Residual Innovation: {0; 0; 3.6997075863; -1.1434902754}
+17:33:16.635 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/D, type: tdoa, f_est: 14303.107080743415,d: 13967.765213890303, innov: {-0; -0; 0.0531405596; -0.0164194271}
+17:33:16.635 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/null, type: aoa, f_est: 252.7411180644993,d: 1.1202991811115165E9, innov: {0; 0; 1.1900704636; -0.3697289815}
+17:33:16.635 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/D, type: tdoa, f_est: 16124.16617631889,d: 14292.71156210661, innov: {-0; -0; 0.2354672734; -0.0726337931}
+17:33:16.636 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/null, type: aoa, f_est: 253.06986499931722,d: 1.3092104381575832E9, innov: {0; 0; 0.0881359037; -0.0268283776}
+17:33:16.636 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:B/C, type: tdoa, f_est: -8553.82230912731,d: -4590.760779629143, innov: {0; 0; -0.7244763679; 0.2228020256}
+17:33:16.636 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/B, type: tdoa, f_est: -1821.0590955754742,d: -332.0634332634848, innov: {0; 0; -0.0445186402; 0.0138539038}
+17:33:16.636 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/C, type: tdoa, f_est: -10374.881404702784,d: -4923.640101848207, innov: {0; 0; -1.159509375; 0.3571862176}
+17:33:16.636 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:A/null, type: aoa, f_est: 252.6872955145954,d: 1.0854172835655544E9, innov: {0; 0; 1.3933726163; -0.4343261976}
+17:33:16.636 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:C/D, type: tdoa, f_est: 24677.9884854462,d: 18885.64331725442, innov: {-0; -0; -0.314170585; 0.0959249353}
+17:33:16.636 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - Observation utilisation: assets:D/null, type: aoa, f_est: 252.97238627693218,d: 8.177451870562855E8, innov: {0; 0; 2.9821957379; -0.9133205808}
+17:33:16.636 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Raw Result: GeoId: MY_GEO_ID, Xk1: -96432.92016353433, Xk2: 4866190.835558125, Xk3: 3.6997075863256343, Xk4: -1.1434902754024383
+17:33:16.636 [Thread-1] DEBUG t.t.f.t.TDOA_AOAObservationITs - Result: Lat: -46.09661937284818, Lon: 109.28299670486832
+17:33:16.749 [Thread-1] DEBUG tech.tgo.fuzer.util.KmlFileHelpers - [KML Exp Geo] finished KML Geo export - updated map data
+17:33:16.750 [Thread-1] DEBUG tech.tgo.fuzer.compute.AlgorithmEKF - This is a Tracking mode run, using latest observations (as held in staging) and continuing...
+

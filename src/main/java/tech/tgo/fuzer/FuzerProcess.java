@@ -31,89 +31,6 @@ public class FuzerProcess implements Serializable {
         this.actionListener = actionListener;
     }
 
-    public void configure(GeoMission geoMission) throws Exception {
-        this.geoMission = geoMission;
-
-        FuzerValidator.validate(geoMission);
-
-        Properties properties = new Properties();
-        String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";
-        try {
-            properties.load(new FileInputStream(appConfigPath));
-            this.geoMission.setProperties(properties);
-        }
-        catch(IOException ioe) {
-            log.error(ioe.getMessage());
-            ioe.printStackTrace();
-            log.error("Error reading application properties");
-            throw new ConfigurationException("Trouble loading common application properties, reinstall the application");
-        }
-
-        if (geoMission.getOutputKml()) {
-            log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
-            File kmlOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
-            kmlOutput.createNewFile();
-        }
-
-        if (geoMission.getOutputFilterState()) {
-            log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
-            File kmlFilterStateOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
-            kmlFilterStateOutput.createNewFile();
-        }
-
-        /* Extract results dispatch period */
-        if (geoMission.getDispatchResultsPeriod()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period") != null && !geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period").isEmpty()) {
-                geoMission.setDispatchResultsPeriod(new Long(properties.getProperty("ekf.filter.default.dispatch_results_period")));
-            }
-            else {
-                throw new ConfigurationException("No dispatch results period specified");
-            }
-        }
-
-        /* Extract throttle setting - NULL is allowed */
-        if (geoMission.getFilterThrottle()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.throttle") != null) {
-                if (geoMission.getProperties().getProperty("ekf.filter.default.throttle").isEmpty()) {
-                    geoMission.setFilterThrottle(null);
-                }
-                else {
-                    geoMission.setFilterThrottle(Long.parseLong(geoMission.getProperties().getProperty("ekf.filter.default.throttle")));
-                }
-            }
-        }
-
-        /* Extract convergence threshold setting */
-        if (geoMission.getFilterConvergenceResidualThreshold()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold") != null && !geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold").isEmpty()) {
-                geoMission.setFilterConvergenceResidualThreshold(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold")));
-            }
-            else {
-                throw new ConfigurationException("No convergence threshold specified");
-            }
-        }
-
-        /* Extract dispatch threshold setting */
-        if (geoMission.getFilterDispatchResidualThreshold()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold") != null && !geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold").isEmpty()) {
-                geoMission.setFilterDispatchResidualThreshold(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold")));
-            }
-            else {
-                throw new ConfigurationException("No dispatch threshold specified");
-            }
-        }
-
-        /* Extract filter measurement error setting */
-        if (geoMission.getFilterMeasurementError()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.measurement.error") != null && !geoMission.getProperties().getProperty("ekf.filter.default.measurement.error").isEmpty()) {
-                geoMission.setFilterMeasurementError(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.measurement.error")));
-            }
-            else {
-                throw new ConfigurationException("No filter measurement error specified specified");
-            }
-        }
-    }
-
     public void removeObservation(Long observationId) throws Exception {
         Observation obs = this.geoMission.observations.get(observationId);
         removeObservation(obs);
@@ -213,10 +130,6 @@ public class FuzerProcess implements Serializable {
                     double X = a*Math.cosh(t); double Y = b*Math.sinh(t); //# Hyperbola branch
                     double x = (obs.getX()+obs.getXb())/2 + X*ca - Y*sa; //# Rotated and translated
                     double y = (obs.getY()+obs.getYb())/2 + X*sa + Y*ca;
-//                    log.debug("branch x/y: "+X+","+Y);
-//                    log.debug("Asset1/2 X: "+obs.getX()+","+obs.getXb());
-//                    log.debug("Asset1/2 Y: "+obs.getY()+","+obs.getYb());
-//                    log.debug("HYP x/y: "+x+","+y);
                     UTMRef utmMeas = new UTMRef(x, y, this.geoMission.getLatZone(), this.geoMission.getLonZone());
                     LatLng ltln = utmMeas.toLatLng();
                     measurementHyperbola.add(new double[]{ltln.getLat(),ltln.getLng()});
@@ -259,8 +172,13 @@ public class FuzerProcess implements Serializable {
                 // TODO, do this in batches to avoid filter drift mid process??
 
 
-                log.trace("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
-                algorithmEKF.setObservations(this.geoMission.observations);
+                // TEMP, reset covariances to allow retracking  NOPE
+                //algorithmEKF.resetCovariances();
+
+
+                // TEMP REMOVED TO FIX BUG
+//                log.trace("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
+//                algorithmEKF.setObservations(this.geoMission.observations);
             }
             else {
                 log.debug("Not adding this OBSERVATION to filter since is configured to produce a single FIX, run again with different observations");
@@ -277,19 +195,137 @@ public class FuzerProcess implements Serializable {
 
     /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
     /* For Fixer - add observations (one per asset) then start, monitor output in result() callback */
-    public void start() throws Exception {
+    public Thread start() throws Exception {
         Iterator it = this.geoMission.observations.values().iterator();
         if (!it.hasNext() && this.geoMission.getFuzerMode().equals(FuzerMode.fix)) {
             throw new ConfigurationException("There were no observations, couldn't start the process");
         }
 
         algorithmEKF = new AlgorithmEKF(this.actionListener, this.geoMission.observations, this.geoMission);
-        algorithmEKF.initialiseFilter();
+
         Thread thread = new Thread(algorithmEKF);
         thread.start();
+
+        return thread;
     }
 
     public GeoMission getGeoMission() {
         return geoMission;
+    }
+
+    public void configure(GeoMission geoMission) throws Exception {
+        this.geoMission = geoMission;
+
+        FuzerValidator.validate(geoMission);
+
+        /* Uses defaults - overridden by some implementations (required for pur tdoa processing) */
+        geoMission.setFilterProcessNoise(new double[][]{{0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}});
+
+        Properties properties = new Properties();
+        String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";
+        try {
+            properties.load(new FileInputStream(appConfigPath));
+            this.geoMission.setProperties(properties);
+        }
+        catch(IOException ioe) {
+            log.error(ioe.getMessage());
+            ioe.printStackTrace();
+            log.error("Error reading application properties");
+            throw new ConfigurationException("Trouble loading common application properties, reinstall the application");
+        }
+
+        if (geoMission.getOutputKml()) {
+            log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
+            File kmlOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputKmlFilename());
+            kmlOutput.createNewFile();
+        }
+
+        if (geoMission.getOutputFilterState()) {
+            log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
+            File kmlFilterStateOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
+            kmlFilterStateOutput.createNewFile();
+        }
+
+        /* Extract results dispatch period */
+        if (geoMission.getDispatchResultsPeriod()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period") != null && !geoMission.getProperties().getProperty("ekf.filter.default.dispatch_results_period").isEmpty()) {
+                geoMission.setDispatchResultsPeriod(new Long(properties.getProperty("ekf.filter.default.dispatch_results_period")));
+            }
+            else {
+                throw new ConfigurationException("No dispatch results period specified");
+            }
+        }
+
+        /* Extract throttle setting - NULL is allowed */
+        if (geoMission.getFilterThrottle()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.throttle") != null) {
+                if (geoMission.getProperties().getProperty("ekf.filter.default.throttle").isEmpty()) {
+                    geoMission.setFilterThrottle(null);
+                }
+                else {
+                    geoMission.setFilterThrottle(Long.parseLong(geoMission.getProperties().getProperty("ekf.filter.default.throttle")));
+                }
+            }
+        }
+
+        /* Extract convergence threshold setting */
+        if (geoMission.getFilterConvergenceResidualThreshold()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold") != null && !geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold").isEmpty()) {
+                geoMission.setFilterConvergenceResidualThreshold(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.convergence_residual_threshold")));
+            }
+            else {
+                throw new ConfigurationException("No convergence threshold specified");
+            }
+        }
+
+        /* Extract dispatch threshold setting */
+        if (geoMission.getFilterDispatchResidualThreshold()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold") != null && !geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold").isEmpty()) {
+                geoMission.setFilterDispatchResidualThreshold(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.dispatch_residual_threshold")));
+            }
+            else {
+                throw new ConfigurationException("No dispatch threshold specified");
+            }
+        }
+
+        /* Extract filter measurement error setting */
+        if (geoMission.getFilterMeasurementError()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.measurement.error") != null && !geoMission.getProperties().getProperty("ekf.filter.default.measurement.error").isEmpty()) {
+                geoMission.setFilterMeasurementError(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.measurement.error")));
+            }
+            else {
+                throw new ConfigurationException("No filter measurement error specified");
+            }
+        }
+
+        /* Extract filter bias settings */
+        if (geoMission.getFilterAOABias()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias").isEmpty()) {
+                geoMission.setFilterAOABias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias")));
+            }
+            else {
+                throw new ConfigurationException("No filter aoa bias specified");
+            }
+        }
+
+        /* Extract filter bias settings */
+        if (geoMission.getFilterTDOABias()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias").isEmpty()) {
+                geoMission.setFilterTDOABias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias")));
+            }
+            else {
+                throw new ConfigurationException("No filter tdoa bias specified");
+            }
+        }
+
+        /* Extract filter bias settings */
+        if (geoMission.getFilterRangeBias()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.range.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.range.bias").isEmpty()) {
+                geoMission.setFilterRangeBias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.range.bias")));
+            }
+            else {
+                throw new ConfigurationException("No filter range bias specified");
+            }
+        }
     }
 }

@@ -44,12 +44,14 @@ public class TDOAObservationITs implements FuzerListener {
     TestAsset asset_c = new TestAsset();
     TestAsset asset_d = new TestAsset();
 
+    GeoMission geoMission;
+
     @Before
     public void configure() {
         movingTargetObserver.setFuzerProcess(fuzerProcess);
 
         /* Configure the intended mission */
-        GeoMission geoMission = new GeoMission();
+        geoMission = new GeoMission();
         geoMission.setFuzerMode(FuzerMode.track);
         geoMission.setTarget(new Target("MY_TGT_ID","MY_TGT_NAME"));
         geoMission.setGeoId("MY_GEO_ID");
@@ -59,11 +61,16 @@ public class TDOAObservationITs implements FuzerListener {
         geoMission.setOutputKml(true);
         geoMission.setOutputKmlFilename("geoOutput.kml");
         geoMission.setShowTrueLoc(true);
+        geoMission.setOutputFilterState(true);
+        geoMission.setOutputFilterStateKmlFilename("filterState.kml");
 
         /* These configs are available for optional override */
-        geoMission.setDispatchResultsPeriod(new Long(1000)); // Default: 1000
-        geoMission.setFilterThrottle(null); // Default is null
-        geoMission.setFilterConvergenceResidualThreshold(0.01); // Default: 0.01
+//        geoMission.setDispatchResultsPeriod(new Long(1000)); // Default: 1000
+//        geoMission.setFilterThrottle(null); // Default is null
+//        geoMission.setFilterConvergenceResidualThreshold(0.01); // Default: 0.01
+        geoMission.setFilterAOABias(1.0);
+        geoMission.setFilterTDOABias(1.0);
+        geoMission.setFilterRangeBias(1.0);
 
         try {
             fuzerProcess.configure(geoMission);
@@ -178,5 +185,116 @@ public class TDOAObservationITs implements FuzerListener {
         }
     }
 
+    @Test
+    public void testStationaryTarget() {
+        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        movingTargetObserver.setTrue_lon(116.000);
+//        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
+//        movingTargetObserver.setTrue_lon(116.08);
+        movingTargetObserver.setTdoa_rand_factor(0.0000000);
+        movingTargetObserver.setLat_move(0.000); // NO MOVEMENT
+        movingTargetObserver.setLon_move(0.000);
 
+        geoMission.setFilterMeasurementError(0.3);
+
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        movingTargetObserver.setTestAssets(assets);
+        timer.scheduleAtFixedRate(movingTargetObserver,0,5000);
+
+        try {
+            fuzerProcess.start();
+
+            Thread.sleep(40000);
+
+            timer.cancel();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testStationaryTarget_SingleMeasurement() {
+        movingTargetObserver.setTrue_lat(-31.9); // MIDDLE
+        movingTargetObserver.setTrue_lon(115.95);
+        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        movingTargetObserver.setTrue_lon(116.000);
+        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
+        movingTargetObserver.setTrue_lon(116.08);
+        movingTargetObserver.setTdoa_rand_factor(0.0000000);
+        movingTargetObserver.setLat_move(0.000); // NO MOVEMENT
+        movingTargetObserver.setLon_move(0.000);
+
+        geoMission.setFilterMeasurementError(0.3);
+        //geoMission.setFilterProcessNoise(new double[][]{{0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}}); // AS PER DEFAULTS
+        //geoMission.setFilterProcessNoise(new double[][]{{10, 0, 0, 0}, {0, 10 ,0, 0}, {0, 0, 0.0001, 0}, {0, 0, 0 ,0.0001}});
+
+        geoMission.setFilterDispatchResidualThreshold(10.0);
+        geoMission.setDispatchResultsPeriod(new Long(100));
+
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+//            asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
+//            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{}));
+//            asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{}));
+        }};
+        movingTargetObserver.setTestAssets(assets);
+        movingTargetObserver.run();
+
+        try {
+            fuzerProcess.start();
+
+            Thread.sleep(100000);
+
+            timer.cancel();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testMoverSouthWest() {
+        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
+        movingTargetObserver.setTrue_lon(116.08);
+        movingTargetObserver.setTdoa_rand_factor(0.0000001);
+        movingTargetObserver.setLat_move(-0.005); // MOVE SW
+        movingTargetObserver.setLon_move(-0.005);
+
+        geoMission.setFilterMeasurementError(0.4);
+
+        geoMission.setFilterDispatchResidualThreshold(1.0);
+        geoMission.setDispatchResultsPeriod(new Long(100));
+
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        movingTargetObserver.setTestAssets(assets);
+        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+
+        try {
+            fuzerProcess.start();
+
+            Thread.sleep(50000);
+
+            timer.cancel();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

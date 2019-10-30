@@ -1,4 +1,4 @@
-package tech.tgo.fuzer.tracking;
+package tech.tgo.fuzer.fix;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
-public class TDOA_AOAObservationITs implements FuzerListener {
+public class TDOAObservationITs implements FuzerListener {
 
-    private static final Logger log = LoggerFactory.getLogger(TDOA_AOAObservationITs.class);
+    private static final Logger log = LoggerFactory.getLogger(TDOAObservationITs.class);
 
     Map<String,GeoMission> fuzerMissions = new HashMap<String,GeoMission>();
 
@@ -52,7 +52,7 @@ public class TDOA_AOAObservationITs implements FuzerListener {
 
         /* Configure the intended mission */
         geoMission = new GeoMission();
-        geoMission.setFuzerMode(FuzerMode.track);
+        geoMission.setFuzerMode(FuzerMode.fix);
         geoMission.setTarget(new Target("MY_TGT_ID","MY_TGT_NAME"));
         geoMission.setGeoId("MY_GEO_ID");
         geoMission.setShowMeas(true);
@@ -61,14 +61,8 @@ public class TDOA_AOAObservationITs implements FuzerListener {
         geoMission.setOutputKml(true);
         geoMission.setOutputKmlFilename("geoOutput.kml");
         geoMission.setShowTrueLoc(true);
-
-        /* These configs are available for optional override */
-//        geoMission.setDispatchResultsPeriod(new Long(1000)); // Default: 1000
-//        geoMission.setFilterThrottle(null); // Default is null
-//        geoMission.setFilterConvergenceResidualThreshold(0.01); // Default: 0.01
-        geoMission.setFilterAOABias(1.0);
-        geoMission.setFilterTDOABias(1.0);
-        geoMission.setFilterRangeBias(1.0);
+        geoMission.setOutputFilterState(true);
+        geoMission.setOutputFilterStateKmlFilename("filterState.kml");
 
         try {
             fuzerProcess.configure(geoMission);
@@ -95,22 +89,18 @@ public class TDOA_AOAObservationITs implements FuzerListener {
 
         /* Create some reusable test assets */
         asset_a.setId("A");
-        asset_a.setProvide_aoa(true);
         asset_a.setProvide_tdoa(true);
         asset_a.setCurrent_loc(asset_a_coords);
 
         asset_b.setId("B");
-        asset_b.setProvide_aoa(true);
         asset_b.setProvide_tdoa(true);
         asset_b.setCurrent_loc(asset_b_coords);
 
         asset_c.setId("C");
-        asset_c.setProvide_aoa(true);
         asset_c.setProvide_tdoa(true);
         asset_c.setCurrent_loc(asset_c_coords);
 
         asset_d.setId("D");
-        asset_d.setProvide_aoa(true);
         asset_d.setProvide_tdoa(true);
         asset_d.setCurrent_loc(asset_d_coords);
 
@@ -129,22 +119,14 @@ public class TDOA_AOAObservationITs implements FuzerListener {
         log.debug("Result: Lat: "+ltln.getLat()+", Lon: "+ltln.getLng());
     }
 
+    /* Notice how this one innovates towards the wrong branch */
     @Test
-    public void testMoverNorthEast() {
-        movingTargetObserver.setTrue_lat(-31.98);  // BOTTOM
+    public void testBottom() {
+        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
         movingTargetObserver.setTrue_lon(116.000);
         movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setAoa_rand_factor(0.0);
-        movingTargetObserver.setLat_move(+0.005); // MOVE NE
-        movingTargetObserver.setLon_move(+0.005);
-
-        geoMission.setFilterDispatchResidualThreshold(1.0);
-        geoMission.setDispatchResultsPeriod(new Long(100));
-
-        geoMission.setFilterAOABias(1.0);
-        geoMission.setFilterTDOABias(1.0);
-        geoMission.setFilterRangeBias(1.0);
-
+        movingTargetObserver.setLat_move(+0.000); // STATIC
+        movingTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -153,14 +135,11 @@ public class TDOA_AOAObservationITs implements FuzerListener {
             put(asset_d.getId(), asset_d);
         }};
         movingTargetObserver.setTestAssets(assets);
-        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+        movingTargetObserver.run();
 
         try {
-            fuzerProcess.start();
-
-            Thread.sleep(40000);
-
-            timer.cancel();
+            Thread thread = fuzerProcess.start();
+            thread.join();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -168,17 +147,12 @@ public class TDOA_AOAObservationITs implements FuzerListener {
     }
 
     @Test
-    public void testMoverNorthEast_TwoAssets() {
-        movingTargetObserver.setTrue_lat(-31.98);  // BOTTOM
+    public void testBottom_TwoAssets() {
+        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
         movingTargetObserver.setTrue_lon(116.000);
         movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setLat_move(+0.005); // MOVE NE
-        movingTargetObserver.setLon_move(+0.005);
-
-        geoMission.setFilterAOABias(1.0);
-        geoMission.setFilterTDOABias(10.0);
-
+        movingTargetObserver.setLat_move(+0.000); // STATIC
+        movingTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -187,52 +161,44 @@ public class TDOA_AOAObservationITs implements FuzerListener {
             asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{}));
         }};
         movingTargetObserver.setTestAssets(assets);
-        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+        movingTargetObserver.run();
 
         try {
-            fuzerProcess.start();
-
-            Thread.sleep(40000);
-
-            timer.cancel();
+            Thread thread = fuzerProcess.start();
+            thread.join();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // This goes haywire - issue with changing the observations mid filter convergence?
-    //      Reason I know this, the following test works perfectly, involves only one set of observations.
     @Test
-    public void testStationaryTarget() {
-        movingTargetObserver.setTrue_lat(-31.98);  // LEFT   -31.92, 115.79549
-        movingTargetObserver.setTrue_lon(115.80);
-//        movingTargetObserver.setTrue_lat(-31.98);  // BOTTOM (THIS SEEMS GET STUCK, when init from DR. Stuck getting above D assets LOB 360-0 crossing)
-//        movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setAoa_rand_factor(0.1);
+    public void testThreeAssets() {
+        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        movingTargetObserver.setTrue_lon(116.000);
+        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
+        movingTargetObserver.setTrue_lon(116.08);
         movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setLat_move(0.000); // NO MOVEMENT
-        movingTargetObserver.setLon_move(0.000);
+        movingTargetObserver.setLat_move(+0.000); // STATIC
+        movingTargetObserver.setLon_move(+0.000);
 
-        geoMission.setFilterDispatchResidualThreshold(1.0);
-        geoMission.setDispatchResultsPeriod(new Long(100));
+        geoMission.setFilterMeasurementError(1.0);
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
             put(asset_b.getId(), asset_b);
             put(asset_c.getId(), asset_c);
-            put(asset_d.getId(), asset_d);
+            asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"B","C"}));
+            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
+            asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{}));
         }};
         movingTargetObserver.setTestAssets(assets);
-        timer.scheduleAtFixedRate(movingTargetObserver,0,5000);
+        movingTargetObserver.run();
 
         try {
-            fuzerProcess.start();
-
-            Thread.sleep(40000);
-
-            timer.cancel();
+            Thread thread = fuzerProcess.start();
+            thread.join();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -240,22 +206,14 @@ public class TDOA_AOAObservationITs implements FuzerListener {
     }
 
     @Test
-    public void testStationaryTarget_SingleMeasurement() {
-        movingTargetObserver.setTrue_lat(-31.98); // LEFT
-        movingTargetObserver.setTrue_lon(115.80);
-//        movingTargetObserver.setTrue_lat(-31.98);  // BOTTOM (THIS SEEMS GET STUCK, when init from DR. Stuck getting above D assets LOB 360-0 crossing)
-//        movingTargetObserver.setTrue_lon(116.000);
+    public void testTopRight() {
         movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
         movingTargetObserver.setTrue_lon(116.08);
-        movingTargetObserver.setAoa_rand_factor(0.15);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setLat_move(0.000); // NO MOVEMENT
+        movingTargetObserver.setTdoa_rand_factor(0.0000000);
+        movingTargetObserver.setLat_move(0.000); // STATIC
         movingTargetObserver.setLon_move(0.000);
 
-        geoMission.setFilterDispatchResidualThreshold(100.0);
-        geoMission.setDispatchResultsPeriod(new Long(100));
-
-        //geoMission.setFilterTDOABias(10.0);  // This is able to help push through the stuck 360-0 issue for the scenario with bottom target. Perhaps incorporate as a user control
+        geoMission.setFilterMeasurementError(0.3);
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
@@ -268,28 +226,29 @@ public class TDOA_AOAObservationITs implements FuzerListener {
         movingTargetObserver.run();
 
         try {
-            fuzerProcess.start();
-
-            Thread.sleep(40000);
-
-            timer.cancel();
+            Thread thread = fuzerProcess.start();
+            thread.join();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /* Demonstrates going to seperate local minimum depending on initial conditions */
     @Test
-    public void testMoverSouthWest() {
-        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
-        movingTargetObserver.setTrue_lon(116.08);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setLat_move(-0.005); // MOVE SW
-        movingTargetObserver.setLon_move(-0.005);
+    public void testMiddle() {
+        movingTargetObserver.setTrue_lat(-31.9); // MIDDLE
+        movingTargetObserver.setTrue_lon(115.95);
+        movingTargetObserver.setTdoa_rand_factor(0.0000000);
+        movingTargetObserver.setLat_move(0.000); // NO MOVEMENT
+        movingTargetObserver.setLon_move(0.000);
 
-        geoMission.setFilterMeasurementError(1.0);
-        geoMission.setFilterDispatchResidualThreshold(4.0);
+        geoMission.setFilterMeasurementError(0.3);
+        //geoMission.setFilterProcessNoise(new double[][]{{0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}}); // AS PER DEFAULTS
+        //geoMission.setFilterProcessNoise(new double[][]{{10, 0, 0, 0}, {0, 10 ,0, 0}, {0, 0, 0.0001, 0}, {0, 0, 0 ,0.0001}});
+
+        geoMission.setFilterDispatchResidualThreshold(10.0);
+        geoMission.setDispatchResultsPeriod(new Long(100));
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
@@ -297,21 +256,19 @@ public class TDOA_AOAObservationITs implements FuzerListener {
             put(asset_b.getId(), asset_b);
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
+//            asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
+//            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{}));
+//            asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{}));
         }};
         movingTargetObserver.setTestAssets(assets);
-        timer.scheduleAtFixedRate(movingTargetObserver,0,999);
+        movingTargetObserver.run();
 
         try {
-            fuzerProcess.start();
-
-            Thread.sleep(60000);
-
-            timer.cancel();
+            Thread thread = fuzerProcess.start();
+            thread.join();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
 }

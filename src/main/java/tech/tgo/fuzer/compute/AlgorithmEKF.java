@@ -30,6 +30,8 @@ public class AlgorithmEKF implements Runnable {
 
     private GeoMission geoMission;
 
+    Map<Long,Observation> staged_observations = new ConcurrentHashMap<Long,Observation>();
+
     Map<Long,Observation> observations = new ConcurrentHashMap<Long,Observation>();
 
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -40,12 +42,10 @@ public class AlgorithmEKF implements Runnable {
     double[][] controlData = { {0}, {0}, {0}, {0}};
     RealMatrix B = new Array2DRowRealMatrix(controlData);
 
-    double[][] procNoiseData = { {0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}}; // orig: 0.01 eye
-    RealMatrix Qu = new Array2DRowRealMatrix(procNoiseData);
-
     double[][] initCovarData = {{1, 0, 0, 0}, {0, 1, 0 ,0}, {0, 0, 1, 0}, {0, 0, 0 ,1}};
     RealMatrix Pinit = new Array2DRowRealMatrix(initCovarData);
 
+    RealMatrix Qu;
     RealMatrix Rk;
 
     RealVector Xk;
@@ -68,19 +68,24 @@ public class AlgorithmEKF implements Runnable {
     KmlFileExporter kmlFileExporter = null;
 
     /*
-     * Create an algorithm tracker process for the given config, observations and client implemented listener
+     * Create a processor for the given config, observations and client implemented listener
      */
     public AlgorithmEKF(FuzerListener fuzerListener, Map<Long,Observation> observations, GeoMission geoMission)
     {
         this.fuzerListener = fuzerListener;
-        this.observations = observations;
         this.geoMission = geoMission;
+
+        setObservations(observations);
+        initialiseFilter();
     }
 
     public void initialiseFilter() {
         /* Initialise filter configurable properties */
         double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}}; // Smaller for trusted measurements. Guide: {0.01 -> 0.1}
         Rk = new Array2DRowRealMatrix(measurementNoiseData);
+
+        double[][] procNoiseData = geoMission.getFilterProcessNoise();
+        Qu = new Array2DRowRealMatrix(procNoiseData);
 
         /* Initialise filter state */
         List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
@@ -92,7 +97,8 @@ public class AlgorithmEKF implements Runnable {
             Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
             log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
 
-            start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, -5000);
+            //start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, -5000);
+            start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random()-0.5)*100000);
         }
         else {
             Asset asset = assetList.get(0);
@@ -100,6 +106,12 @@ public class AlgorithmEKF implements Runnable {
 
             start_x_y = new double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
         }
+
+        // TEMP
+        //start_x_y = new double[]{409679,6491248};
+        //start_x_y = new double[]{390679,6631248};
+        //start_x_y = new double[]{386645.527,6461159.073};
+
         log.debug("Filter start point: "+start_x_y[0]+","+start_x_y[1]);
         double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
 
@@ -110,10 +122,34 @@ public class AlgorithmEKF implements Runnable {
 
         Xk = Xinit;
         Pk = Pinit.scalarMultiply(1000.0);
+
+        // NEW FEATURE HERE
+        log.trace("Initialising Stage Observations as current observations");
+        setStaged_observations(this.geoMission.observations);
     }
 
-    public synchronized void setObservations(Map<Long, Observation> observations) {
-        this.observations = observations;
+    public void setObservations(Map<Long, Observation> observations) {
+        Comparator<Map.Entry<Long, Observation>> valueComparator = new Comparator<Map.Entry<Long, Observation>>() {
+            @Override
+            public int compare(Map.Entry<Long, Observation> e1, Map.Entry<Long, Observation> e2) {
+                ObservationType v1 = e1.getValue().getObservationType();
+                ObservationType v2 = e2.getValue().getObservationType();
+                return v1.compareTo(v2);
+            }
+        };
+
+        List<Map.Entry<Long, Observation>> listOfEntries = new ArrayList<Map.Entry<Long, Observation>>(observations.entrySet());
+        Collections.sort(listOfEntries, valueComparator);
+        LinkedHashMap<Long, Observation> sortedByValue = new LinkedHashMap<Long, Observation>(listOfEntries.size());
+        for(Map.Entry<Long, Observation> entry : listOfEntries){
+            sortedByValue.put(entry.getKey(), entry.getValue());
+        }
+        Set<Map.Entry<Long, Observation>> entrySetSortedByValue = sortedByValue.entrySet();
+
+        for(Map.Entry<Long, Observation> mapping : entrySetSortedByValue){
+            log.debug(mapping.getKey() + " ==> " + mapping.getValue().getObservationType().name());
+        }
+        this.observations = sortedByValue;
     }
 
     public void run()
@@ -142,6 +178,8 @@ public class AlgorithmEKF implements Runnable {
         }
         int filterStateExportCounter = 0;
 
+        //temp
+        boolean converged = false;
 
         while(true)
         {
@@ -160,10 +198,17 @@ public class AlgorithmEKF implements Runnable {
                 }
             }
 
-            Xk = Thi.operate(Xk);// + B*uu);
+            Xk = Thi.operate(Xk);
 
-            log.trace("Xk1="+Xk.toArray()[0]+" Xk2="+Xk.toArray()[1]);
-            Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
+            //temp
+            if (!converged) {
+                // Only need process noise during an initial searching state?  NOPE, this is needed IOT innovate
+                Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
+            }
+            else {
+                // I think this is causing the 'drift after converged' bug?? NOPE
+                Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
+            }
 
             /* reinitialise innovation vector each time */
             innov = new ArrayRealVector(innovd);
@@ -197,18 +242,11 @@ public class AlgorithmEKF implements Runnable {
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 
-                    H = recalculateH_TDOA(obs.getX(), obs.getY(), obs.getXb(), obs.getYb(), xk, yk);
+                    H = recalculateH_TDOA(obs.getX(), obs.getY(), obs.getXb(), obs.getYb(), xk, yk);//.scalarMultiply(-1); // temp scalar mult this oddly seems to fix an issue
 
                     f_est = Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2)) - Math.sqrt(Math.pow((obs.getXb() - xk), 2) + Math.pow(obs.getYb() - yk, 2));
 
                     d = obs.getMeas() * Helpers.SPEED_OF_LIGHT;
-
-//                    // TEMP    DEVELOPMENTAL
-//                    if (d<0) {
-//                        //f_est = Math.sqrt(Math.pow((obs.getXb() - xk), 2) + Math.pow(obs.getYb() - yk, 2)) - Math.sqrt(Math.pow((obs.getX() - xk), 2) + Math.pow(obs.getY() - yk, 2));  NOPE
-//                        //H = H.scalarMultiply(-1); NOPE
-//                        obs.setCrossed_border(true);
-//                    }
 
                     log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
                 }
@@ -226,6 +264,13 @@ public class AlgorithmEKF implements Runnable {
                         f_est = 360 - Math.abs(f_est);
                     }
 
+//                    f_est(i,:) = [atan((y_aoa(i) - Xk(2))/(x_aoa(i) - Xk(1)))*180/pi];
+//                    if(Xk(1)<x_aoa(i))
+//                        f_est(i,:) = f_est(i,:)+180;
+//                    end
+
+
+
                     d = obs.getMeas() * 180 / Math.PI;
 
                     log.trace("AOA innovation: " + f_est + ", vs d: " + d);
@@ -234,36 +279,61 @@ public class AlgorithmEKF implements Runnable {
                 RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
                 RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
 
+
+
+                // TODO, new feature
+                // aoa processed last
+                // if there is a prevailing innovation direction, match aoa innovations towards it
+                // if aoa, check current innov, and ensure match the aoa innovation direction.
+
+
                 /* Measurement balancer */
                 if (obs.getObservationType().equals(ObservationType.range)) {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
+                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterRangeBias());
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
+                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterTDOABias());
                 }
                 else {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(1);
+                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterAOABias());
                 }
 
                 double rk = d - f_est;
 
-                // TODO uncommetn to fix o-360 border crossing bug
+                /* 360-0 Bug Fix */
+                // Only required for when two aoa measurements?
+//                if (obs.getObservationType().equals(ObservationType.aoa)) {
+//                    rk = Math.abs(rk); // Always innovate anticlockwise
+//                }
                 if (obs.getObservationType().equals(ObservationType.aoa)) {
-                    rk = Math.abs(rk); // Always innovate anticlockwise
+//                    RealVector nonAoaNextState = Xk.add(innov);
+//                    if (nonAoaNextState.getEntry(3) > obs.getY()) {  NOPE
+//                        rk = Math.abs(rk); // innovate anticlockwise
+//                    }
+//                    else {
+//                        rk = -Math.abs(rk); // innovate clockwise
+//                    }
+
+
+
+//                    if (Xk.getEntry(3) < obs.getY()) {
+//                        if (innov.getEntry(2) > 0) {
+//                            rk = Math.abs(rk); // innovate anticlockwise
+//                        } else {
+//                            rk = -Math.abs(rk); // innovate clockwise
+//                        }
+//                    }
+//                    else {
+//                        if (innov.getEntry(2) > 0) {
+//                            rk = -Math.abs(rk); // innovate anticlockwise
+//                        } else {
+//                            rk = Math.abs(rk); // innovate clockwise
+//                        }
+//                    }
                 }
-
-
 
                 double[] HXk = H.operate(Xk).toArray();
                 RealVector innov_ = K.scalarMultiply(rk - HXk[0]).getColumnVector(0);
-
-                // TEMP test
-//                if (obs.getObservationType().equals(ObservationType.range)) {
-//                    if (Math.abs(innov_.getEntry(3)) < 5E-10) {
-//                        innov_.setEntry(3,0);
-//                        innov_.setEntry(2,0);
-//                    }
-//                }
 
                 innov = innov_.add(innov);
 
@@ -275,8 +345,7 @@ public class AlgorithmEKF implements Runnable {
             Xk = Xk.add(innov);
             Pk = (eye.multiply(Pk)).subtract(P_innov);
 
-
-            /* Export filter state */
+            /* Export filter state - development debugging */
             if (this.geoMission.getOutputFilterState()) {
                 filterStateExportCounter++;
                 if (filterStateExportCounter == 10) {
@@ -311,43 +380,32 @@ public class AlgorithmEKF implements Runnable {
                 }
                 residual_rk = residual_rk / this.observations.size();
 
-
-                // TODO, gradually increase R here??
-
-
-                /* If filter had adequately processed latest observations - prevent dispatching spurious results */
+                /* A measure of residual changes the filter intends to make */
                 double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
-                //log.debug("Residual: "+residual);
 
                 if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
                     log.debug("Dispatching Result From # Observations: " + this.observations.size());
                     log.debug("Residual Movements: "+residual);
                     log.debug("Residual Measurement Delta: "+residual_rk);
                     log.debug("Residual Innovation: "+innov);
+                    log.debug("Pk: "+Pk);
 
                     if (log.isDebugEnabled()) {
                         for (FilterObservationDTO obs_state : filterObservationDTOs) {
-                            log.debug("Observation utilisation: type: "+obs_state.getObs().getObservationType().name()+", f_est: " + obs_state.getF_est() + ",d: " + obs_state.getObs().getMeas()+", innov: "+obs_state.getInnov());
-                            log.debug("Innov: "+obs_state.getInnov().getEntry(3));
-
-                            //DEPRECATE THIS:  TMEP
-                            if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa) && obs_state.getObs().getCrossed_border() != null) { /// TODO deprecate
-                                log.debug("AOA meas Crossed the Zero border: "+obs_state.getObs().getCrossed_border());
-                                // TODO, consider reset covariances?
-                                //reinitialiseFilter();
+                            double f_est_adj = obs_state.getF_est();
+                            if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa)) {
+                                f_est_adj = f_est_adj / Helpers.SPEED_OF_LIGHT;
                             }
+                            else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
+                                f_est_adj = f_est_adj * Math.PI / 360;
+                            }
+                            log.debug("Observation utilisation: assets:"+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+", type: "+obs_state.getObs().getObservationType().name()+", f_est(adj): " + f_est_adj + ",d: " + obs_state.getObs().getMeas()+", innov: "+obs_state.getInnov());
                         }
                     }
 
                     startTime = Calendar.getInstance().getTimeInMillis();
 
-                    //if (residual_rk < 100) {
                     dispatchResult(Xk);
-//                    }
-//                    else {
-//                        log.debug("Reinitialising filter and not dispatching result since residual_rk >  threshold: "+residual_rk);
-//                        reinitialiseFilter();
-//                    }
 
                     if (geoMission.getFuzerMode().equals(FuzerMode.fix)) {
                         if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
@@ -355,9 +413,21 @@ public class AlgorithmEKF implements Runnable {
                             running.set(false);
                             break;
                         }
-                    } else {
-                        log.debug("This is a Tracking mode run, continuing...");
                     }
+                    else {
+                        log.debug("This is a Tracking mode run, using latest observations (as held in staging) and continuing...");
+
+                        /* Resynch latest observations, and reinitialise with current state estimate */
+                        log.debug("# Staged observations: "+this.staged_observations.size());
+                        setObservations(this.staged_observations);
+
+                        //resetCovariances();
+
+                        converged=true;
+                    }
+                }
+                else {
+                    log.debug("Residual not low enough to export result: "+residual);
                 }
             }
         }
@@ -377,11 +447,29 @@ public class AlgorithmEKF implements Runnable {
 
     public RealMatrix recalculateH_TDOA(double x, double y, double x2, double y2, double Xk1, double Xk2) {
 
+        /*  MATHCODE
+            f_meas(i,:) = [sqrt((x(1)-X_true(1,k))^2 + (y(1)-X_true(2,k))^2) - sqrt((x(i+1)-X_true(1,k))^2 + (y(i+1)-X_true(2,k))^2)] + 1*(0.5-rand);
+            f_est(i,:) = [(sqrt((x(1)-Xk(1))^2 + (y(1)-Xk(2))^2) - sqrt((x(i+1)-Xk(1))^2 + (y(i+1)-Xk(2))^2))];
+            r(i,:) = f_meas(i,:) - f_est(i,:);
+
+            R1 = sqrt((x(1)-Xk(1))^2 + (y(1)-Xk(2))^2);
+            R2 = sqrt((x(i+1)-Xk(1))^2 + (y(i+1)-Xk(2))^2);
+
+            dfdx(i) = -(x(1)+Xk(1))/R1 - (-x(i+1)+Xk(1))/R2;
+            dfdy(i) = -(y(1)+Xk(2))/R1 - (-y(i+1)+Xk(2))/R2;
+         */
+
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow(y-Xk2,2));
         double R2 = Math.sqrt(Math.pow((x2-Xk1),2) + Math.pow(y2-Xk2,2));
 
-        double dfdx = -(x+Xk1)/R1 - (-x2+Xk1)/R2;
-        double dfdy = -(y+Xk2)/R1 - (-y2+Xk2)/R2;
+//        double dfdx = -(x-Xk1)/R1 - (-x2+Xk1)/R2;  //ORIGINAL
+//        double dfdy = -(y-Xk2)/R1 - (-y2+Xk2)/R2;
+
+        double dfdx = (-x+Xk1)/R1 - (-x2+Xk1)/R2; // Equivalent (DON'T EDIT, Seems to always work)
+        double dfdy = (-y+Xk2)/R1 - (-y2+Xk2)/R2;
+
+//        double dfdx = (-x+Xk1)/(R1-R2) + (x2-Xk1)/(R1-R2); // Example form, doesnt work
+//        double dfdy = (-y+Xk2)/(R1-R2) + (y2-Xk2)/(R1-R2);
 
         double[][] jacobianData = {{0, 0, dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
@@ -391,6 +479,7 @@ public class AlgorithmEKF implements Runnable {
     public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {
 
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));   // Note: better performance using sqrt
+        //double R1 = Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2);
 
         double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose linearisation
         double dfdy = -(x-Xk1)/R1;
@@ -405,8 +494,8 @@ public class AlgorithmEKF implements Runnable {
         double[] asset_a_utm = Helpers.convertLatLngToUtmNthingEasting(asset_a.getCurrent_loc()[0],asset_a.getCurrent_loc()[1]);
         double[] asset_b_utm = Helpers.convertLatLngToUtmNthingEasting(asset_b.getCurrent_loc()[0],asset_b.getCurrent_loc()[1]);
         if (asset_b == null) {
-            x_init = asset_a_utm[1] - addition;
-            y_init = asset_a_utm[0] + addition;
+            x_init = asset_a_utm[1] + addition;
+            y_init = asset_a_utm[0] - addition;
         }
         else {
             x_init = asset_a_utm[1];
@@ -474,5 +563,9 @@ public class AlgorithmEKF implements Runnable {
         log.debug("Resetting covariances, from: "+Pk);
         Pk = Pinit.scalarMultiply(1000.0);
         log.debug("Resetting covariances, to: "+Pk);
+    }
+
+    public synchronized void setStaged_observations(Map<Long, Observation> staged_observations) {
+        this.staged_observations = staged_observations;
     }
 }
