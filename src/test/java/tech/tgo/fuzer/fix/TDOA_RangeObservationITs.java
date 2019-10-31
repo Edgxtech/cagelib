@@ -10,7 +10,7 @@ import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.Target;
 import tech.tgo.fuzer.util.ConfigurationException;
-import tech.tgo.fuzer.util.MovingTargetObserver;
+import tech.tgo.fuzer.util.SimulatedTargetObserver;
 import tech.tgo.fuzer.util.TestAsset;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 
 public class TDOA_RangeObservationITs implements FuzerListener {
 
@@ -29,7 +28,7 @@ public class TDOA_RangeObservationITs implements FuzerListener {
 
     FuzerProcess fuzerProcess = new FuzerProcess(this);
 
-    MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
+    SimulatedTargetObserver simulatedTargetObserver = new SimulatedTargetObserver();
 
     /* Some common asset coords to reuse */
     double[] asset_a_coords = new double[]{-31.9, 115.98};
@@ -46,7 +45,7 @@ public class TDOA_RangeObservationITs implements FuzerListener {
 
     @Before
     public void configure() {
-        movingTargetObserver.setFuzerProcess(fuzerProcess);
+        simulatedTargetObserver.setFuzerProcess(fuzerProcess);
 
         /* Configure the intended mission */
         geoMission = new GeoMission();
@@ -123,12 +122,12 @@ public class TDOA_RangeObservationITs implements FuzerListener {
 
     @Test
     public void testBottom() {
-        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
-        movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setRange_rand_factor(50);
-        movingTargetObserver.setLat_move(+0.005); // STATIC
-        movingTargetObserver.setLon_move(+0.005);
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setRange_rand_factor(50);
+        simulatedTargetObserver.setLat_move(+0.005); // STATIC
+        simulatedTargetObserver.setLon_move(+0.005);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -136,8 +135,8 @@ public class TDOA_RangeObservationITs implements FuzerListener {
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();
@@ -151,12 +150,12 @@ public class TDOA_RangeObservationITs implements FuzerListener {
     /* Useful to compare results of this with All Observations equivalent test. Notice here the final result is split between hyp branches */
     @Test
     public void testBottom_TwoAssets() {
-        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
-        movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setRange_rand_factor(50);
-        movingTargetObserver.setLat_move(+0.000); // STATIC
-        movingTargetObserver.setLon_move(+0.000);
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setRange_rand_factor(50);
+        simulatedTargetObserver.setLat_move(+0.000); // STATIC
+        simulatedTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -164,8 +163,8 @@ public class TDOA_RangeObservationITs implements FuzerListener {
             asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"B"}));
             asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{}));
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();
@@ -178,12 +177,12 @@ public class TDOA_RangeObservationITs implements FuzerListener {
 
     @Test
     public void testTopRight() {
-        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
-        movingTargetObserver.setTrue_lon(116.08);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setRange_rand_factor(50);
-        movingTargetObserver.setLat_move(0.000); // STATIC
-        movingTargetObserver.setLon_move(0.000);
+        simulatedTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
+        simulatedTargetObserver.setTrue_lon(116.08);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setRange_rand_factor(50);
+        simulatedTargetObserver.setLat_move(0.000); // STATIC
+        simulatedTargetObserver.setLon_move(0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -191,8 +190,8 @@ public class TDOA_RangeObservationITs implements FuzerListener {
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();

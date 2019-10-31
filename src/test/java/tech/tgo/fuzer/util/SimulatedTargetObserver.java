@@ -9,9 +9,9 @@ import tech.tgo.fuzer.model.ObservationType;
 import java.util.*;
 
 /* Simulate receiving new observations from following a target */
-public class MovingTargetObserver extends TimerTask {
+public class SimulatedTargetObserver extends TimerTask {
 
-    private static final Logger log = LoggerFactory.getLogger(MovingTargetObserver.class);
+    private static final Logger log = LoggerFactory.getLogger(SimulatedTargetObserver.class);
 
     FuzerProcess fuzerProcess;
 

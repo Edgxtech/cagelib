@@ -10,7 +10,7 @@ import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.Target;
 import tech.tgo.fuzer.util.ConfigurationException;
-import tech.tgo.fuzer.util.MovingTargetObserver;
+import tech.tgo.fuzer.util.SimulatedTargetObserver;
 import tech.tgo.fuzer.util.TestAsset;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 
 public class TDOA_AOAObservationITs implements FuzerListener {
 
@@ -29,7 +28,7 @@ public class TDOA_AOAObservationITs implements FuzerListener {
 
     FuzerProcess fuzerProcess = new FuzerProcess(this);
 
-    MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
+    SimulatedTargetObserver simulatedTargetObserver = new SimulatedTargetObserver();
 
     /* Some common asset coords to reuse */
     double[] asset_a_coords = new double[]{-31.9, 115.98};
@@ -46,7 +45,7 @@ public class TDOA_AOAObservationITs implements FuzerListener {
 
     @Before
     public void configure() {
-        movingTargetObserver.setFuzerProcess(fuzerProcess);
+        simulatedTargetObserver.setFuzerProcess(fuzerProcess);
 
         /* Configure the intended mission */
         geoMission = new GeoMission();
@@ -124,12 +123,12 @@ public class TDOA_AOAObservationITs implements FuzerListener {
     // With wrong starting condition, can fail by drifting off into distance
     @Test
     public void testBottom() {
-        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
-        movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setAoa_rand_factor(0.0);
-        movingTargetObserver.setLat_move(+0.000); // STATIC
-        movingTargetObserver.setLon_move(+0.000);
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setAoa_rand_factor(0.0);
+        simulatedTargetObserver.setLat_move(+0.000); // STATIC
+        simulatedTargetObserver.setLon_move(+0.000);
 
         geoMission.setFilterDispatchResidualThreshold(1.0);
         geoMission.setDispatchResultsPeriod(new Long(100));
@@ -141,8 +140,8 @@ public class TDOA_AOAObservationITs implements FuzerListener {
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();
@@ -155,12 +154,12 @@ public class TDOA_AOAObservationITs implements FuzerListener {
 
     @Test
     public void testBottom_TwoAssets() {
-        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
-        movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setLat_move(+0.005); // STATIC
-        movingTargetObserver.setLon_move(+0.005);
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setLat_move(+0.005); // STATIC
+        simulatedTargetObserver.setLon_move(+0.005);
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
@@ -169,8 +168,8 @@ public class TDOA_AOAObservationITs implements FuzerListener {
             asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
             asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{}));
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();
@@ -183,12 +182,12 @@ public class TDOA_AOAObservationITs implements FuzerListener {
 
     @Test
     public void testLeft() {
-        movingTargetObserver.setTrue_lat(-31.98); // LEFT
-        movingTargetObserver.setTrue_lon(115.80);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setLat_move(0.000); // STATIC
-        movingTargetObserver.setLon_move(0.000);
+        simulatedTargetObserver.setTrue_lat(-31.98); // LEFT
+        simulatedTargetObserver.setTrue_lon(115.80);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setLat_move(0.000); // STATIC
+        simulatedTargetObserver.setLon_move(0.000);
 
         geoMission.setFilterDispatchResidualThreshold(1.0);
         geoMission.setDispatchResultsPeriod(new Long(100));
@@ -200,8 +199,8 @@ public class TDOA_AOAObservationITs implements FuzerListener {
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();
@@ -214,15 +213,12 @@ public class TDOA_AOAObservationITs implements FuzerListener {
 
     @Test
     public void testTopRight() {
-        movingTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
-        movingTargetObserver.setTrue_lon(116.08);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setTdoa_rand_factor(0.0000001);
-        movingTargetObserver.setLat_move(0.000); // STATIC
-        movingTargetObserver.setLon_move(0.000);
-
-        geoMission.setFilterMeasurementError(1.0);
-        geoMission.setFilterDispatchResidualThreshold(4.0);
+        simulatedTargetObserver.setTrue_lat(-31.7); // TOPRIGHT
+        simulatedTargetObserver.setTrue_lon(116.08);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setLat_move(0.000); // STATIC
+        simulatedTargetObserver.setLon_move(0.000);
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
@@ -231,8 +227,8 @@ public class TDOA_AOAObservationITs implements FuzerListener {
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();

@@ -10,7 +10,7 @@ import tech.tgo.fuzer.model.FuzerMode;
 import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.Target;
 import tech.tgo.fuzer.util.ConfigurationException;
-import tech.tgo.fuzer.util.MovingTargetObserver;
+import tech.tgo.fuzer.util.SimulatedTargetObserver;
 import tech.tgo.fuzer.util.TestAsset;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
@@ -18,7 +18,6 @@ import uk.me.jstott.jcoord.UTMRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 
 public class AOAObservationITs implements FuzerListener {
 
@@ -28,7 +27,7 @@ public class AOAObservationITs implements FuzerListener {
 
     FuzerProcess fuzerProcess = new FuzerProcess(this);
 
-    MovingTargetObserver movingTargetObserver = new MovingTargetObserver();
+    SimulatedTargetObserver simulatedTargetObserver = new SimulatedTargetObserver();
 
     /* Some common asset coords to reuse */
     double[] asset_a_coords = new double[]{-31.9, 115.98};
@@ -43,7 +42,7 @@ public class AOAObservationITs implements FuzerListener {
 
     @Before
     public void configure() {
-        movingTargetObserver.setFuzerProcess(fuzerProcess);
+        simulatedTargetObserver.setFuzerProcess(fuzerProcess);
 
         /* Configure the intended mission */
         GeoMission geoMission = new GeoMission();
@@ -117,11 +116,11 @@ public class AOAObservationITs implements FuzerListener {
 
     @Test
     public void testBottom() {
-        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
-        movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setLat_move(+0.000); // STATIC
-        movingTargetObserver.setLon_move(+0.000);
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setLat_move(+0.000); // STATIC
+        simulatedTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -129,8 +128,8 @@ public class AOAObservationITs implements FuzerListener {
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();
@@ -143,18 +142,18 @@ public class AOAObservationITs implements FuzerListener {
 
     @Test
     public void testBottom_TwoAssets() {
-        movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
-        movingTargetObserver.setTrue_lon(116.000);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setLat_move(+0.000); // STATIC
-        movingTargetObserver.setLon_move(+0.000);
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setLat_move(+0.000); // STATIC
+        simulatedTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_b.getId(), asset_b);
             put(asset_c.getId(), asset_c);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();
@@ -167,11 +166,11 @@ public class AOAObservationITs implements FuzerListener {
 
     @Test
     public void testTop() {
-        movingTargetObserver.setTrue_lat(-31.7); // TOP
-        movingTargetObserver.setTrue_lon(115.80);
-        movingTargetObserver.setAoa_rand_factor(0.1);
-        movingTargetObserver.setLat_move(+0.000); // STATIC
-        movingTargetObserver.setLon_move(+0.000);
+        simulatedTargetObserver.setTrue_lat(-31.7); // TOP
+        simulatedTargetObserver.setTrue_lon(115.80);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setLat_move(+0.000); // STATIC
+        simulatedTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -179,8 +178,8 @@ public class AOAObservationITs implements FuzerListener {
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
         }};
-        movingTargetObserver.setTestAssets(assets);
-        movingTargetObserver.run();
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
 
         try {
             Thread thread = fuzerProcess.start();

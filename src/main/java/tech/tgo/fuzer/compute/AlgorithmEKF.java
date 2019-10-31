@@ -144,11 +144,6 @@ public class AlgorithmEKF implements Runnable {
         for(Map.Entry<Long, Observation> entry : listOfEntries){
             sortedByValue.put(entry.getKey(), entry.getValue());
         }
-        Set<Map.Entry<Long, Observation>> entrySetSortedByValue = sortedByValue.entrySet();
-
-        for(Map.Entry<Long, Observation> mapping : entrySetSortedByValue){
-            log.debug(mapping.getKey() + " ==> " + mapping.getValue().getObservationType().name());
-        }
         this.observations = sortedByValue;
     }
 
@@ -179,7 +174,7 @@ public class AlgorithmEKF implements Runnable {
         int filterStateExportCounter = 0;
 
         //temp
-        boolean converged = false;
+        //boolean converged = false;
 
         while(true)
         {
@@ -200,15 +195,17 @@ public class AlgorithmEKF implements Runnable {
 
             Xk = Thi.operate(Xk);
 
-            //temp
-            if (!converged) {
-                // Only need process noise during an initial searching state?  NOPE, this is needed IOT innovate
-                Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
-            }
-            else {
-                // I think this is causing the 'drift after converged' bug?? NOPE
-                Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
-            }
+            Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
+
+//            //temp
+//            if (!converged) {
+//                // Only need process noise during an initial searching state?  NOPE, this is needed IOT innovate
+//
+//            }
+//            else {
+//                // I think this is causing the 'drift after converged' bug?? NOPE
+//                Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
+//            }
 
             /* reinitialise innovation vector each time */
             innov = new ArrayRealVector(innovd);
@@ -216,6 +213,9 @@ public class AlgorithmEKF implements Runnable {
 
             /* reset */
             filterObservationDTOs.removeAllElements();
+
+            // TEMP
+            RealVector nonAoaNextState = null;
 
             /* observations collection is dynamically updated for tracking mode missions */
             Iterator obsIterator = this.observations.values().iterator();
@@ -306,14 +306,19 @@ public class AlgorithmEKF implements Runnable {
 //                    rk = Math.abs(rk); // Always innovate anticlockwise
 //                }
                 if (obs.getObservationType().equals(ObservationType.aoa)) {
-                    RealVector nonAoaNextState = Xk.add(innov);
+                    /* Only apply this rule if there is a prevailing pressure */
+                    if (innov.getEntry(0) != 0.0) {
+
+                        if (nonAoaNextState == null) {
+                            // Set this once for each loop
+                            nonAoaNextState = Xk.add(innov);
+                        }
 //                    if (nonAoaNextState.getEntry(3) > obs.getY()) {  NOPE
 //                        rk = Math.abs(rk); // innovate anticlockwise
 //                    }
 //                    else {
 //                        rk = -Math.abs(rk); // innovate clockwise
 //                    }
-
 
 
 //                    if (Xk.getEntry(3) < obs.getY()) {
@@ -331,25 +336,83 @@ public class AlgorithmEKF implements Runnable {
 //                        }
 //                    }
 
-                    double mox = (Xk.getEntry(3)-obs.getY()) / (Xk.getEntry(2)-obs.getX()); // gradient from obs to current state (so a line projection can be made)
-                    double fxp = nonAoaNextState.getEntry(3) + mox*innov.getEntry(2); // fxp = y(k+1) + mox.x_pressure
+//                    double m_ox = Math.tan(f_est);
+//
+//                    double fxp = m_ox*nonAoaNextState.getEntry(2); // fxp = y(k+1) + mox * x_pressure       ////   nonAoaNextState.getEntry(3) +
+//                    log.debug("Xk: "+Xk);
+//                    log.debug("Mox: "+m_ox+", fxp: "+fxp+", Yp: "+innov.getEntry(3)+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
+//
+//                    if (Math.abs(nonAoaNextState.getEntry(3)) > Math.abs(fxp)) {
+//                        if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+//                            // 1st quad - A
+//                            rk = Math.abs(rk); // innovate anticlockwise
+//                            log.debug("1Q");
+//                        }
+//                        else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+//                            // 2nd quad - C
+//                            rk = -Math.abs(rk); // innovate clockwise
+//                            log.debug("2Q");
+//                        }
+//                        else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+//                            // 3rd quad - A
+//                            rk = Math.abs(rk); // innovate anticlockwise
+//                            log.debug("3Q");
+//                        }
+//                        else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+//                            // 4th quad - C
+//                            rk = -Math.abs(rk); // innovate clockwise
+//                            log.debug("4Q");
+//                        }
+//                    }
 
-                    if (Math.abs(innov.getEntry(3)) > Math.abs(fxp)) {
-                        if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                            // 1st quad - A
-                            rk = Math.abs(rk); // innovate anticlockwise
+                        double pressure_angle = Math.atan((nonAoaNextState.getEntry(2) - obs.getY()) / (nonAoaNextState.getEntry(0) - obs.getX())) * 180 / Math.PI; // gradient from obs to current state (so a line projection can be made)
+                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Yp: "+innov.getEntry(3)+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
+                        if (nonAoaNextState.getEntry(0) < obs.getX()) {
+                            pressure_angle = pressure_angle + 180;
                         }
-                        else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                            // 2nd quad - C
-                            rk = -Math.abs(rk); // innovate clockwise
+
+                        if (nonAoaNextState.getEntry(1) < obs.getY() && nonAoaNextState.getEntry(0) >= obs.getX()) {
+                            pressure_angle = 360 - Math.abs(pressure_angle);
                         }
-                        else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                            // 3rd quad - A
-                            rk = Math.abs(rk); // innovate anticlockwise
-                        }
-                        else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                            // 4th quad - C
-                            rk = -Math.abs(rk); // innovate clockwise
+                        //log.debug("P-ang (adjusted): "+pressure_angle);
+
+
+                        if (Math.abs(pressure_angle) > Math.abs(f_est)) {
+                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+                                // 1st quad - A
+                                rk = Math.abs(rk); // innovate anticlockwise
+                                //log.debug("1Q");
+                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+                                // 2nd quad - C
+                                rk = -Math.abs(rk); // innovate clockwise
+                                //log.debug("2Q");
+                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+                                // 3rd quad - A
+                                rk = Math.abs(rk); // innovate anticlockwise
+                                //log.debug("3Q");
+                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+                                // 4th quad - C
+                                rk = -Math.abs(rk); // innovate clockwise
+                                //log.debug("4Q");
+                            }
+                        } else {
+                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+                                // 1st quad - A
+                                rk = -Math.abs(rk); // innovate anticlockwise
+                                //log.debug("1Q");
+                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+                                // 2nd quad - C
+                                rk = Math.abs(rk); // innovate clockwise
+                                //log.debug("2Q");
+                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+                                // 3rd quad - A
+                                rk = -Math.abs(rk); // innovate anticlockwise
+                                //log.debug("3Q");
+                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+                                // 4th quad - C
+                                rk = Math.abs(rk); // innovate clockwise
+                                //log.debug("4Q");
+                            }
                         }
                     }
                 }
@@ -445,7 +508,8 @@ public class AlgorithmEKF implements Runnable {
 
                         //resetCovariances();
 
-                        converged=true;
+                        //temp
+                        //converged=true;
                     }
                 }
                 else {

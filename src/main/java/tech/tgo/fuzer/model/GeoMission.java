@@ -60,15 +60,16 @@ public class GeoMission {
     /* Optional to override default - filter summative residual state error threshold used by fix mode runs only - Default: 0.01 */
     public Double filterConvergenceResidualThreshold;
 
-    /* Optional to override default - filter summative residual state error threshold used to decide on dispatch or not - Default: 0.5 */
+    /* Optional to override default - filter summative residual state error threshold used to decide on dispatch or not - Default: 0.1. Guide [0.1 -> 5.0]. Higher values provides more insight into filter while converging */
     public Double filterDispatchResidualThreshold;
 
     /* Optional to override default - filter measurement error parameter (Rk) - Default: 0.1 */
     public Double filterMeasurementError;
 
+    /* Optional override - i.e. geoMission.setFilterProcessNoise(new double[][]{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0.0001, 0}, {0, 0, 0 ,0.0001}}); */
     public double[][] filterProcessNoise;
 
-    /* NOTE: purely for R&D, these should not be used as they skew results unreliably */
+    /* NOTE: purely for R&D, these should NOT be used as they unreliably skew results */
     public Double filterAOABias;
 
     public Double filterTDOABias;
