@@ -306,7 +306,7 @@ public class AlgorithmEKF implements Runnable {
 //                    rk = Math.abs(rk); // Always innovate anticlockwise
 //                }
                 if (obs.getObservationType().equals(ObservationType.aoa)) {
-//                    RealVector nonAoaNextState = Xk.add(innov);
+                    RealVector nonAoaNextState = Xk.add(innov);
 //                    if (nonAoaNextState.getEntry(3) > obs.getY()) {  NOPE
 //                        rk = Math.abs(rk); // innovate anticlockwise
 //                    }
@@ -330,6 +330,28 @@ public class AlgorithmEKF implements Runnable {
 //                            rk = Math.abs(rk); // innovate clockwise
 //                        }
 //                    }
+
+                    double mox = (Xk.getEntry(3)-obs.getY()) / (Xk.getEntry(2)-obs.getX()); // gradient from obs to current state (so a line projection can be made)
+                    double fxp = nonAoaNextState.getEntry(3) + mox*innov.getEntry(2); // fxp = y(k+1) + mox.x_pressure
+
+                    if (Math.abs(innov.getEntry(3)) > Math.abs(fxp)) {
+                        if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+                            // 1st quad - A
+                            rk = Math.abs(rk); // innovate anticlockwise
+                        }
+                        else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+                            // 2nd quad - C
+                            rk = -Math.abs(rk); // innovate clockwise
+                        }
+                        else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+                            // 3rd quad - A
+                            rk = Math.abs(rk); // innovate anticlockwise
+                        }
+                        else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+                            // 4th quad - C
+                            rk = -Math.abs(rk); // innovate clockwise
+                        }
+                    }
                 }
 
                 double[] HXk = H.operate(Xk).toArray();

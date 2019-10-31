@@ -119,7 +119,7 @@ public class TDOAObservationITs implements FuzerListener {
         log.debug("Result: Lat: "+ltln.getLat()+", Lon: "+ltln.getLng());
     }
 
-    /* Notice how this one innovates towards the wrong branch */
+    /* Notice how this can innovate towards the wrong branch - depending on init conditions */
     @Test
     public void testBottom() {
         movingTargetObserver.setTrue_lat(-31.98); // BOTTOM
@@ -234,7 +234,7 @@ public class TDOAObservationITs implements FuzerListener {
         }
     }
 
-    /* Demonstrates going to seperate local minimum depending on initial conditions */
+    /* Demonstrates going to separate local minimum depending on initial conditions */
     @Test
     public void testMiddle() {
         movingTargetObserver.setTrue_lat(-31.9); // MIDDLE
@@ -244,7 +244,6 @@ public class TDOAObservationITs implements FuzerListener {
         movingTargetObserver.setLon_move(0.000);
 
         geoMission.setFilterMeasurementError(0.3);
-        //geoMission.setFilterProcessNoise(new double[][]{{0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}}); // AS PER DEFAULTS
         //geoMission.setFilterProcessNoise(new double[][]{{10, 0, 0, 0}, {0, 10 ,0, 0}, {0, 0, 0.0001, 0}, {0, 0, 0 ,0.0001}});
 
         geoMission.setFilterDispatchResidualThreshold(10.0);
@@ -256,9 +255,6 @@ public class TDOAObservationITs implements FuzerListener {
             put(asset_b.getId(), asset_b);
             put(asset_c.getId(), asset_c);
             put(asset_d.getId(), asset_d);
-//            asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
-//            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{}));
-//            asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{}));
         }};
         movingTargetObserver.setTestAssets(assets);
         movingTargetObserver.run();
