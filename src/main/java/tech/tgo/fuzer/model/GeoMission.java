@@ -3,9 +3,7 @@ package tech.tgo.fuzer.model;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
- * Geolocation fusion and tracking, using custom extended kalman filter implementation
- *
+/**
  * @author Timothy Edge (timmyedge)
  */
 public class GeoMission {

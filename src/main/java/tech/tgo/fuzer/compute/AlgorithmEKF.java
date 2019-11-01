@@ -22,6 +22,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Extended Kalman Filter Fusion Processor
+ * @author Timothy Edge (timmyedge)
+ */
 public class AlgorithmEKF implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(AlgorithmEKF.class);
@@ -609,13 +613,18 @@ public class AlgorithmEKF implements Runnable {
 
         this.fuzerListener.result(geoMission.getGeoId(),Xk.getEntry(0),Xk.getEntry(1), Xk.getEntry(2), Xk.getEntry(3));
 
-        // TODO, CEP / VARIANCE
-//        varianceCounter++;
-//        variance = (variance*(varianceCounter-1) + (Math.pow(Xk3,2) + Math.pow(Xk4,2))/2)/varianceCounter;
-//        double cep = Math.sqrt(variance);
-//        double cep = (Math.abs(Xk3)+Math.abs(Xk4))/2;
-        double cep = 1500;
-        this.geoMission.getTarget().setCurrent_cep(cep);
+        /* Compute probability ELP */
+        double[][] covMatrix=new double[][]{{Pk.getEntry(0,0),Pk.getEntry(0,1)},{Pk.getEntry(1,0),Pk.getEntry(1,1)}};
+        double[] evalues = Helpers.getEigenvalues(covMatrix);
+        double largestEvalue = Math.max(evalues[0],evalues[1]);
+        double smallestEvalue = Math.min(evalues[0],evalues[1]);
+        double[] evector = Helpers.getEigenvector(covMatrix, largestEvalue);
+        double rot = Math.atan(evector[1] / evector[0]);
+        double major = 2*Math.sqrt(9.210*largestEvalue); // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I
+        double minor = 2*Math.sqrt(9.210*smallestEvalue);
+        this.geoMission.getTarget().setElp_major(major);
+        this.geoMission.getTarget().setElp_minor(minor);
+        this.geoMission.getTarget().setElp_rot(rot);
 
         if (this.geoMission.getOutputFilterState() && kmlFileExporter!=null) {
             kmlFileExporter.writeCurrentExports(this.geoMission);

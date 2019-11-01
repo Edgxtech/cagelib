@@ -4,6 +4,9 @@ import org.apache.commons.math3.linear.RealVector;
 
 import java.util.List;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class FilterStateDTO {
     List<FilterObservationDTO> filterObservationDTOs;
     RealVector Xk;

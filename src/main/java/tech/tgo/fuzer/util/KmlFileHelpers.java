@@ -19,13 +19,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.math3.linear.RealVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
-import tech.tgo.fuzer.compute.FilterStateDTO;
 import tech.tgo.fuzer.model.Asset;
 import tech.tgo.fuzer.model.GeoMission;
 import uk.me.jstott.jcoord.LatLng;
@@ -34,112 +32,6 @@ import uk.me.jstott.jcoord.UTMRef;
 public class KmlFileHelpers {
 
     private static final Logger log = LoggerFactory.getLogger(KmlFileHelpers.class);
-
-//    // TODO, return an element that can be appended to
-//    public static ProvisionFilterStateExportDTO provisionFilterStateExport() {
-//        try
-//        {
-//            //filterStateDTOS.add(filterStateDTO);
-//
-//            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//            DocumentBuilder builder = factory.newDocumentBuilder();
-//            TransformerFactory tranFactory = TransformerFactory.newInstance();
-//            Transformer aTransformer = tranFactory.newTransformer();
-//
-//            Document doc = builder.newDocument();
-//            Element root = doc.createElement("kml");
-//            root.setAttribute("xmlns", "http://www.opengis.net/kml/2.2");
-//            root.setAttribute("xmlns:gx","http://www.google.com/kml/ext/2.2");
-//            doc.appendChild(root);
-//
-//            Element dnode = doc.createElement("Document");
-//            root.appendChild(dnode);
-//
-//
-//                Element filterStatePlacemark = doc.createElement("Placemark");
-//                dnode.appendChild(filterStatePlacemark);
-//
-//                Element name = doc.createElement("name");
-//                name.appendChild(doc.createTextNode("Filter State"));
-//                filterStatePlacemark.appendChild(name);
-//
-//
-//            Element style = doc.createElement("Style");
-//            style.setAttribute("id", "filterStateStyle");
-//            Element measStyle = doc.createElement("LineStyle");
-//            Element color = doc.createElement("color");
-//            color.appendChild(doc.createTextNode("7fccfc0")); //"7fccfc00"));
-//            Element width = doc.createElement("width");
-//            width.appendChild(doc.createTextNode("2"));
-//            measStyle.appendChild(color);
-//            measStyle.appendChild(width);
-//            style.appendChild(measStyle);
-//            dnode.appendChild(style);
-//
-//            Element styleUrl = doc.createElement("styleUrl");
-//            styleUrl.appendChild(doc.createTextNode("#filterStateStyle"));
-//
-//
-//            filterStatePlacemark.appendChild(styleUrl);
-//
-//                Element line = doc.createElement("LineString");
-//                Element coords = doc.createElement("coordinates");
-//                coords.setAttribute("id","coords");
-//
-////                Iterator filterStateDTOIterator = filterStateDTOS.iterator();
-////
-////                try {
-////                    synchronized (filterStateDTOIterator) {
-////                        while (filterStateDTOIterator.hasNext()) {
-////                            FilterStateDTO filterStateDTO = (FilterStateDTO) filterStateDTOIterator.next();
-////                            RealVector Xk = filterStateDTO.getXk();
-////                            double[] latLon = Helpers.convertUtmNthingEastingToLatLng(Xk.getEntry(0),Xk.getEntry(1), geoMission.getLatZone(), geoMission.getLonZone());
-////                            coords.appendChild(doc.createTextNode(latLon[1] + "," + latLon[0] + ",0 \n"));
-////                        }
-////                    }
-////                } catch (Exception esynch) {
-////                    log.trace("error iterating over measurement circle, b/c it being updated");
-////                }
-//                line.appendChild(coords);
-//
-//                filterStatePlacemark.appendChild(line);
-//
-//
-//            Source src = new DOMSource(doc);
-//            Result dest = new StreamResult(new File("output/filterState.kml"));
-//            aTransformer.transform(src, dest);
-//
-//            return new ProvisionFilterStateExportDTO(aTransformer,doc);
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//            log.error(e.getMessage());
-//            return null;
-//        }
-//    }
-//
-//    public static void exportAdditionalFilterState(GeoMission geoMission, ProvisionFilterStateExportDTO provisionFilterStateExportDTO, FilterStateDTO filterStateDTO) {
-//
-//        try {
-//            double[] latLon = Helpers.convertUtmNthingEastingToLatLng(filterStateDTO.getXk().getEntry(0),filterStateDTO.getXk().getEntry(1), geoMission.getLatZone(), geoMission.getLonZone());
-//
-//            Element coords = provisionFilterStateExportDTO.getDoc().getElementById("coords");
-//            log.debug("Coords: "+coords);
-//            coords.appendChild(provisionFilterStateExportDTO.getDoc().createTextNode(latLon[1] + "," + latLon[0] + ",0 \n"));
-//
-//            Source src = new DOMSource(provisionFilterStateExportDTO.getDoc());
-//            Result dest = new StreamResult(new File("output/filterState.kml"));
-//            provisionFilterStateExportDTO.getTransformer().transform(src, dest);
-//
-//            //log.debug("[KML Exp Geo] finished KML filter state export - updated map data");
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//            log.error(e.getMessage());
-//        }
-//    }
 
     public static void exportGeoMissionToKml(GeoMission geoMission) {
         try
@@ -200,7 +92,7 @@ public class KmlFileHelpers {
                 exportTargetEstimationResult(doc,dnode,geoMission);
             }
 
-            /* PLOT the geo CEP result */
+            /* PLOT the geo probability ELP result */
             if (geoMission.showCEPs)
             {
                 exportTargetEstimationCEP(doc,dnode,geoMission);
@@ -328,16 +220,24 @@ public class KmlFileHelpers {
         try {
             try
             {
-                List<double[]> cepCircle = new ArrayList<double[]>();
+                List<double[]> geometryCoords = new ArrayList<double[]>();
 
-                double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(geoMission.getTarget().getCurrent_loc()[0],geoMission.getTarget().getCurrent_loc()[1]);
+                double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(geoMission.getTarget().getCurrent_loc()[0], geoMission.getTarget().getCurrent_loc()[1]);
+                log.debug("UTM Target Loc: "+utm_target_loc[0]+", "+utm_target_loc[1]);
 
-                for (double theta = (1/2)*Math.PI; theta <= (5/2)*Math.PI; theta+= 0.2)
-                {
-                    UTMRef utmCEP = new UTMRef(geoMission.getTarget().getCurrent_cep()*Math.cos(theta) + utm_target_loc[1], geoMission.getTarget().getCurrent_cep()*Math.sin(theta) + utm_target_loc[0], geoMission.getLatZone(), geoMission.getLonZone());
-                    LatLng ltln2 = utmCEP.toLatLng();
-                    double[] cepPoint = {ltln2.getLat(),ltln2.getLng()};
-                    cepCircle.add(cepPoint);
+                double[][] M_rot = new double[][]{{Math.cos(geoMission.getTarget().getElp_rot()), -Math.sin(geoMission.getTarget().getElp_rot())}, {Math.cos(geoMission.getTarget().getElp_rot()), Math.sin(geoMission.getTarget().getElp_rot())}};
+
+                for (double theta = (1 / 2) * Math.PI; theta <= (5 / 2) * Math.PI; theta += 0.2) {
+                    double a = geoMission.getTarget().getElp_major() * Math.cos(theta);
+                    double b = geoMission.getTarget().getElp_minor() * Math.sin(theta);
+
+                    double x = M_rot[0][0] * (a) + M_rot[0][1] * (b);
+                    double y = M_rot[1][0] * (a) + M_rot[1][1] * (b);
+
+                    UTMRef utmMeas = new UTMRef(x + utm_target_loc[1], y + utm_target_loc[0], geoMission.getLatZone(), geoMission.getLonZone());
+                    LatLng ltln = utmMeas.toLatLng();
+                    double[] measPoint = {ltln.getLat(), ltln.getLng()};
+                    geometryCoords.add(measPoint);
                 }
 
                 Element style = doc.createElement("Style");
@@ -369,7 +269,7 @@ public class KmlFileHelpers {
                 Element cepOuterRing = doc.createElement("LinearRing");
                 Element cepCircleCoords = doc.createElement("coordinates");
 
-                Iterator circlePoints = cepCircle.iterator();
+                Iterator circlePoints = geometryCoords.iterator();
                 while (circlePoints.hasNext())
                 {
                     double[] point = (double[])circlePoints.next();

@@ -3,6 +3,9 @@ package tech.tgo.fuzer.compute;
 import org.apache.commons.math3.linear.RealVector;
 import tech.tgo.fuzer.model.Observation;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class FilterObservationDTO {
     Observation obs;
     double f_est;

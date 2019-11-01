@@ -4,7 +4,12 @@ public class Target {
     String id;
     String name;
     double[] current_loc;
-    double current_cep;
+
+    //double current_cep; DEPRECATED to allow for elliptical params
+    double elp_major;
+    double elp_minor;
+    double elp_rot;
+
     Double[] true_current_loc;
 
     public Target(String id, String name) {
@@ -36,13 +41,13 @@ public class Target {
         this.current_loc = current_loc;
     }
 
-    public double getCurrent_cep() {
-        return current_cep;
-    }
-
-    public void setCurrent_cep(double current_cep) {
-        this.current_cep = current_cep;
-    }
+//    public double getCurrent_cep() {
+//        return current_cep;
+//    }
+//
+//    public void setCurrent_cep(double current_cep) {
+//        this.current_cep = current_cep;
+//    }
 
     public Double[] getTrue_current_loc() {
         return true_current_loc;
@@ -50,5 +55,29 @@ public class Target {
 
     public void setTrue_current_loc(Double[] true_current_loc) {
         this.true_current_loc = true_current_loc;
+    }
+
+    public double getElp_major() {
+        return elp_major;
+    }
+
+    public void setElp_major(double elp_major) {
+        this.elp_major = elp_major;
+    }
+
+    public double getElp_minor() {
+        return elp_minor;
+    }
+
+    public void setElp_minor(double elp_minor) {
+        this.elp_minor = elp_minor;
+    }
+
+    public double getElp_rot() {
+        return elp_rot;
+    }
+
+    public void setElp_rot(double elp_rot) {
+        this.elp_rot = elp_rot;
     }
 }

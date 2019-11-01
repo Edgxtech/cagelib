@@ -12,7 +12,7 @@ import uk.me.jstott.jcoord.UTMRef;
 import java.io.*;
 import java.util.*;
 
-/*
+/**
  * Geolocation fusion and tracking, using custom extended kalman filter implementation
  *
  * @author Timothy Edge (timmyedge)

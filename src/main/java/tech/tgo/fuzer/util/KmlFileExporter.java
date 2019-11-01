@@ -157,7 +157,6 @@ public class KmlFileExporter {
         }
     }
 
-
     public void exportAdditionalFilterState(GeoMission geoMission, FilterStateDTO filterStateDTO, double residual) {
 
         try {
@@ -172,8 +171,6 @@ public class KmlFileExporter {
             if (residual <= 5) {
                 coords3.appendChild(doc.createTextNode(latLon[1] + "," + latLon[0] + ",0 \n"));
             }
-
-
         }
         catch (Exception e)
         {
