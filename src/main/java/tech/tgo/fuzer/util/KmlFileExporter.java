@@ -18,7 +18,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 
 /**
- * KML Filesystem I/O
+ * KML Filesystem I/O (Non-Static applications)
  * @author Timothy Edge (timmyedge)
  */
 public class KmlFileExporter {
@@ -56,9 +56,6 @@ public class KmlFileExporter {
 
             Element dnode = doc.createElement("Document");
             root.appendChild(dnode);
-
-
-
 
             /* High */
             Element filterStatePlacemark = doc.createElement("Placemark");

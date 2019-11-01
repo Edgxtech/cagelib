@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class TestMaths {
 
     private static final Logger log = LoggerFactory.getLogger(TestMaths.class);
@@ -43,10 +46,10 @@ public class TestMaths {
         double minor = 2*Math.sqrt(5.991*smallestEvalue);
         log.debug("Major: "+major+", minor: "+minor);
 
-        exportTargetEstimationELP(-32,115.9, major, minor, rot);
+        exportTargetEstimationEllipse(-32,115.9, major, minor, rot);
     }
 
-    public static void exportTargetEstimationELP(double lat, double lon, double major, double minor, double rot) {
+    public static void exportTargetEstimationEllipse(double lat, double lon, double major, double minor, double rot) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();

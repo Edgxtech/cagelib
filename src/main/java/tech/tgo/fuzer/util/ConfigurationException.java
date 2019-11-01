@@ -1,5 +1,8 @@
 package tech.tgo.fuzer.util;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class ConfigurationException extends Exception {
 
     public String message;

@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class TDOAObservationITs implements FuzerListener {
 
     private static final Logger log = LoggerFactory.getLogger(TDOAObservationITs.class);

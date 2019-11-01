@@ -1,9 +1,11 @@
 package tech.tgo.fuzer.util;
 
-import javax.print.Doc;
 import javax.xml.transform.Transformer;
 import org.w3c.dom.Document;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class ProvisionFilterStateExportDTO {
     Transformer transformer;
     Document doc;

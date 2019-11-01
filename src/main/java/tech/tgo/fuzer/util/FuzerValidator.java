@@ -6,6 +6,9 @@ import tech.tgo.fuzer.model.GeoMission;
 import tech.tgo.fuzer.model.Observation;
 import tech.tgo.fuzer.model.ObservationType;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class FuzerValidator {
 
     private static final Logger log = LoggerFactory.getLogger(FuzerValidator.class);

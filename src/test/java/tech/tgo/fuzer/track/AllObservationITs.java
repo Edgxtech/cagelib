@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class AllObservationITs implements FuzerListener {
 
     private static final Logger log = LoggerFactory.getLogger(AllObservationITs.class);
@@ -229,7 +232,7 @@ public class AllObservationITs implements FuzerListener {
 
     /* FAILS under normal conditions
     * switches to wrong result during in between period, obs from A ~360-, B ~0+
-    * Confirmed fixed with the AOA 360-0 bug fix */
+    * Confirmed fixed with a single forced rotation direction override */
     @Test
     public void testMoverNorthEast_B_TwoAssets() {
         simulatedTargetObserver.setTrue_lat(-31.895); // RIGHT -31.900 is below the 360-0 crossover
@@ -263,9 +266,7 @@ public class AllObservationITs implements FuzerListener {
         }
     }
 
-    /* FAILS under normal conditions
-    *  occasionally switches to wrong result.
-    * Appears to be fixed with the AOA 360-0 bug fix */
+    /* Sensitive to initial conditions, finds wrong local minimum */
     @Test
     public void testStationaryTarget() {
         simulatedTargetObserver.setTrue_lat(-31.98); // LEFT

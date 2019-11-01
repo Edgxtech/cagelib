@@ -3,6 +3,9 @@ package tech.tgo.fuzer.util;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class Helpers {
 
     public static int SPEED_OF_LIGHT = 299792458; // [m/s]

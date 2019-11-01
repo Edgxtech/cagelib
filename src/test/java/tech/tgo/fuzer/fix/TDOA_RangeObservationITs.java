@@ -20,6 +20,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class TDOA_RangeObservationITs implements FuzerListener {
 
     private static final Logger log = LoggerFactory.getLogger(TDOA_RangeObservationITs.class);

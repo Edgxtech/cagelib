@@ -21,7 +21,6 @@ public class GeoMission {
     char latZone;
     int lonZone;
 
-    /*
     /* Settings if choosing for fuzer to output to KML
     /*  - Switch
     /*  - Output filename

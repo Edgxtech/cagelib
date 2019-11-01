@@ -167,15 +167,6 @@ public class FuzerProcess implements Serializable {
         if (algorithmEKF !=null && algorithmEKF.isRunning()) {
             log.trace("Algorithm was running, will update observations list for tracking mode runs only");
             if (this.geoMission.getFuzerMode().equals(FuzerMode.track)) {
-
-
-                // TODO, do this in batches to avoid filter drift mid process??
-
-
-                // TEMP, reset covariances to allow retracking  NOPE
-                //algorithmEKF.resetCovariances();
-
-
                 // TEMP REMOVED TO FIX BUG
 //                log.trace("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
 //                algorithmEKF.setObservations(this.geoMission.observations);

@@ -3,6 +3,9 @@ package tech.tgo.fuzer.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class ObservationTestHelpers {
 
     private static final Logger log = LoggerFactory.getLogger(ObservationTestHelpers.class);

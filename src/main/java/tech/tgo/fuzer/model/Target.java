@@ -1,5 +1,8 @@
 package tech.tgo.fuzer.model;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class Target {
     String id;
     String name;

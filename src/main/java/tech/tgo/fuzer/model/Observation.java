@@ -2,9 +2,7 @@ package tech.tgo.fuzer.model;
 
 import java.util.List;
 
-/*
- * Geolocation fusion and tracking, using custom extended kalman filter implementation
- *
+/**
  * @author Timothy Edge (timmyedge)
  */
 public class Observation {

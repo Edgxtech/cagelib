@@ -4,6 +4,9 @@ import tech.tgo.fuzer.model.Asset;
 
 import java.util.List;
 
+/**
+ * @author Timothy Edge (timmyedge)
+ */
 public class TestAsset extends Asset {
     Boolean provide_range;
     Boolean provide_aoa;

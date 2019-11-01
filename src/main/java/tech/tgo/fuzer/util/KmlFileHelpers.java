@@ -1,10 +1,5 @@
 package tech.tgo.fuzer.util;
 
-/**
- * KML Filesystem I/O
- * @author Timothy Edge (timmyedge)
- */
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,6 +24,10 @@ import tech.tgo.fuzer.model.GeoMission;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
+/**
+ * KML Filesystem I/O - (Static Applications)
+ * @author Timothy Edge (timmyedge)
+ */
 public class KmlFileHelpers {
 
     private static final Logger log = LoggerFactory.getLogger(KmlFileHelpers.class);
