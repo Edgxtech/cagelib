@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>tech.tgo.fuzer</groupId>
-    <artifactId>fuzerlib</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <groupId>tech.tgo.efusion</groupId>
+    <artifactId>efusionlib</artifactId>
+    <version>0.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -15,7 +15,6 @@
         <mockito.version>2.13.0</mockito.version>
     </properties>
     <repositories>
-        <!-- contains jcoord libary -->
         <repository>
             <id>akmasoft-repo</id>
             <name>akmasoft-repo</name>
@@ -25,16 +24,16 @@
     <build>
         <plugins>
             <!-- Makes the JAR executable, by configuring the plugin to use the included manifest file -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven.jar.plugin.version}</version>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-jar-plugin</artifactId>-->
+                <!--<version>${maven.jar.plugin.version}</version>-->
+                <!--<configuration>-->
+                    <!--<archive>-->
+                        <!--<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
+                    <!--</archive>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
             <!-- JaCoCo configuration - provides test coverage reports -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -65,7 +64,6 @@
             <version>1.8.0-beta2</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -76,8 +74,6 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
         </dependency>
-
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -96,7 +92,6 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Project -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>

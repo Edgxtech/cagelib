@@ -1,9 +1,9 @@
 <configuration>
     <appender name="FILE"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/fuzerlib/fuzerlib.log</file>
+        <file>/var/log/efusionlib/efusionlib.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/fuzerlib/fuzerlib.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>/var/log/efusionlib/efusionlib.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>20MB</maxFileSize>
@@ -23,8 +23,8 @@
         </encoder>
     </appender>
 
-    <logger name="tech.tgo.fuzer" level="DEBUG" />
-    <logger name="tech.tgo.fuzer.compute.AlgorithmEKF" level="DEBUG" />
+    <logger name="tech.tgo.efusion" level="DEBUG" />
+    <logger name="tech.tgo.efusion.compute.ComputeProcess" level="DEBUG" />
 
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />
