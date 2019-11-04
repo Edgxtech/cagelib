@@ -8,3 +8,5 @@ build/
 *.DS_Store
 *.iml
 TODO.txt
+TESTS.txt
+DEBUG.txt
