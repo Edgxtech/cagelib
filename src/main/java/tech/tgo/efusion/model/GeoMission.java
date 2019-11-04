@@ -29,10 +29,15 @@ public class GeoMission {
     Boolean outputFilterState = false;
     String outputKmlFilename = null;
     String outputFilterStateKmlFilename = null;
-    public Boolean showCEPs = false;
-    public Boolean showMeas = false;
-    public Boolean showGEOs = false;
-    public Boolean showTrueLoc = false;
+    Boolean showCEPs = false;
+    Boolean showMeas = false;
+    Boolean showGEOs = false;
+    Boolean showTrueLoc = false;
+
+    /* Allow specific conditions, otherwise default uses random conditions geographically nearby observing assets */
+    Boolean filterUseSpecificInitialCondition = null;
+    Double filterSpecificInitialLat = null;
+    Double filterSpecificInitialLon = null;
 
     /* Memory store of assets contributing to the mission */
     Map<String,Asset> assets = new HashMap<String,Asset>();
@@ -271,5 +276,29 @@ public class GeoMission {
 
     public void setFilterProcessNoise(double[][] filterProcessNoise) {
         this.filterProcessNoise = filterProcessNoise;
+    }
+
+    public Boolean getFilterUseSpecificInitialCondition() {
+        return filterUseSpecificInitialCondition;
+    }
+
+    public void setFilterUseSpecificInitialCondition(Boolean filterUseSpecificInitialCondition) {
+        this.filterUseSpecificInitialCondition = filterUseSpecificInitialCondition;
+    }
+
+    public Double getFilterSpecificInitialLat() {
+        return filterSpecificInitialLat;
+    }
+
+    public void setFilterSpecificInitialLat(Double filterSpecificInitialLat) {
+        this.filterSpecificInitialLat = filterSpecificInitialLat;
+    }
+
+    public Double getFilterSpecificInitialLon() {
+        return filterSpecificInitialLon;
+    }
+
+    public void setFilterSpecificInitialLon(Double filterSpecificInitialLon) {
+        this.filterSpecificInitialLon = filterSpecificInitialLon;
     }
 }

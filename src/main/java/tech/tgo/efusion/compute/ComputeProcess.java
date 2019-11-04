@@ -92,26 +92,31 @@ public class ComputeProcess implements Runnable {
         Qu = new Array2DRowRealMatrix(procNoiseData);
 
         /* Initialise filter state */
-        List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
         double[] start_x_y;
-        if (assetList.size()>1) {
-            Random rand = new Random();
-            Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
-            assetList.remove(randAssetA);
-            Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
-            log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
-
-            //start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, -5000);
-            start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random()-0.5)*100000);
+        if (this.geoMission.getFilterUseSpecificInitialCondition()!=null && this.geoMission.getFilterUseSpecificInitialCondition()) {
+            double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(this.geoMission.getFilterSpecificInitialLat(), this.geoMission.getFilterSpecificInitialLon());
+            start_x_y = new double[]{asset_utm[1], asset_utm[0]};
+            log.debug("Using SPECIFIC initial condition: "+this.geoMission.getFilterSpecificInitialLat()+", "+this.geoMission.getFilterSpecificInitialLon()+" ["+start_x_y[1]+", "+start_x_y[0]+"]");
         }
         else {
-            Asset asset = assetList.get(0);
-            double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0],asset.getCurrent_loc()[1]);
-
-            start_x_y = new double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
+            List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
+            if (assetList.size() > 1) {
+                Random rand = new Random();
+                Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
+                assetList.remove(randAssetA);
+                Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
+                //log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
+                start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random() - 0.5) * 100000);
+                log.debug("Using RANDOM initial condition: near asset(s) ['"+randAssetA.getId() + "' & '" + randAssetB.getId()+"']: "+start_x_y[1]+", "+start_x_y[0]);
+            } else {
+                Asset asset = assetList.get(0);
+                double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+                start_x_y = new double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
+                log.debug("Using RANDOM initial condition: near asset ["+asset.getId()+"]: "+start_x_y[1]+", "+start_x_y[0]);
+            }
         }
 
-        // TEMP
+        // TEMP DEV
         //start_x_y = new double[]{409679,6491248};
         //start_x_y = new double[]{390679,6631248};
         //start_x_y = new double[]{386645.527,6461159.073};
@@ -127,8 +132,7 @@ public class ComputeProcess implements Runnable {
         Xk = Xinit;
         Pk = Pinit.scalarMultiply(1000.0);
 
-        // NEW FEATURE HERE
-        log.trace("Initialising Stage Observations as current observations");
+        log.trace("Initialising Stage Observations as current observations, #: "+this.geoMission.observations.size());
         setStaged_observations(this.geoMission.observations);
     }
 
@@ -154,7 +158,6 @@ public class ComputeProcess implements Runnable {
     public void run()
     {
         log.info("Running for # observations:"+observations.size());
-
         if (observations.size()==0) {
             log.info("No observations returning");
             return;
@@ -198,18 +201,13 @@ public class ComputeProcess implements Runnable {
 
             Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
 
-            /* reinitialise innovation vector each time */
+            /* reinitialise various collections */
             innov = new ArrayRealVector(innovd);
             P_innov = new Array2DRowRealMatrix(P_innovd);
-
-            /* reset */
             filterObservationDTOs.removeAllElements();
-
-            // TEMP
             RealVector nonAoaNextState = null;
-
-            /* observations collection is dynamically updated for tracking mode missions */
             Iterator obsIterator = this.observations.values().iterator();
+
             while (obsIterator.hasNext()) {
 
                 Observation obs = (Observation) obsIterator.next();
@@ -262,7 +260,6 @@ public class ComputeProcess implements Runnable {
 
                 RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
                 RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
-
 
                 /* Measurement balancer -  TO BE DEPRECATED */
                 if (obs.getObservationType().equals(ObservationType.range)) {
@@ -431,18 +428,6 @@ public class ComputeProcess implements Runnable {
 
     public RealMatrix recalculateH_TDOA(double x, double y, double x2, double y2, double Xk1, double Xk2) {
 
-        /*  MATHCODE
-            f_meas(i,:) = [sqrt((x(1)-X_true(1,k))^2 + (y(1)-X_true(2,k))^2) - sqrt((x(i+1)-X_true(1,k))^2 + (y(i+1)-X_true(2,k))^2)] + 1*(0.5-rand);
-            f_est(i,:) = [(sqrt((x(1)-Xk(1))^2 + (y(1)-Xk(2))^2) - sqrt((x(i+1)-Xk(1))^2 + (y(i+1)-Xk(2))^2))];
-            r(i,:) = f_meas(i,:) - f_est(i,:);
-
-            R1 = sqrt((x(1)-Xk(1))^2 + (y(1)-Xk(2))^2);
-            R2 = sqrt((x(i+1)-Xk(1))^2 + (y(i+1)-Xk(2))^2);
-
-            dfdx(i) = -(x(1)+Xk(1))/R1 - (-x(i+1)+Xk(1))/R2;
-            dfdy(i) = -(y(1)+Xk(2))/R1 - (-y(i+1)+Xk(2))/R2;
-         */
-
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow(y-Xk2,2));
         double R2 = Math.sqrt(Math.pow((x2-Xk1),2) + Math.pow(y2-Xk2,2));
 
@@ -462,8 +447,7 @@ public class ComputeProcess implements Runnable {
 
     public RealMatrix recalculateH_AOA(double x, double y, double Xk1, double Xk2) {
 
-        double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2));   // Note: better performance using sqrt
-        //double R1 = Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2);
+        double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow((y-Xk2),2)); // Note: better performance using sqrt
 
         double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose linearisation
         double dfdy = -(x-Xk1)/R1;

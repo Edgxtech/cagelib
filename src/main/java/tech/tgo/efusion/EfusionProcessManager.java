@@ -105,8 +105,7 @@ public class EfusionProcessManager implements Serializable {
             this.geoMission.getAssets().put(obs.getAssetId_b(),asset_b);
         }
 
-        if (this.geoMission.showMeas)
-        {
+        if (this.geoMission.getShowMeas()) {
             /* RANGE MEASUREMENT */
             if (obs.getObservationType().equals(ObservationType.range)) {
                 List<double[]> measurementCircle = new ArrayList<double[]>();

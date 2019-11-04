@@ -65,6 +65,11 @@ public class AllObservationFixITs implements EfusionListener {
         geoMission.setOutputFilterState(true);
         geoMission.setOutputFilterStateKmlFilename("filterState.kml");
 
+        // Optional test
+//        geoMission.setFilterUseSpecificInitialCondition(true);
+//        geoMission.setFilterSpecificInitialLat(-32.0);
+//        geoMission.setFilterSpecificInitialLon(116.9);
+
         try {
             efusionProcessManager.configure(geoMission);
         }

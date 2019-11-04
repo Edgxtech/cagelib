@@ -61,7 +61,7 @@ public class KmlFileHelpers {
             }
 
             /* PLOT the measurements */
-            if (gm.showMeas) {
+            if (gm.getShowMeas()) {
 
                 Element style = doc.createElement("Style");
                 style.setAttribute("id", "measurementStyle");
@@ -86,19 +86,19 @@ public class KmlFileHelpers {
             }
 
             /* PLOT the geo result */
-            if (gm.showGEOs)
+            if (gm.getShowGEOs())
             {
                 exportTargetEstimationResult(doc,dnode,geoMission);
             }
 
             /* PLOT the geo probability ELP result */
-            if (geoMission.showCEPs)
+            if (geoMission.getShowCEPs())
             {
                 exportTargetEstimationCEP(doc,dnode,geoMission);
             }
 
             /* PLOT the true target loc - for experiment purposes */
-            if (gm.showTrueLoc)
+            if (gm.getShowTrueLoc())
             {
                 exportTargetTrueLocation(doc, dnode, geoMission);
             }
