@@ -24,7 +24,7 @@
     </appender>
 
     <logger name="tech.tgo.efusion" level="DEBUG" />
-    <logger name="tech.tgo.efusion.compute.ComputeProcess" level="DEBUG" />
+    <logger name="tech.tgo.efusion.compute.ComputeProcessor" level="DEBUG" />
 
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />

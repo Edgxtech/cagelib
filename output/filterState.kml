@@ -1,13 +1,25 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2"><Document><Placemark><name>High Residual</name><styleUrl>#style1</styleUrl><LineString><coordinates>116.31085434894541,-31.955617912392746,0 
-116.11988145614913,-31.963754765317063,0 
-116.05288406751184,-31.979272687143393,0 
-116.02332492584416,-31.983570698944373,0 
-116.01059647013619,-31.98267834465207,0 
-116.0049944014799,-31.981451847770167,0 
-116.00239953787298,-31.980708405814614,0 
-</coordinates></LineString></Placemark><Style id="style1"><LineStyle><color>ffffA500</color></LineStyle></Style><Placemark><name>Medium Residual</name><styleUrl>#style2</styleUrl><LineString><coordinates>116.00115942195136,-31.98031993712069,0 
-116.00055796034272,-31.9801249625086,0 
-</coordinates></LineString></Placemark><Style id="style2"><LineStyle><color>ffffD500</color></LineStyle></Style><Placemark><name>Low Residual</name><styleUrl>#style3</styleUrl><LineString><coordinates>116.00026426957909,-31.980028349571988,0 
-116.0001204047274,-31.97998070369977,0 
-116.00004982441537,-31.979957253542164,0 
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2"><Document><Placemark><name>High Residual</name><styleUrl>#style1</styleUrl><LineString><coordinates>116.00628699321743,-31.708819712051742,0 
+115.97136347882417,-31.679596938859675,0 
+115.94241275328143,-31.671018925261322,0 
+115.91788320844181,-31.66886742440531,0 
+115.89628520872719,-31.669482791713907,0 
+115.87691309664754,-31.67177389891268,0 
+115.85969204095348,-31.675228049818916,0 
+115.84486685604244,-31.67936368375108,0 
+115.83267992417241,-31.683653848800798,0 
+115.82315165159213,-31.687629381863935,0 
+115.81603809198464,-31.69099075976919,0 
+115.81092483254935,-31.69363491987115,0 
+115.80735341750466,-31.695604486019096,0 
+115.80490969742218,-31.697014451873375,0 
+115.80326116398983,-31.69799586045055,0 
+</coordinates></LineString></Placemark><Style id="style1"><LineStyle><color>ffffA500</color></LineStyle></Style><Placemark><name>Medium Residual</name><styleUrl>#style2</styleUrl><LineString><coordinates>115.80215965411415,-31.698665815941848,0 
+115.80142831645597,-31.69911713433509,0 
+115.80094478112686,-31.699418459478654,0 
+</coordinates></LineString></Placemark><Style id="style2"><LineStyle><color>ffffD500</color></LineStyle></Style><Placemark><name>Low Residual</name><styleUrl>#style3</styleUrl><LineString><coordinates>115.80062596145157,-31.699618439962553,0 
+115.80041612503926,-31.699750633231996,0 
+115.80027818014737,-31.699837786564657,0 
+115.80018756596535,-31.699895145431167,0 
+115.8001280726671,-31.699932852014303,0 
+115.80008902484867,-31.699957620794088,0 
 </coordinates></LineString></Placemark><Style id="style3"><LineStyle><color>fffgG500</color><width>2</width></LineStyle></Style></Document></kml>

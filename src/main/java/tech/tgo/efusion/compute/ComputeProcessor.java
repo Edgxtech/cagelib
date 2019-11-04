@@ -1,8 +1,3 @@
-/*
- * Geolocation fusion and tracking, using custom extended kalman filter implementation
- *
- * @author Timothy Edge (timmyedge)
- */
 package tech.tgo.efusion.compute;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -26,9 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Extended Kalman Filter Fusion Processor
  * @author Timothy Edge (timmyedge)
  */
-public class ComputeProcess implements Runnable {
+public class ComputeProcessor implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(ComputeProcess.class);
+    private static final Logger log = LoggerFactory.getLogger(ComputeProcessor.class);
 
     private EfusionListener efusionListener;
 
@@ -72,9 +67,9 @@ public class ComputeProcess implements Runnable {
     KmlFileExporter kmlFileExporter = null;
 
     /*
-     * Create a processor for the given config, observations and client implemented listener
+     * Create processor for the given config, observations and client implemented listener
      */
-    public ComputeProcess(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
+    public ComputeProcessor(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
     {
         this.efusionListener = efusionListener;
         this.geoMission = geoMission;
@@ -84,8 +79,7 @@ public class ComputeProcess implements Runnable {
     }
 
     public void initialiseFilter() {
-        /* Initialise filter configurable properties */
-        double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}}; // Smaller for trusted measurements. Guide: {0.01 -> 0.1}
+        double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}};
         Rk = new Array2DRowRealMatrix(measurementNoiseData);
 
         double[][] procNoiseData = geoMission.getFilterProcessNoise();
@@ -116,19 +110,10 @@ public class ComputeProcess implements Runnable {
             }
         }
 
-        // TEMP DEV
-        //start_x_y = new double[]{409679,6491248};
-        //start_x_y = new double[]{390679,6631248};
-        //start_x_y = new double[]{386645.527,6461159.073};
-
-        log.debug("Filter start point: "+start_x_y[0]+","+start_x_y[1]);
+        log.debug("Filter start state: "+start_x_y[0]+","+start_x_y[1]);
         double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
 
-        log.info("Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
-        double[] latLonStart = Helpers.convertUtmNthingEastingToLatLng(initStateData[0], initStateData[1], geoMission.getLatZone(), geoMission.getLonZone());
-        log.info("Init start point: "+latLonStart[0]+","+latLonStart[1]);
         RealVector Xinit = new ArrayRealVector(initStateData);
-
         Xk = Xinit;
         Pk = Pinit.scalarMultiply(1000.0);
 
@@ -295,23 +280,23 @@ public class ComputeProcess implements Runnable {
 
                         if (Math.abs(pressure_angle) > Math.abs(f_est)) {
                             if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = Math.abs(rk); // innovate anticlockwise
+                                rk = Math.abs(rk);
                             } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = -Math.abs(rk); // innovate clockwise
+                                rk = -Math.abs(rk);
                             } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = Math.abs(rk); // innovate anticlockwise
+                                rk = Math.abs(rk);
                             } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = -Math.abs(rk); // innovate clockwise
+                                rk = -Math.abs(rk);
                             }
                         } else {
                             if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = -Math.abs(rk); // innovate anticlockwise
+                                rk = -Math.abs(rk);
                             } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = Math.abs(rk); // innovate clockwise
+                                rk = Math.abs(rk);
                             } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = -Math.abs(rk); // innovate anticlockwise
+                                rk = -Math.abs(rk);
                             } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = Math.abs(rk); // innovate clockwise
+                                rk = Math.abs(rk);
                             }
                         }
                     }
@@ -334,10 +319,8 @@ public class ComputeProcess implements Runnable {
             if (this.geoMission.getOutputFilterState()) {
                 filterStateExportCounter++;
                 if (filterStateExportCounter == 10) {
-
                     // Only if it is changing significantly
                     double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
-
                     if (residual > 0.5) {
                         filterStateDTO.setFilterObservationDTOs(filterObservationDTOs);
                         filterStateDTO.setXk(Xk);
@@ -431,14 +414,8 @@ public class ComputeProcess implements Runnable {
         double R1 = Math.sqrt(Math.pow((x-Xk1),2) + Math.pow(y-Xk2,2));
         double R2 = Math.sqrt(Math.pow((x2-Xk1),2) + Math.pow(y2-Xk2,2));
 
-//        double dfdx = -(x-Xk1)/R1 - (-x2+Xk1)/R2;  //ORIGINAL
-//        double dfdy = -(y-Xk2)/R1 - (-y2+Xk2)/R2;
-
-        double dfdx = (-x+Xk1)/R1 - (-x2+Xk1)/R2; // Equivalent (DON'T EDIT, Seems to always work)
+        double dfdx = (-x+Xk1)/R1 - (-x2+Xk1)/R2;
         double dfdy = (-y+Xk2)/R1 - (-y2+Xk2)/R2;
-
-//        double dfdx = (-x+Xk1)/(R1-R2) + (x2-Xk1)/(R1-R2); // Example form, doesnt work
-//        double dfdy = (-y+Xk2)/(R1-R2) + (y2-Xk2)/(R1-R2);
 
         double[][] jacobianData = {{0, 0, dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);

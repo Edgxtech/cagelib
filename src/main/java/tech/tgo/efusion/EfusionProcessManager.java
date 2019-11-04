@@ -2,7 +2,7 @@ package tech.tgo.efusion;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.tgo.efusion.compute.ComputeProcess;
+import tech.tgo.efusion.compute.ComputeProcessor;
 import tech.tgo.efusion.model.*;
 import tech.tgo.efusion.util.ConfigurationException;
 import tech.tgo.efusion.util.EfusionValidator;
@@ -25,7 +25,7 @@ public class EfusionProcessManager implements Serializable {
 
     GeoMission geoMission;
 
-    ComputeProcess computeProcess;
+    ComputeProcessor computeProcessor;
 
     public EfusionProcessManager(EfusionListener actionListener) {
         this.actionListener = actionListener;
@@ -163,12 +163,12 @@ public class EfusionProcessManager implements Serializable {
         }
 
         /* Update the live observations - if a 'tracking' mission type */
-        if (computeProcess !=null && computeProcess.isRunning()) {
+        if (computeProcessor !=null && computeProcessor.isRunning()) {
             log.trace("Algorithm was running, will update observations list for tracking mode runs only");
             if (this.geoMission.getMissionMode().equals(MissionMode.track)) {
                 // TEMP REMOVED TO FIX BUG
 //                log.trace("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
-//                computeProcess.setObservations(this.geoMission.observations);
+//                computeProcessor.setObservations(this.geoMission.observations);
             }
             else {
                 log.debug("Not adding this OBSERVATION to filter since is configured to produce a single FIX, run again with different observations");
@@ -180,7 +180,7 @@ public class EfusionProcessManager implements Serializable {
     }
 
     public void stop() throws Exception {
-        computeProcess.stopThread();
+        computeProcessor.stopThread();
     }
 
     /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
@@ -191,9 +191,9 @@ public class EfusionProcessManager implements Serializable {
             throw new ConfigurationException("There were no observations, couldn't start the process");
         }
 
-        computeProcess = new ComputeProcess(this.actionListener, this.geoMission.observations, this.geoMission);
+        computeProcessor = new ComputeProcessor(this.actionListener, this.geoMission.observations, this.geoMission);
 
-        Thread thread = new Thread(computeProcess);
+        Thread thread = new Thread(computeProcessor);
         thread.start();
 
         return thread;
