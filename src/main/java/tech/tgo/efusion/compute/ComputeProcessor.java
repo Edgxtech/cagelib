@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.model.*;
 import tech.tgo.efusion.util.Helpers;
-import tech.tgo.efusion.util.KmlFileExporter;
 import tech.tgo.efusion.util.KmlFileHelpers;
+import tech.tgo.efusion.util.KmlFileStaticHelpers;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,7 +64,7 @@ public class ComputeProcessor implements Runnable {
     double yk;
     RealMatrix K;
 
-    KmlFileExporter kmlFileExporter = null;
+    KmlFileHelpers kmlFileHelpers = null;
 
     /*
      * Create processor for the given config, observations and client implemented listener
@@ -159,8 +159,8 @@ public class ComputeProcessor implements Runnable {
         long startTime = Calendar.getInstance().getTimeInMillis();
 
         if (this.geoMission.getOutputFilterState()) {
-            kmlFileExporter = new KmlFileExporter();
-            kmlFileExporter.provisionFilterStateExport();
+            kmlFileHelpers = new KmlFileHelpers();
+            kmlFileHelpers.provisionFilterStateExport();
             log.debug("Provisioned filter state export");
         }
         int filterStateExportCounter = 0;
@@ -324,7 +324,7 @@ public class ComputeProcessor implements Runnable {
                     if (residual > 0.5) {
                         filterStateDTO.setFilterObservationDTOs(filterObservationDTOs);
                         filterStateDTO.setXk(Xk);
-                        kmlFileExporter.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
+                        kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
                         filterStateExportCounter = 0;
                     }
                 }
@@ -481,12 +481,12 @@ public class ComputeProcessor implements Runnable {
         this.geoMission.getTarget().setElp_minor(minor);
         this.geoMission.getTarget().setElp_rot(rot);
 
-        if (this.geoMission.getOutputFilterState() && kmlFileExporter!=null) {
-            kmlFileExporter.writeCurrentExports(this.geoMission);
+        if (this.geoMission.getOutputFilterState() && kmlFileHelpers !=null) {
+            kmlFileHelpers.writeCurrentExports(this.geoMission);
         }
 
         if (this.geoMission.getOutputKml()) {
-            KmlFileHelpers.exportGeoMissionToKml(this.geoMission);
+            KmlFileStaticHelpers.exportGeoMissionToKml(this.geoMission);
         }
     }
 
