@@ -61,7 +61,7 @@ public class AOAObservationFixITs implements EfusionListener {
         geoMission.setOutputFilterState(true);
         geoMission.setOutputFilterStateKmlFilename("filterState.kml");
 
-        /* These configs are available for optional override */
+        /* These configs available for optional override */
         geoMission.setDispatchResultsPeriod(new Long(1000)); // Default: 1000
         geoMission.setFilterThrottle(null); // Default is null
         geoMission.setFilterConvergenceResidualThreshold(0.01); // Default: 0.01

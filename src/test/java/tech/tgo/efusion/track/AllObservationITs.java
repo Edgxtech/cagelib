@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.EfusionProcessManager;
+import tech.tgo.efusion.util.SimulatedTargetObservationRemover;
 import tech.tgo.efusion.util.SimulatedTargetObserver;
 import tech.tgo.efusion.model.MissionMode;
 import tech.tgo.efusion.model.GeoMission;
@@ -34,6 +35,8 @@ public class AllObservationITs implements EfusionListener {
 
     SimulatedTargetObserver simulatedTargetObserver = new SimulatedTargetObserver();
 
+    SimulatedTargetObservationRemover simulatedTargetObservationRemover = new SimulatedTargetObservationRemover();
+
     Timer timer = new Timer();
 
     /* Some common asset coords to reuse */
@@ -52,6 +55,7 @@ public class AllObservationITs implements EfusionListener {
     @Before
     public void configure() {
         simulatedTargetObserver.setEfusionProcessManager(efusionProcessManager);
+        simulatedTargetObservationRemover.setEfusionProcessManager(efusionProcessManager);
 
         /* Configure the intended mission */
         geoMission = new GeoMission();
@@ -344,6 +348,38 @@ public class AllObservationITs implements EfusionListener {
         }};
         simulatedTargetObserver.setTestAssets(assets);
         timer.scheduleAtFixedRate(simulatedTargetObserver,0,999);
+
+        try {
+            efusionProcessManager.start();
+
+            Thread.sleep(30000);
+
+            timer.cancel();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testMoverNorth_RemoveRandomObservations() {
+        simulatedTargetObserver.setTrue_lat(-31.99); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(115.95);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setRange_rand_factor(50);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setLat_move(+0.005); // MOVE N
+        simulatedTargetObserver.setLon_move(+0.000);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        timer.scheduleAtFixedRate(simulatedTargetObserver,0,999);
+        timer.scheduleAtFixedRate(simulatedTargetObservationRemover,1500, 400);
 
         try {
             efusionProcessManager.start();
