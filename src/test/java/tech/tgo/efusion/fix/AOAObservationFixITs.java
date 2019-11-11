@@ -26,7 +26,7 @@ public class AOAObservationFixITs implements EfusionListener {
 
     private static final Logger log = LoggerFactory.getLogger(AOAObservationFixITs.class);
 
-    Map<String,GeoMission> fuzerMissions = new HashMap<String,GeoMission>();
+    Map<String,GeoMission> missionsMap = new HashMap<String,GeoMission>();
 
     EfusionProcessManager efusionProcessManager = new EfusionProcessManager(this);
 
@@ -87,7 +87,7 @@ public class AOAObservationFixITs implements EfusionListener {
         log.debug("Configured Geo Mission, continuing");
 
         /* Client side needs to manage geomission references for callback response */
-        fuzerMissions.put(geoMission.getGeoId(), geoMission);
+        missionsMap.put(geoMission.getGeoId(), geoMission);
 
         /* Create some reusable test assets */
         asset_a.setId("A");
@@ -109,12 +109,8 @@ public class AOAObservationFixITs implements EfusionListener {
 
     /* Result callback */
     @Override
-    public void result(String geoId, double Xk1, double Xk2, double Xk3, double Xk4) {
-        log.debug("Raw Result: GeoId: "+geoId+", Xk1: "+Xk1+", Xk2: "+Xk2+", Xk3: "+Xk3+", Xk4: "+Xk4);
-        GeoMission geoMission = fuzerMissions.get(geoId);
-        UTMRef utm = new UTMRef(Xk1,Xk2, geoMission.getLatZone(), geoMission.getLonZone());
-        LatLng ltln = utm.toLatLng();
-        log.debug("Result: Lat: "+ltln.getLat()+", Lon: "+ltln.getLng());
+    public void result(String geoId, double lat, double lon, double cep_elp_maj, double cep_elp_min, double cep_elp_rot) {
+        log.debug("Result -> GeoId: " + geoId + ", Lat: " + lat + ", Lon: " + lon + ", CEP major: " + cep_elp_maj + ", CEP minor: " + cep_elp_min + ", CEP rotation: " + cep_elp_rot);
     }
 
     @Test

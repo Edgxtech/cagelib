@@ -391,7 +391,7 @@ public class ComputeProcessor implements Runnable {
                     }
                 }
                 else {
-                    log.debug("Residual not low enough to export result: "+residual);
+                    log.trace("Residual not low enough to export result: "+residual);
                 }
             }
         }
@@ -466,8 +466,6 @@ public class ComputeProcessor implements Runnable {
         double[] latLon = Helpers.convertUtmNthingEastingToLatLng(Xk.getEntry(0),Xk.getEntry(1), this.geoMission.getLatZone(), this.geoMission.getLonZone());
         this.geoMission.getTarget().setCurrent_loc(latLon);
 
-        this.efusionListener.result(geoMission.getGeoId(),Xk.getEntry(0),Xk.getEntry(1), Xk.getEntry(2), Xk.getEntry(3));
-
         /* Compute probability ELP */
         double[][] covMatrix=new double[][]{{Pk.getEntry(0,0),Pk.getEntry(0,1)},{Pk.getEntry(1,0),Pk.getEntry(1,1)}};
         double[] evalues = Helpers.getEigenvalues(covMatrix);
@@ -480,6 +478,8 @@ public class ComputeProcessor implements Runnable {
         this.geoMission.getTarget().setElp_major(major);
         this.geoMission.getTarget().setElp_minor(minor);
         this.geoMission.getTarget().setElp_rot(rot);
+
+        this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], major, minor, rot);
 
         if (this.geoMission.getOutputFilterState() && kmlFileHelpers !=null) {
             kmlFileHelpers.writeCurrentExports(this.geoMission);
