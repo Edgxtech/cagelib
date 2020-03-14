@@ -365,7 +365,7 @@ public class ComputeProcessor implements Runnable {
                                 f_est_adj = f_est_adj / Helpers.SPEED_OF_LIGHT;
                             }
                             else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
-                                f_est_adj = f_est_adj * Math.PI / 360;
+                                f_est_adj = f_est_adj * Math.PI / 180;
                             }
                             log.debug("Observation utilisation: assets:"+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+", type: "+obs_state.getObs().getObservationType().name()+", f_est(adj): " + f_est_adj + ",d: " + obs_state.getObs().getMeas()+", innov: "+obs_state.getInnov());
                         }
