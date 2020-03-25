@@ -50,6 +50,9 @@ public class GeoMission {
     public Set<Long> hyperbolasToShow = new HashSet<Long>();
     public Set<Long> linesToShow = new HashSet<Long>();
 
+    /* Used only to indicate when a fix mode mission has just put out it's last result */
+    Boolean finished;
+
     /* Library default properties*/
     public Properties properties;
 
@@ -300,5 +303,13 @@ public class GeoMission {
 
     public void setFilterSpecificInitialLon(Double filterSpecificInitialLon) {
         this.filterSpecificInitialLon = filterSpecificInitialLon;
+    }
+
+    public Boolean getFinished() {
+        return finished;
+    }
+
+    public void setFinished(Boolean finished) {
+        this.finished = finished;
     }
 }
