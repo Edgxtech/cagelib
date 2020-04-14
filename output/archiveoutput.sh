@@ -22,6 +22,7 @@ while getopts ":i:vh" optname
 function continue {
 	cp filterState.kml archivedOutput/$1_filterState_`date +%F`.kml
 	cp geoOutput.kml archivedOutput/$1_geoOutput_`date +%F`.kml
+	cp /Users/mobile3/Downloads/$1.jpg archivedOutput/$1_out.jpg
 }
 
 if [ -n "$1" ]; then

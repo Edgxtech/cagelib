@@ -367,7 +367,7 @@ public class ComputeProcessor implements Runnable {
                             else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
                                 f_est_adj = f_est_adj * Math.PI / 180;
                             }
-                            log.debug("Observation utilisation: assets:"+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+", type: "+obs_state.getObs().getObservationType().name()+", f_est(adj): " + f_est_adj + ",d: " + obs_state.getObs().getMeas()+", innov: "+obs_state.getInnov());
+                            log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov());
                         }
                     }
 

@@ -32,6 +32,14 @@ public class Helpers {
         return new double[]{ltln.getLat(),ltln.getLng()};
     }
 
+//    public static double[] getEigenvalues2D(double[][] matrix) {
+//        double a = matrix[0][0];
+//        double b = matrix[0][1];
+//        double e1 = ((a+d) + Math.sqrt( Math.pow(a-d,2) + 4*b*c))/2;
+//        double e2 = ((a+d) - Math.sqrt( Math.pow(a-d,2) + 4*b*c))/2;
+//        return new double[]{e1,e2};
+//    }
+
     public static double[] getEigenvalues(double[][] matrix) {
         double a = matrix[0][0];
         double b = matrix[0][1];

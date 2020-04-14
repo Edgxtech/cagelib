@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * @author Timothy Edge (timmyedge)
  */
-public class FundamentalConvergenceTests implements EfusionListener {
+public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
 
     private static final Logger log = LoggerFactory.getLogger(tech.tgo.efusion.fix.AllObservationFixITs.class);
 
@@ -118,9 +118,9 @@ public class FundamentalConvergenceTests implements EfusionListener {
         asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C","D"}));
         asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{"D"}));
 
-        simulatedTargetObserver.setAoa_rand_factor(0.0);
-        simulatedTargetObserver.setTdoa_rand_factor(0.0);
-        simulatedTargetObserver.setRange_rand_factor(0);
+        simulatedTargetObserver.setAoa_rand_factor(0.2);
+        simulatedTargetObserver.setTdoa_rand_factor(0.000005); // ~5ms
+        simulatedTargetObserver.setRange_rand_factor(100);
 
         ATEStats = new SummaryStatistics();
     }
@@ -146,8 +146,8 @@ public class FundamentalConvergenceTests implements EfusionListener {
     }
 
     @Test
-    public void test111() {
-        /* 1.1.1 Converge to AOA */
+    public void test211() {
+        /* 2.1.1 Converge to AOA */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
@@ -169,8 +169,8 @@ public class FundamentalConvergenceTests implements EfusionListener {
     }
 
     @Test
-    public void test112() {
-        /* 1.1.2 Converge to Range */
+    public void test212() {
+        /* 2.1.2 Converge to Range */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_range(true);
@@ -192,8 +192,8 @@ public class FundamentalConvergenceTests implements EfusionListener {
     }
 
     @Test
-    public void test113() {
-        /* 1.1.3 Converge to TDOA */
+    public void test213() {
+        /* 2.1.3 Converge to TDOA */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_tdoa(true);
@@ -213,11 +213,12 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
-    public void test121() {
-        /* 1.2.1 Converge to AOA, AOA */
+    public void test221() {
+        /* 2.2.1 Converge to AOA, AOA */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
@@ -237,11 +238,12 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
-    public void test122() {
-        /* 1.2.2 Converge to AOA, TDOA */
+    public void test222() {
+        /* 2.2.2 Converge to AOA, TDOA */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_tdoa(true);
@@ -263,11 +265,12 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
-    public void test123() {
-        /* 1.2.3 Converge to AOA, Range */
+    public void test223() {
+        /* 2.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
@@ -288,11 +291,12 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
-    public void test123a() {
-        /* 1.2.3 Converge to AOA, Range */
+    public void test223a() {
+        /* 2.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
@@ -318,11 +322,12 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
-    public void test124() {
-        /* 1.2.4 Converge to TDOA, TDOA */
+    public void test224() {
+        /* 2.2.4 Converge to TDOA, TDOA */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_tdoa(true);
@@ -345,11 +350,12 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
-    public void test125() {
-        /* 1.2.5 Converge to TDOA, Range */
+    public void test225() {
+        /* 2.2.5 Converge to TDOA, Range */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_tdoa(true);
@@ -370,11 +376,12 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
-    public void test126() {
-        /* 1.2.6 Converge to Range, Range */
+    public void test226() {
+        /* 2.2.6 Converge to Range, Range */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_range(true);
@@ -394,12 +401,13 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
 
     @Test
-    public void test131() {
-        /* 1.3.1 Converge to AOA, TDOA, Range */
+    public void test231() {
+        /* 2.3.1 Converge to AOA, TDOA, Range */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
@@ -422,5 +430,6 @@ public class FundamentalConvergenceTests implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 }

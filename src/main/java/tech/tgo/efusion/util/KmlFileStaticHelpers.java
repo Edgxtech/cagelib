@@ -139,7 +139,7 @@ public class KmlFileStaticHelpers {
                 dnode.appendChild(PFplacemark);
 
                 Element name = doc.createElement("name");
-                name.appendChild(doc.createTextNode(geoMission.getTarget().getName()));
+                name.appendChild(doc.createTextNode("True: "+geoMission.getTarget().getName()));
                 PFplacemark.appendChild(name);
 
                 PFplacemark.appendChild(crosshairStyle);
@@ -226,7 +226,8 @@ public class KmlFileStaticHelpers {
                 double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(geoMission.getTarget().getCurrent_loc()[0], geoMission.getTarget().getCurrent_loc()[1]);
                 log.debug("UTM Target Loc: "+utm_target_loc[0]+", "+utm_target_loc[1]);
 
-                double[][] M_rot = new double[][]{{Math.cos(geoMission.getTarget().getElp_rot()), -Math.sin(geoMission.getTarget().getElp_rot())}, {Math.cos(geoMission.getTarget().getElp_rot()), Math.sin(geoMission.getTarget().getElp_rot())}};
+                // temp swapped bottom row to cos,sin
+                double[][] M_rot = new double[][]{{Math.cos(geoMission.getTarget().getElp_rot()), -Math.sin(geoMission.getTarget().getElp_rot())}, {Math.sin(geoMission.getTarget().getElp_rot()), Math.cos(geoMission.getTarget().getElp_rot())}};
 
                 for (double theta = (1 / 2) * Math.PI; theta <= (5 / 2) * Math.PI; theta += 0.2) {
                     double a = geoMission.getTarget().getElp_major() * Math.cos(theta);
@@ -265,6 +266,14 @@ public class KmlFileStaticHelpers {
                 polyPlacemark.appendChild(styleUrl);
 
                 Element polygon = doc.createElement("Polygon");
+
+                Element altitudeMode = doc.createElement("altitudeMode");
+                altitudeMode.appendChild(doc.createTextNode("relativeToGround"));
+                polygon.appendChild(altitudeMode);
+
+                Element altitude = doc.createElement("extrude");
+                altitude.appendChild(doc.createTextNode("1"));
+                polygon.appendChild(altitude);
 
                 Element outer = doc.createElement("outerBoundaryIs");
                 Element cepOuterRing = doc.createElement("LinearRing");
