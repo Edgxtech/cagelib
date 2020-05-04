@@ -129,6 +129,11 @@ public class AllObservationFixITs implements EfusionListener {
 
     @Test
     public void testBottom() {
+        //DEV TESTING
+        //geoMission.setFilterMeasurementError(0.1);
+        //geoMission.setFilterProcessNoise(new double[][]{{0, 0, 0, 0}, {0, 0 ,0, 0}, {0, 0, 0.1, 0}, {0, 0, 0 ,0.1}});
+
+
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
         simulatedTargetObserver.setAoa_rand_factor(0.0);

@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Extended Kalman Filter Fusion Processor
  * @author Timothy Edge (timmyedge)
  */
-public class ComputeProcessor implements Runnable {
+public class ComputeProcessorAL1 implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(ComputeProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(ComputeProcessorAL1.class);
 
     private EfusionListener efusionListener;
 
@@ -31,13 +31,13 @@ public class ComputeProcessor implements Runnable {
 
     private final AtomicBoolean running = new AtomicBoolean(false);
 
-    double[][] ThiData = { {1,0,1, 0}, {0,1,0,1}, {0,0,0,0}, {0,0,0,0}};
+    double[][] ThiData = { {1,0}, {0,1}};
     RealMatrix Thi = new Array2DRowRealMatrix(ThiData);
 
-    double[][] controlData = { {0}, {0}, {0}, {0}};
+    double[][] controlData = { {0}, {0}};
     RealMatrix B = new Array2DRowRealMatrix(controlData);
 
-    double[][] initCovarData = {{1, 0, 0, 0}, {0, 1, 0 ,0}, {0, 0, 1, 0}, {0, 0, 0 ,1}};
+    double[][] initCovarData = {{1, 0}, {0, 1}};
     RealMatrix Pinit = new Array2DRowRealMatrix(initCovarData);
 
     RealMatrix Qu;
@@ -46,13 +46,13 @@ public class ComputeProcessor implements Runnable {
     RealVector Xk;
     RealMatrix Pk;
 
-    double[] innovd = {0,0,0,0};
+    double[] innovd = {0,0};
     RealVector innov;
 
-    double[][] P_innovd = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
+    double[][] P_innovd = {{0,0}, {0,0}};
     RealMatrix P_innov;
 
-    double[][] eyeData = {{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}};
+    double[][] eyeData = {{1,0}, {0,1}};
     RealMatrix eye = new Array2DRowRealMatrix(eyeData);
 
     RealMatrix H;
@@ -65,7 +65,7 @@ public class ComputeProcessor implements Runnable {
     /*
      * Create processor for the given config, observations and client implemented listener
      */
-    public ComputeProcessor(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
+    public ComputeProcessorAL1(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
     {
         this.efusionListener = efusionListener;
         this.geoMission = geoMission;
@@ -98,6 +98,8 @@ public class ComputeProcessor implements Runnable {
                 //log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
                 start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random() - 0.5) * 100000);
                 log.debug("Using RANDOM initial condition: near asset(s) ['"+randAssetA.getId() + "' & '" + randAssetB.getId()+"']: "+start_x_y[1]+", "+start_x_y[0]);
+
+                log.debug("Dist between assets: "+Math.sqrt(Math.pow(randAssetA.getCurrent_loc()[0] - randAssetB.getCurrent_loc()[0], 2) + Math.pow(randAssetA.getCurrent_loc()[1] - randAssetB.getCurrent_loc()[1], 2)));
             } else {
                 Asset asset = assetList.get(0);
                 double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
@@ -107,11 +109,11 @@ public class ComputeProcessor implements Runnable {
         }
 
         log.debug("Filter start state: "+start_x_y[0]+","+start_x_y[1]);
-        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
+        double[] initStateData = {start_x_y[0], start_x_y[1]};
 
         RealVector Xinit = new ArrayRealVector(initStateData);
         Xk = Xinit;
-        Pk = Pinit.scalarMultiply(1000.0);
+        Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
 
         log.trace("Initialising Stage Observations as current observations, #: "+this.geoMission.observations.size());
         setStaged_observations(this.geoMission.observations);
@@ -180,6 +182,15 @@ public class ComputeProcessor implements Runnable {
 
             Xk = Thi.operate(Xk);
 
+//            log.info("Pk:");
+//                log.info("Pk: "+ Pk);
+//
+//                log.info("Thi:");
+//                log.info("val: "+ Thi);
+//
+                //log.info("Qu:");
+                //log.info("val: "+ Qu);
+
             Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
 
             /* reinitialise various collections */
@@ -199,6 +210,7 @@ public class ComputeProcessor implements Runnable {
                 double f_est = 0.0;
                 double d = 0.0;
                 H = null;
+                RealMatrix Inverse = null;
 
                 if (obs.getObservationType().equals(ObservationType.range)) {
 
@@ -209,6 +221,10 @@ public class ComputeProcessor implements Runnable {
                     d = obs.getMeas();
 
                     log.trace("RANGE innovation: " + f_est + ", vs d: " + d);
+
+                    // TODO, use obtained measurement error from observations
+                    RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{0.1}})));
+                    Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
                 }
                 else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 
@@ -219,6 +235,9 @@ public class ComputeProcessor implements Runnable {
                     d = obs.getMeas() * Helpers.SPEED_OF_LIGHT;
 
                     log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
+
+                    RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{0.05}})));
+                    Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
                 }
                 else if (obs.getObservationType().equals(ObservationType.aoa)) {
 
@@ -237,81 +256,72 @@ public class ComputeProcessor implements Runnable {
                     d = obs.getMeas() * 180 / Math.PI;
 
                     log.trace("AOA innovation: " + f_est + ", vs d: " + d);
+
+                    //Where Rk ~ 500m for AOA innacuracies
+                    RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{0.05}})));
+                    Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
                 }
 
-                RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
-                RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
-//                log.info("To Invert:");
-//                log.info(toInvert.toString());
-//                log.info("Inverse:");
-//                log.info(Inverse.toString());
 
-                /* Measurement balancer -  TO BE DEPRECATED */
-                if (obs.getObservationType().equals(ObservationType.range)) {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterRangeBias());
-                }
-                else if (obs.getObservationType().equals(ObservationType.tdoa)) {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterTDOABias());
-                }
-                else {
-                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterAOABias());
-                }
-                log.info("K:");
-                log.info(K.toString());
+
+                K = Pk.multiply(H.transpose()).multiply(Inverse);  //.scalarMultiply(this.geoMission.getFilterRangeBias());
+                //log.info("K:"+K);
+                //log.info(K.toString());
 
                 double rk = d - f_est;
 
                 /* '360-0 Conundrum' adjustment */
-                if (obs.getObservationType().equals(ObservationType.aoa)) {
-                    if (innov.getEntry(0) != 0.0) {
-                        if (nonAoaNextState == null) {
-                            nonAoaNextState = Xk.add(innov);
-                        }
+//                if (obs.getObservationType().equals(ObservationType.aoa)) {
+//                    if (innov.getEntry(0) != 0.0) {
+//                        if (nonAoaNextState == null) {
+//                            nonAoaNextState = Xk.add(innov);
+//                        }
+//
+//                        /* gradient from obs to prevailing pressure direction */
+//                        // TODO, need to check if this is using delta_x or y
+//                        double pressure_angle = Math.atan((nonAoaNextState.getEntry(2) - obs.getY()) / (nonAoaNextState.getEntry(0) - obs.getX())) * 180 / Math.PI;
+//                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Yp: "+innov.getEntry(3)+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
+//                        if (nonAoaNextState.getEntry(0) < obs.getX()) {
+//                            pressure_angle = pressure_angle + 180;
+//                        }
+//
+//                        if (nonAoaNextState.getEntry(1) < obs.getY() && nonAoaNextState.getEntry(0) >= obs.getX()) {
+//                            pressure_angle = 360 - Math.abs(pressure_angle);
+//                        }
+//                        //log.debug("P-ang (adjusted): "+pressure_angle);
+//
+//                        if (Math.abs(pressure_angle) > Math.abs(f_est)) {
+//                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+//                                rk = Math.abs(rk);
+//                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+//                                rk = -Math.abs(rk);
+//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+//                                rk = Math.abs(rk);
+//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+//                                rk = -Math.abs(rk);
+//                            }
+//                        } else {
+//                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+//                                rk = -Math.abs(rk);
+//                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+//                                rk = Math.abs(rk);
+//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+//                                rk = -Math.abs(rk);
+//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+//                                rk = Math.abs(rk);
+//                            }
+//                        }
+//                    }
+//                }
 
-                        /* gradient from obs to prevailing pressure direction */
-                        double pressure_angle = Math.atan((nonAoaNextState.getEntry(2) - obs.getY()) / (nonAoaNextState.getEntry(0) - obs.getX())) * 180 / Math.PI;
-                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Yp: "+innov.getEntry(3)+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
-                        if (nonAoaNextState.getEntry(0) < obs.getX()) {
-                            pressure_angle = pressure_angle + 180;
-                        }
-
-                        if (nonAoaNextState.getEntry(1) < obs.getY() && nonAoaNextState.getEntry(0) >= obs.getX()) {
-                            pressure_angle = 360 - Math.abs(pressure_angle);
-                        }
-                        //log.debug("P-ang (adjusted): "+pressure_angle);
-
-                        if (Math.abs(pressure_angle) > Math.abs(f_est)) {
-                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = Math.abs(rk);
-                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = -Math.abs(rk);
-                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = Math.abs(rk);
-                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = -Math.abs(rk);
-                            }
-                        } else {
-                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = -Math.abs(rk);
-                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = Math.abs(rk);
-                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-                                rk = -Math.abs(rk);
-                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-                                rk = Math.abs(rk);
-                            }
-                        }
-                    }
-                }
-
-                double[] HXk = H.operate(Xk).toArray();
-                RealVector innov_ = K.scalarMultiply(rk - HXk[0]).getColumnVector(0);
-//                log.info("r - HXk:");
-//                log.info("val: "+ (rk - HXk[0]));
+                //double[] HXk = H.operate(Xk).toArray();  /// REMOVED in AL1
+                RealVector innov_ = K.scalarMultiply(rk).getColumnVector(0);    /// rk - HXk[0]  -removed in AL1
 
                 innov = innov_.add(innov);
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
+                //log.info("P_innov:"+P_innov);
+
 //                log.info("K:");
 //                log.info("val: "+ K);
 //
@@ -329,17 +339,22 @@ public class ComputeProcessor implements Runnable {
 
             Xk = Xk.add(innov);
             Pk = (eye.multiply(Pk)).subtract(P_innov);
+            //log.debug("Pk: "+Pk);
 
             /* Export filter state - development debugging */
             if (this.geoMission.getOutputFilterState()) {
                 filterStateExportCounter++;
                 if (filterStateExportCounter == 10) {
                     // Only if it is changing significantly
-                    double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
-                    if (residual > 0.5) {
+
+                    // TODO, this no longer works in AL1
+                    //double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
+                    double variance_sum = Pk.getEntry(0,0) + Pk.getEntry(1,1);
+
+                    if (variance_sum > 0.5) {
                         filterStateDTO.setFilterObservationDTOs(filterObservationDTOs);
                         filterStateDTO.setXk(Xk);
-                        kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
+                        kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, variance_sum);
                         filterStateExportCounter = 0;
                     }
                 }
@@ -364,11 +379,16 @@ public class ComputeProcessor implements Runnable {
                 residual_rk = residual_rk / this.observations.size();
 
                 /* A measure of residual changes the filter intends to make */
-                double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
+                // TODO, this no longer works in AL1
+                //double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
+                double variance_sum = Pk.getEntry(0,0) + Pk.getEntry(1,1);
+                //log.debug("PK: "+Pk);
+                log.debug("Variance Sum: " + variance_sum);
 
-                if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
+                if (1 < 10.0) { //this.geoMission.getFilterDispatchResidualThreshold()) {
                     log.debug("Dispatching Result From # Observations: " + this.observations.size());
-                    log.debug("Residual Movements: "+residual);
+                    //log.debug("Residual Movements: "+residual);
+                    log.debug("Residual Variance: "+variance_sum);
                     log.debug("Residual Measurement Delta: "+residual_rk);
                     log.debug("Residual Innovation: "+innov);
                     log.debug("Covariance: "+Pk);
@@ -391,7 +411,8 @@ public class ComputeProcessor implements Runnable {
                     dispatchResult(Xk);
 
                     if (geoMission.getMissionMode().equals(MissionMode.fix)) {
-                        if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
+                        // if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
+                        if (variance_sum < this.geoMission.getFilterConvergenceResidualThreshold()) {
                             log.debug("Exiting since this is a FIX Mode run and filter has converged to threshold");
                             running.set(false);
                             break;
@@ -406,7 +427,7 @@ public class ComputeProcessor implements Runnable {
                     }
                 }
                 else {
-                    log.trace("Residual not low enough to export result: "+residual);
+                    log.trace("Variance Residual not low enough to export result: "+variance_sum);
                 }
             }
         }
@@ -419,7 +440,7 @@ public class ComputeProcessor implements Runnable {
         double dfdx = -(x_rssi-Xk1)/R1;
         double dfdy = -(y_rssi-Xk2)/R1;
 
-        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+        double[][] jacobianData = {{dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
         return H;
     }
@@ -432,7 +453,7 @@ public class ComputeProcessor implements Runnable {
         double dfdx = (-x+Xk1)/R1 - (-x2+Xk1)/R2;
         double dfdy = (-y+Xk2)/R1 - (-y2+Xk2)/R2;
 
-        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+        double[][] jacobianData = {{dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
         return H;
     }
@@ -444,7 +465,7 @@ public class ComputeProcessor implements Runnable {
         double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose linearisation
         double dfdy = -(x-Xk1)/R1;
 
-        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+        double[][] jacobianData = {{dfdx, dfdy}};
         RealMatrix H = new Array2DRowRealMatrix(jacobianData);
         return H;
     }
@@ -482,58 +503,15 @@ public class ComputeProcessor implements Runnable {
         this.geoMission.getTarget().setCurrent_loc(latLon);
 
         /* Compute probability ELP */
+        log.debug("PK: "+Pk);
         double[][] covMatrix=new double[][]{{Pk.getEntry(0,0),Pk.getEntry(0,1)},{Pk.getEntry(1,0),Pk.getEntry(1,1)}};
         double[] evalues = Helpers.getEigenvalues(covMatrix);
         log.debug("#1 E-values: "+evalues[0]+","+evalues[1]);
         double largestEvalue = Math.max(evalues[0],evalues[1]);
         double smallestEvalue = Math.min(evalues[0],evalues[1]);
         double[] evector = Helpers.getEigenvector(covMatrix, largestEvalue);
-        log.debug("#1 E-vector: "+evector[0]+","+evector[1]);
-        double rot = Math.atan(evector[1] / evector[0]);
-        // TODO, confirm the rotation angle is coming out correct, if not apply this correction
-        // This angle is between -pi and pi, adjust
-        if (rot<0)
-            rot = rot + 2*Math.PI;
-
-        double half_major_axis_length = Math.sqrt(largestEvalue)*5.991; // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I ch-square distribution, two unknowns / i.e. two degrees freedom
-        double half_minor_axis_length = Math.sqrt(smallestEvalue)*5.991;
-        /* I believe this original below is incorrect, the chi-square value was supposed to be outside the sqrt */
-            //double major = 2*Math.sqrt(9.210*largestEvalue); // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I ch-square distribution, two unknowns / i.e. two degrees freedom
-            //double minor = 2*Math.sqrt(9.210*smallestEvalue);
-
-        this.geoMission.getTarget().setElp_major(half_major_axis_length);
-        this.geoMission.getTarget().setElp_minor(half_minor_axis_length);
-        this.geoMission.getTarget().setElp_rot(rot);
-        log.debug("#1 CEP major: "+half_major_axis_length+", CEP minor: "+half_minor_axis_length+", CEP rotation: "+rot);
-
-
-
-        //// ALL BELOW EXPERIMENTAL
-
-            /* TEMP - Compute probability delta ELP */
-            double[][] covMatrixB=new double[][]{{Pk.getEntry(2,2),Pk.getEntry(2,3)},{Pk.getEntry(3,2),Pk.getEntry(3,3)}};
-            double[] evaluesB = Helpers.getEigenvalues(covMatrixB);
-            log.debug("#2 E-values: "+evaluesB[0]+","+evaluesB[1]);
-            double largestEvalueB = Math.max(evaluesB[0],evaluesB[1]);
-            double smallestEvalueB = Math.min(evaluesB[0],evaluesB[1]);
-            double[] evectorB = Helpers.getEigenvector(covMatrixB, largestEvalueB);
-            double rotB = Math.atan(evectorB[1] / evectorB[0]);
-            double majorB = Math.sqrt(largestEvalueB)*9.210; // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I z-value
-            double minorB = Math.sqrt(smallestEvalueB)*9.210;
-            log.debug("#2 CEP major: "+majorB+", CEP minor: "+minorB+", CEP rotation: "+rotB);
-            //this.geoMission.getTarget().setElp_major(majorB*1000);
-            //this.geoMission.getTarget().setElp_minor(minorB*1000);
-            //this.geoMission.getTarget().setElp_rot(rot);
-
-
-            double cep = 0.75*(Pk.getEntry(0,0) + Pk.getEntry(1,1));
-            log.debug("#3 CEP: "+cep);
-
-            //this.geoMission.getTarget().setElp_major(cep/2);
-            //this.geoMission.getTarget().setElp_minor(cep/2);
-
-
-            RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
+        /* Alternative is to use this
+         *  RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
             EigenDecomposition eig = new EigenDecomposition(J2);
             double[] evaluesC = eig.getRealEigenvalues();
             log.debug("#4 E-values: "+evaluesC[0]+","+evaluesC[1]);
@@ -541,11 +519,24 @@ public class ComputeProcessor implements Runnable {
             RealMatrix V = eig.getV();
             RealMatrix D = eig.getD();
             log.debug("#4 V: "+V);
-            log.debug("#4 D: "+D);
+            log.debug("#4 D: "+D);*/
+        log.debug("#1 E-vector: "+evector[0]+","+evector[1]);
+        double rot = Math.atan(evector[1] / evector[0]);
+        // TODO, confirm the rotation angle is coming out correct, if not apply this correction
+        // This angle is between -pi and pi, adjust
+        if (rot<0)
+            rot = rot + 2*Math.PI;
 
-        //// ALL ABOVE EXPERIMENTAL
+        double half_major_axis_length = Math.sqrt(largestEvalue)*1.39; // 1.39 equiv 50% (i.e. CEP), 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I ch-square distribution, two unknowns / i.e. two degrees freedom
+        double half_minor_axis_length = Math.sqrt(smallestEvalue)*1.39;
+        /* I believe this original below is incorrect, the chi-square value was supposed to be outside the sqrt */
+            //double major = 2*Math.sqrt(9.210*largestEvalue); // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I ch-square distribution, two unknowns / i.e. two degrees freedom
+            //double minor = 2*Math.sqrt(9.210*smallestEvalue);
 
-
+        this.geoMission.getTarget().setElp_major(half_major_axis_length*10000); /* UTM -> [m]: X10^4 */
+        this.geoMission.getTarget().setElp_minor(half_minor_axis_length*10000);
+        this.geoMission.getTarget().setElp_rot(rot);
+        log.debug("#1 CEP major: "+half_major_axis_length+", CEP minor: "+half_minor_axis_length+", CEP rotation: "+rot);
 
         this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], half_major_axis_length, half_minor_axis_length, rot);
 

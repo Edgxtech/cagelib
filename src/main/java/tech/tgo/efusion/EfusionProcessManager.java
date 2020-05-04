@@ -2,7 +2,7 @@ package tech.tgo.efusion;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.tgo.efusion.compute.ComputeProcessor;
+import tech.tgo.efusion.compute.ComputeProcessorAL1;
 import tech.tgo.efusion.model.*;
 import tech.tgo.efusion.util.ConfigurationException;
 import tech.tgo.efusion.util.EfusionValidator;
@@ -25,7 +25,7 @@ public class EfusionProcessManager implements Serializable {
 
     GeoMission geoMission;
 
-    ComputeProcessor computeProcessor;
+    ComputeProcessorAL1 computeProcessor;
 
     public EfusionProcessManager(EfusionListener actionListener) {
         this.actionListener = actionListener;
@@ -191,7 +191,7 @@ public class EfusionProcessManager implements Serializable {
             throw new ConfigurationException("There were no observations, couldn't start the process");
         }
 
-        computeProcessor = new ComputeProcessor(this.actionListener, this.geoMission.observations, this.geoMission);
+        computeProcessor = new ComputeProcessorAL1(this.actionListener, this.geoMission.observations, this.geoMission);
 
         Thread thread = new Thread(computeProcessor);
         thread.start();
@@ -209,7 +209,8 @@ public class EfusionProcessManager implements Serializable {
         EfusionValidator.validate(geoMission);
 
         /* Uses defaults - overridden by some implementations (required for pur tdoa processing) */
-        geoMission.setFilterProcessNoise(new double[][]{{0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}});
+        //geoMission.setFilterProcessNoise(new double[][]{{0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}});  // 4x4 for AL0 engine
+        geoMission.setFilterProcessNoise(new double[][]{{0.01, 0}, {0, 0.01}});
 
         Properties properties = new Properties();
         String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";

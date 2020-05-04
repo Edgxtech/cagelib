@@ -48,6 +48,16 @@ public class Helpers {
         double e1 = ((a+d) + Math.sqrt( Math.pow(a-d,2) + 4*b*c))/2;
         double e2 = ((a+d) - Math.sqrt( Math.pow(a-d,2) + 4*b*c))/2;
         return new double[]{e1,e2};
+        /* NOTE: This also works
+            RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
+            EigenDecomposition eig = new EigenDecomposition(J2);
+            double[] evaluesC = eig.getRealEigenvalues();
+            log.debug("#4 E-values: "+evaluesC[0]+","+evaluesC[1]);
+            double[] evectorC = eig.(covMatrix, largestEvalue);
+            log.debug("#1 E-vector: "+evector[0]+","+evector[1]);
+            RealMatrix V = eig.getV();
+            RealMatrix D = eig.getD();
+         */
     }
     public static double[] getEigenvector(double[][] matrix, double eigenvalue) {
         double a = matrix[0][0];

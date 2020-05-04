@@ -43,12 +43,14 @@ public class AOAObservationFixITs implements EfusionListener {
     TestAsset asset_c = new TestAsset();
     TestAsset asset_d = new TestAsset();
 
+    GeoMission geoMission = new GeoMission();
+
     @Before
     public void configure() {
         simulatedTargetObserver.setEfusionProcessManager(efusionProcessManager);
 
         /* Configure the intended mission */
-        GeoMission geoMission = new GeoMission();
+        geoMission = new GeoMission();
         geoMission.setMissionMode(MissionMode.fix);
         geoMission.setTarget(new Target("MY_TGT_ID","MY_TGT_NAME"));
         geoMission.setGeoId("MY_GEO_ID");
@@ -117,7 +119,7 @@ public class AOAObservationFixITs implements EfusionListener {
     public void testBottom() {
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
-        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setAoa_rand_factor(0.5);
         simulatedTargetObserver.setLat_move(+0.000); // STATIC
         simulatedTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
@@ -141,9 +143,12 @@ public class AOAObservationFixITs implements EfusionListener {
 
     @Test
     public void testBottom_TwoAssets() {
+        //geoMission.setFilterProcessNoise(new double[][]{{0, 0, 0, 0}, {0, 0 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}});
+
+
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
-        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setAoa_rand_factor(0.2);
         simulatedTargetObserver.setLat_move(+0.000); // STATIC
         simulatedTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
@@ -167,7 +172,7 @@ public class AOAObservationFixITs implements EfusionListener {
     public void testTop() {
         simulatedTargetObserver.setTrue_lat(-31.7); // TOP
         simulatedTargetObserver.setTrue_lon(115.80);
-        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setAoa_rand_factor(0.2);
         simulatedTargetObserver.setLat_move(+0.000); // STATIC
         simulatedTargetObserver.setLon_move(+0.000);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()

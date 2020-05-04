@@ -273,7 +273,7 @@ public class ErroneousDataTests_5 implements EfusionListener {
         /* 5.1.4 Erroneous Range Type */
         simulatedTargetObserver.setTrue_lat(-34.856327); // TOP
         simulatedTargetObserver.setTrue_lon(138.596404);
-        simulatedTargetObserver.setRange_rand_factor(1000.0);
+        simulatedTargetObserver.setRange_rand_factor(2000.0);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
