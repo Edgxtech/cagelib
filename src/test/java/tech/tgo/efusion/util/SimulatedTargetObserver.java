@@ -74,8 +74,8 @@ public class SimulatedTargetObserver extends TimerTask {
                     }
                     else {
                         obs.setMeas_error(range_rand_factor / 10000); // units are in utm. [1 utm equates to 10000m]
-                        // TEMP TEST OVERRIDE
-                        obs.setMeas_error(0.2);
+                        // TEMP TEST OVERRIDE - force to use system defaults (0.3 seems to be best overall)
+                        obs.setMeas_error(null);
                     }
                     efusionProcessManager.addObservation(obs);
                 }
@@ -112,8 +112,8 @@ public class SimulatedTargetObserver extends TimerTask {
                         }
                         else {
                             obs_c.setMeas_error(tdoa_rand_factor * Helpers.SPEED_OF_LIGHT / 10000); // units are in utm. [1 utm equates to 10000m]
-                            // TEMP TEST OVERRIDE
-                            obs_c.setMeas_error(0.2);
+                            // TEMP TEST OVERRIDE - force to use system defaults (0.3 seems to be best overall)
+                            obs_c.setMeas_error(null);
                         }
                         efusionProcessManager.addObservation(obs_c);
                     }
@@ -137,8 +137,8 @@ public class SimulatedTargetObserver extends TimerTask {
                     }
                     else {
                         obs_d.setMeas_error(Math.tan(aoa_rand_factor) * 1000 / 10000); // Assuming target is at 1000m. Units are in utm. [1 utm equates to 10000m]
-                        // TEMP TEST OVERRIDE
-                        obs_d.setMeas_error(0.2);
+                        // TEMP TEST OVERRIDE - force to use system defaults (0.3 seems to be best overall)
+                        obs_d.setMeas_error(null);
                     }
                     efusionProcessManager.addObservation(obs_d);
                 }

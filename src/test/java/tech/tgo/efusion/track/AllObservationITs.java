@@ -198,12 +198,13 @@ public class AllObservationITs implements EfusionListener {
 
     /* FAILS under normal conditions
     *   incorrect result between obs from A ~360- to B ~0+: AOA 360-0 conundrum
-    *   Confirmed fixed with forced innovation direction fix. Not addressed by the prevailing innov pressure fix, needs further R&D */
+    *   Confirmed fixed with forced innovation direction fix. Not addressed by the prevailing innov pressure fix, needs further R&D
+    *   PERHAPS: Can hold a monitored 'measurement delta', then if it suddenly changes by a large %, reinitialise the search */
     @Test
     public void testMoverNorthEast_TwoAssets() {
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
-        simulatedTargetObserver.setAoa_rand_factor(0.0);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
         simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
         simulatedTargetObserver.setRange_rand_factor(200);
         simulatedTargetObserver.setLat_move(+0.005); // MOVE NE

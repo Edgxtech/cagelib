@@ -11,9 +11,9 @@ public class Helpers {
     public static int SPEED_OF_LIGHT = 299792458; // [m/s]
 
     /* Measurement errors, default, used for unrealistic no-sim-error scenarios, need at least a small amount of error to function */
-    public static double SMALL_DEFAULT_RANGE_MEAS_ERROR = 0.01;
-    public static double SMALL_DEFAULT_TDOA_MEAS_ERROR = 0.1;
-    public static double SMALL_DEFAULT_AOA_MEAS_ERROR = 0.01;
+    public static double SMALL_DEFAULT_RANGE_MEAS_ERROR = 0.25;
+    public static double SMALL_DEFAULT_TDOA_MEAS_ERROR = 0.25;
+    public static double SMALL_DEFAULT_AOA_MEAS_ERROR = 0.25;
 
 
     /*  Convert lat/lon to UTM northing/easting

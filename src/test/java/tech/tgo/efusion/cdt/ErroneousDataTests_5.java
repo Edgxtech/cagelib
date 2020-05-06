@@ -191,6 +191,9 @@ public class ErroneousDataTests_5 implements EfusionListener {
         log.debug("ATE following test: "+ ATEStats.getMean()+", StdDev: "+ATEStats.getStandardDeviation());
     }
 
+    // FIRST THING TO NOTICE
+    //    When having many measurements, i.e. much more than with the fundamental convergence tests, start seeing smaller CEPs
+    //    This is a good sign, more statistical evidence of the result with more measurements overall.
     @Test
     public void test511() {
         /* 5.1.1 Reference Test */

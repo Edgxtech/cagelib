@@ -159,6 +159,7 @@ public class TDOA_AOAObservationITs implements EfusionListener {
     }
 
     // Flicks over to wrong side from 360-0 crossing
+    // Sometimes doesnt latch on from initial convergence
     @Test
     public void testMoverNorthEast_TwoAssets() {
         simulatedTargetObserver.setTrue_lat(-31.98);  // BOTTOM
@@ -167,9 +168,6 @@ public class TDOA_AOAObservationITs implements EfusionListener {
         simulatedTargetObserver.setAoa_rand_factor(0.1);
         simulatedTargetObserver.setLat_move(+0.005); // MOVE NE
         simulatedTargetObserver.setLon_move(+0.005);
-
-        geoMission.setFilterAOABias(1.0);
-        geoMission.setFilterTDOABias(10.0);
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{

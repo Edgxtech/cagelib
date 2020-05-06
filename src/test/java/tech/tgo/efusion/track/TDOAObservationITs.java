@@ -145,6 +145,11 @@ public class TDOAObservationITs implements EfusionListener {
         }
     }
 
+    /*
+      This demonstrates a potential opportunity. It shows the CEP as a large major length axis which is correct since only have one
+      geometric shape with the one measurement, however for the tracking use case, over time, we can gradually see how the
+      probability densities will enable the position to be estimated
+     */
     @Test
     public void testMoverNorthEast_TwoAssets() {
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM

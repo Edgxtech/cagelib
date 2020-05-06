@@ -147,7 +147,7 @@ public class AOAObservationITs implements EfusionListener {
     public void testMoverNorthEast_TwoAssets() {
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
-        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setAoa_rand_factor(0.01);
         simulatedTargetObserver.setLat_move(+0.005); // MOVE NE
         simulatedTargetObserver.setLon_move(+0.005);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()

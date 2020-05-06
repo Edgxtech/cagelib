@@ -129,6 +129,7 @@ public class ComputeProcessorAL1 implements Runnable {
             }
         };
 
+        /* Sort such that AOA last, for applying the 360-0 conundrum fix */
         List<Map.Entry<Long, Observation>> listOfEntries = new ArrayList<Map.Entry<Long, Observation>>(observations.entrySet());
         Collections.sort(listOfEntries, valueComparator);
         LinkedHashMap<Long, Observation> sortedByValue = new LinkedHashMap<Long, Observation>(listOfEntries.size());
@@ -197,7 +198,7 @@ public class ComputeProcessorAL1 implements Runnable {
             innov = new ArrayRealVector(innovd);
             P_innov = new Array2DRowRealMatrix(P_innovd);
             filterObservationDTOs.removeAllElements();
-            RealVector nonAoaNextState = null;
+            RealVector nextOtherMeasurementExclusiveState = null;
             Iterator obsIterator = this.observations.values().iterator();
 
             while (obsIterator.hasNext()) {
@@ -233,7 +234,7 @@ public class ComputeProcessorAL1 implements Runnable {
 
                     d = obs.getMeas() * Helpers.SPEED_OF_LIGHT;
 
-                    log.debug("TDOA innovation: " + f_est + ", vs d: " + d);
+                    log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
 
                     //log.info("Pk: "+ Pk);
                     //log.debug("H: "+H);
@@ -276,27 +277,35 @@ public class ComputeProcessorAL1 implements Runnable {
 
                 double rk = d - f_est;
 
-                /* '360-0 Conundrum' adjustment */
+//                //log.info("RUNNING CONUNDRUM TEST");
+//                /* '360-0 Conundrum' adjustment. NOTE: AOA types always processed last due to sorting during setObservations */
 //                if (obs.getObservationType().equals(ObservationType.aoa)) {
+//
 //                    if (innov.getEntry(0) != 0.0) {
-//                        if (nonAoaNextState == null) {
-//                            nonAoaNextState = Xk.add(innov);
+//                        if (nextOtherMeasurementExclusiveState == null) {
+//                            nextOtherMeasurementExclusiveState = Xk.add(innov);
 //                        }
 //
 //                        /* gradient from obs to prevailing pressure direction */
-//                        // TODO, need to check if this is using delta_x or y
-//                        double pressure_angle = Math.atan((nonAoaNextState.getEntry(2) - obs.getY()) / (nonAoaNextState.getEntry(0) - obs.getX())) * 180 / Math.PI;
-//                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Yp: "+innov.getEntry(3)+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
-//                        if (nonAoaNextState.getEntry(0) < obs.getX()) {
-//                            pressure_angle = pressure_angle + 180;
+//                        double pressure_angle = Math.atan((nextOtherMeasurementExclusiveState.getEntry(1) - obs.getY()) / (nextOtherMeasurementExclusiveState.getEntry(0) - obs.getX())) * 180 / Math.PI;
+//                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
+//
+//                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) >= obs.getY()) {
+//                            pressure_angle = 180 - pressure_angle;
 //                        }
 //
-//                        if (nonAoaNextState.getEntry(1) < obs.getY() && nonAoaNextState.getEntry(0) >= obs.getX()) {
-//                            pressure_angle = 360 - Math.abs(pressure_angle);
+//                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY()) {
+//                            pressure_angle = 180 + Math.abs(pressure_angle);
 //                        }
-//                        //log.debug("P-ang (adjusted): "+pressure_angle);
 //
+//                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY()) {
+//                            pressure_angle = -Math.abs(pressure_angle);
+//                        }
+//
+//                        // This may only be useful for low numbers of predom AOA scenarios, and only for TRACK MODE runs (TBD)
+//                        /* For the case where the prevailing direction is above the intended innovation direction of the measurement in question */
 //                        if (Math.abs(pressure_angle) > Math.abs(f_est)) {
+//                            /* 1st to 4th quadrant, choose positive or negative angle respectively */
 //                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
 //                                rk = Math.abs(rk);
 //                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
@@ -306,7 +315,9 @@ public class ComputeProcessorAL1 implements Runnable {
 //                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
 //                                rk = -Math.abs(rk);
 //                            }
-//                        } else {
+//                        }
+//                        /* For the case where the prevailing direction is below the intended innovation direction of the measurement in question */
+//                        else {
 //                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
 //                                rk = -Math.abs(rk);
 //                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
@@ -386,7 +397,7 @@ public class ComputeProcessorAL1 implements Runnable {
                 //double variance_sum = Pk.getEntry(0,0) + Pk.getEntry(1,1);
                 //log.debug("Variance Sum: " + variance_sum);
 
-                if (residual < 10) { //) { this.geoMission.getFilterDispatchResidualThreshold()
+                if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
                     log.debug("Dispatching Result From # Observations: " + this.observations.size());
                     log.debug("Residual Movements: "+residual);
                     //log.debug("Residual Variance: "+variance_sum);
@@ -403,7 +414,7 @@ public class ComputeProcessorAL1 implements Runnable {
                             else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
                                 f_est_adj = f_est_adj * Math.PI / 180;
                             }
-                            log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov());
+                            log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov()+", MeasError: "+obs_state.getObs().getMeas_error());
                         }
                     }
 

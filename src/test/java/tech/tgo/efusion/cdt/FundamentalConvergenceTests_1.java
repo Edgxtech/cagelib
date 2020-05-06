@@ -343,7 +343,9 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         printPerformance();
     }
 
-    @Test // doesnt seem to work
+    // v.sensitive to init conditions, can fail to converge.
+    // Will require the boxing technique
+    @Test
     public void test124() {
         /* 1.2.4 Converge to TDOA, TDOA */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT

@@ -233,11 +233,11 @@ public class TDOAObservationFixITs implements EfusionListener {
     public void testMiddle() {
         simulatedTargetObserver.setTrue_lat(-31.9); // MIDDLE
         simulatedTargetObserver.setTrue_lon(115.95);
-        simulatedTargetObserver.setTdoa_rand_factor(0.0000000);
+        simulatedTargetObserver.setTdoa_rand_factor(0.00000001);
         simulatedTargetObserver.setLat_move(0.000); // NO MOVEMENT
         simulatedTargetObserver.setLon_move(0.000);
 
-        geoMission.setFilterMeasurementError(0.3);
+        //geoMission.setFilterMeasurementError(0.3);  DEPRECATED
         //geoMission.setFilterProcessNoise(new double[][]{{10, 0, 0, 0}, {0, 10 ,0, 0}, {0, 0, 0.0001, 0}, {0, 0, 0 ,0.0001}});
 
         geoMission.setFilterDispatchResidualThreshold(10.0);

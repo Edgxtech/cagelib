@@ -123,11 +123,19 @@ public class TDOA_AOAObservationFixITs implements EfusionListener {
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
         simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
-        simulatedTargetObserver.setAoa_rand_factor(0.0);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
         simulatedTargetObserver.setLat_move(+0.000); // STATIC
         simulatedTargetObserver.setLon_move(+0.000);
 
-        geoMission.setFilterDispatchResidualThreshold(1.0);
+        //asset_a.setProvide_tdoa(false);
+        //asset_b.setProvide_tdoa(false);
+        //asset_c.setProvide_tdoa(false);
+
+        //geoMission.setFilterUseSpecificInitialCondition(true);
+        //geoMission.setFilterSpecificInitialLat(-32.07);
+        //geoMission.setFilterSpecificInitialLon(115.93);
+
+        geoMission.setFilterDispatchResidualThreshold(50.0);
         geoMission.setDispatchResultsPeriod(new Long(100));
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()

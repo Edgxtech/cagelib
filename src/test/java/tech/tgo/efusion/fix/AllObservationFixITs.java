@@ -1,5 +1,6 @@
 package tech.tgo.efusion.fix;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import tech.tgo.efusion.model.MissionMode;
 import tech.tgo.efusion.model.GeoMission;
 import tech.tgo.efusion.model.Target;
 import tech.tgo.efusion.util.ConfigurationException;
+import tech.tgo.efusion.util.Helpers;
 import tech.tgo.efusion.util.SimulatedTargetObserver;
 import tech.tgo.efusion.util.TestAsset;
 
@@ -43,6 +45,9 @@ public class AllObservationFixITs implements EfusionListener {
     TestAsset asset_d = new TestAsset();
 
     GeoMission geoMission;
+
+    SummaryStatistics ATEStats;
+    double[] latest_est_latlon;
 
     @Before
     public void configure() {
@@ -119,12 +124,28 @@ public class AllObservationFixITs implements EfusionListener {
         asset_a.setTdoa_asset_ids(Arrays.asList(new String[]{"B","C","D"}));
         asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C","D"}));
         asset_c.setTdoa_asset_ids(Arrays.asList(new String[]{"D"}));
+
+        ATEStats = new SummaryStatistics();
     }
 
     /* Result callback */
     @Override
     public void result(String geoId, double lat, double lon, double cep_elp_maj, double cep_elp_min, double cep_elp_rot) {
         log.debug("Result -> GeoId: "+geoId+", Lat: "+lat+", Lon: "+lon+", CEP major: "+cep_elp_maj+", CEP minor: "+cep_elp_min+", CEP rotation: "+cep_elp_rot);
+
+        // buffer just the latest value - ok for fix tests, need to hold all est since first convergence for track tests
+        latest_est_latlon = new double[]{lat,lon};
+    }
+
+    public void printPerformance() {
+        /* Performance analysis - Average True Error (ATE) */
+        Double[] true_lat_lon = this.geoMission.getTarget().getTrue_current_loc();
+        double[] true_nth_east = Helpers.convertLatLngToUtmNthingEasting(true_lat_lon[0], true_lat_lon[1]);
+        double[] est_nth_east = Helpers.convertLatLngToUtmNthingEasting(latest_est_latlon[0], latest_est_latlon[1]);
+        double ate_value = Math.sqrt(Math.pow(true_nth_east[0] - est_nth_east[0], 2) + Math.pow(true_nth_east[1] - est_nth_east[1], 2));
+        ATEStats.addValue(ate_value);
+
+        log.debug("ATE following test: " + ATEStats.getMean() + ", StdDev: " + ATEStats.getStandardDeviation());
     }
 
     @Test
@@ -136,7 +157,7 @@ public class AllObservationFixITs implements EfusionListener {
 
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
-        simulatedTargetObserver.setAoa_rand_factor(0.0);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
         simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
         simulatedTargetObserver.setRange_rand_factor(200);
         simulatedTargetObserver.setLat_move(0.0); // STATIC
@@ -158,13 +179,14 @@ public class AllObservationFixITs implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
     public void testBottom_TwoAssets() {
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
-        simulatedTargetObserver.setAoa_rand_factor(0.0);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
         simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
         simulatedTargetObserver.setRange_rand_factor(200);
         simulatedTargetObserver.setLat_move(0.0); // STATIC
@@ -189,6 +211,7 @@ public class AllObservationFixITs implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
@@ -218,6 +241,7 @@ public class AllObservationFixITs implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
@@ -246,6 +270,7 @@ public class AllObservationFixITs implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
@@ -274,6 +299,7 @@ public class AllObservationFixITs implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 
     @Test
@@ -302,5 +328,6 @@ public class AllObservationFixITs implements EfusionListener {
         catch (Exception e) {
             e.printStackTrace();
         }
+        printPerformance();
     }
 }
