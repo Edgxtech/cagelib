@@ -284,7 +284,7 @@ public class KmlFileStaticHelpers {
                 {
                     double[] point = (double[])circlePoints.next();
 
-                    cepCircleCoords.appendChild(doc.createTextNode(point[1]+","+point[0]+",0 \n"));
+                    cepCircleCoords.appendChild(doc.createTextNode(point[1]+","+point[0]+",10 \n"));
                 }
                 cepOuterRing.appendChild(cepCircleCoords);
 

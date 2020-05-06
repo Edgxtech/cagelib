@@ -64,6 +64,15 @@ public class Observation {
 
     Boolean crossed_border;
 
+    /* Should be capped at no more than the rand_factor, expressed in utm units
+     * May expect sensors to report dynamic measurement errors, otherwise defaults
+     * in application.properties should be used.
+     * units are in utm. [1 utm equates to 10000m].
+     * Guide: TDOA: 0.000005 [ms] == 1500 DDOA [m] == 0.15 [utm]
+     * Guide: AOA: 0.2 [radians] == 202.71[m] == 0.020271 [utm] (Assuming AOA are to targets @1000m; val = tan(0.2)*1000)
+     * Guide: Range: 100 [m] == 0.01 [utm] */
+    Double meas_error;
+
     public Observation(Long id, String assetId, double lat, double lon) {
         this.id = id;
         this.assetId = assetId;
@@ -229,5 +238,13 @@ public class Observation {
 
     public void setCrossed_border(Boolean crossed_border) {
         this.crossed_border = crossed_border;
+    }
+
+    public Double getMeas_error() {
+        return meas_error;
+    }
+
+    public void setMeas_error(Double meas_error) {
+        this.meas_error = meas_error;
     }
 }

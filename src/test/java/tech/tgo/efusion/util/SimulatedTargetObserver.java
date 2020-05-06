@@ -63,12 +63,20 @@ public class SimulatedTargetObserver extends TimerTask {
                         assetToObservationIdMapping.put(asset.getId()+"_"+ObservationType.range.name(),obsId);
                     }
                     //double meas_range = Math.sqrt(Math.pow(a_y-true_y,2) + Math.pow(a_x-true_x,2)) + Math.random()*range_rand_factor; orig
-                    double meas_range = ObservationTestHelpers.getRangeMeasurement(a_y, a_x, true_y, true_x, range_rand_factor);
+                    double meas_range = ObservationTestHelpers.getRandomRangeMeasurement(a_y, a_x, true_y, true_x, range_rand_factor);
                     log.debug("Asset: "+asset.getId()+", Meas range: " + meas_range);
 
                     Observation obs = new Observation(obsId, asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
                     obs.setMeas(meas_range);
                     obs.setObservationType(ObservationType.range);
+                    if (range_rand_factor==0.0) {
+                        obs.setMeas_error(Helpers.SMALL_DEFAULT_RANGE_MEAS_ERROR); // Force it to use default meas error
+                    }
+                    else {
+                        obs.setMeas_error(range_rand_factor / 10000); // units are in utm. [1 utm equates to 10000m]
+                        // TEMP TEST OVERRIDE
+                        obs.setMeas_error(0.2);
+                    }
                     efusionProcessManager.addObservation(obs);
                 }
 
@@ -87,7 +95,7 @@ public class SimulatedTargetObserver extends TimerTask {
                         double b_y = utm_coords[0];
                         double b_x = utm_coords[1];
 
-                        double meas_tdoa = ObservationTestHelpers.getTdoaMeasurement(a_y, a_x, b_y, b_x, true_y, true_x, tdoa_rand_factor);
+                        double meas_tdoa = ObservationTestHelpers.getRandomTdoaMeasurement(a_y, a_x, b_y, b_x, true_y, true_x, tdoa_rand_factor);
                         log.debug("Asset: "+asset.getId()+", 2nd Asset: "+secondary_asset_id+", Meas tdoa: "+meas_tdoa);
 
                         Observation obs_c = new Observation(obsId, asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
@@ -96,6 +104,17 @@ public class SimulatedTargetObserver extends TimerTask {
                         obs_c.setLon_b(asset1.getCurrent_loc()[1]);
                         obs_c.setMeas(meas_tdoa); // tdoa in seconds
                         obs_c.setObservationType(ObservationType.tdoa);
+                        /* Should be capped at no more than the rand_factor, expressed in utm units
+                        *  May expect sensors to report dynamic measurement errors,
+                        *  for sim use the upper limit assuming full measurement error */
+                        if (tdoa_rand_factor==0.0) {
+                            obs_c.setMeas_error(Helpers.SMALL_DEFAULT_TDOA_MEAS_ERROR); // Force it to use default meas error
+                        }
+                        else {
+                            obs_c.setMeas_error(tdoa_rand_factor * Helpers.SPEED_OF_LIGHT / 10000); // units are in utm. [1 utm equates to 10000m]
+                            // TEMP TEST OVERRIDE
+                            obs_c.setMeas_error(0.2);
+                        }
                         efusionProcessManager.addObservation(obs_c);
                     }
                 }
@@ -107,12 +126,20 @@ public class SimulatedTargetObserver extends TimerTask {
                         obsId = new Random().nextLong();
                         assetToObservationIdMapping.put(asset.getId()+"_"+ObservationType.aoa.name(),obsId);
                     }
-                    double meas_aoa = ObservationTestHelpers.getAoaMeasurement(a_y, a_x, true_y, true_x, aoa_rand_factor);
+                    double meas_aoa = ObservationTestHelpers.getRandomAoaMeasurement(a_y, a_x, true_y, true_x, aoa_rand_factor);
                     log.debug("Asset: "+asset.getId()+", Meas AOA: "+meas_aoa);
 
                     Observation obs_d = new Observation(obsId,asset.getId(), asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
                     obs_d.setMeas(meas_aoa); // aoa in radians
                     obs_d.setObservationType(ObservationType.aoa);
+                    if (aoa_rand_factor==0.0) {
+                        obs_d.setMeas_error(Helpers.SMALL_DEFAULT_AOA_MEAS_ERROR); // Force it to use default meas error
+                    }
+                    else {
+                        obs_d.setMeas_error(Math.tan(aoa_rand_factor) * 1000 / 10000); // Assuming target is at 1000m. Units are in utm. [1 utm equates to 10000m]
+                        // TEMP TEST OVERRIDE
+                        obs_d.setMeas_error(0.2);
+                    }
                     efusionProcessManager.addObservation(obs_d);
                 }
             }

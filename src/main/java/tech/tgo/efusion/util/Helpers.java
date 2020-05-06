@@ -10,6 +10,12 @@ public class Helpers {
 
     public static int SPEED_OF_LIGHT = 299792458; // [m/s]
 
+    /* Measurement errors, default, used for unrealistic no-sim-error scenarios, need at least a small amount of error to function */
+    public static double SMALL_DEFAULT_RANGE_MEAS_ERROR = 0.01;
+    public static double SMALL_DEFAULT_TDOA_MEAS_ERROR = 0.1;
+    public static double SMALL_DEFAULT_AOA_MEAS_ERROR = 0.01;
+
+
     /*  Convert lat/lon to UTM northing/easting
     /*  - Filter operates in UTM format coords
     /*  - Returns Northing,Easting
@@ -52,11 +58,6 @@ public class Helpers {
             RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
             EigenDecomposition eig = new EigenDecomposition(J2);
             double[] evaluesC = eig.getRealEigenvalues();
-            log.debug("#4 E-values: "+evaluesC[0]+","+evaluesC[1]);
-            double[] evectorC = eig.(covMatrix, largestEvalue);
-            log.debug("#1 E-vector: "+evector[0]+","+evector[1]);
-            RealMatrix V = eig.getV();
-            RealMatrix D = eig.getD();
          */
     }
     public static double[] getEigenvector(double[][] matrix, double eigenvalue) {

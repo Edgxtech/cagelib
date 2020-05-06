@@ -7,9 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.EfusionProcessManager;
-import tech.tgo.efusion.model.GeoMission;
-import tech.tgo.efusion.model.MissionMode;
-import tech.tgo.efusion.model.Target;
+import tech.tgo.efusion.model.*;
 import tech.tgo.efusion.util.ConfigurationException;
 import tech.tgo.efusion.util.Helpers;
 import tech.tgo.efusion.util.SimulatedTargetObserver;
@@ -26,6 +24,7 @@ import java.util.Map;
 public class FundamentalConvergenceTests_1 implements EfusionListener {
 
     private static final Logger log = LoggerFactory.getLogger(tech.tgo.efusion.fix.AllObservationFixITs.class);
+    private static final Logger test_output_log = LoggerFactory.getLogger("test_output");
 
     Map<String,GeoMission> missionsMap = new HashMap<String,GeoMission>();
 
@@ -143,6 +142,24 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         ATEStats.addValue(ate_value);
 
         log.debug("ATE following test: "+ ATEStats.getMean()+", StdDev: "+ATEStats.getStandardDeviation());
+
+        /* PRINT RESULTS IN T&E REPORT RESULTS FORMAT - check /var/log/efusionlib/efusionlib_testoutput.log */
+        test_output_log.debug("------------------------------------------");
+        GeoMission geoMission = efusionProcessManager.getGeoMission();
+        test_output_log.debug("Assets:");
+        for (Asset asset : geoMission.getAssets().values()) {
+            test_output_log.debug(asset.getId()+": "+asset.getCurrent_loc()[0]+","+asset.getCurrent_loc()[1]);
+        }
+        test_output_log.debug("\nTarget:\n"+geoMission.getTarget().getTrue_current_loc()[0]+","+geoMission.getTarget().getTrue_current_loc()[1]);
+        test_output_log.debug("\nTechnique Params:");
+        test_output_log.debug("Qu: "+geoMission.getFilterProcessNoise()[0][0]);
+        test_output_log.debug("\nMeasurements:");
+        for (Observation obs : geoMission.getObservations().values()) {
+            test_output_log.debug(obs.getAssetId()+"_"+obs.getObservationType().name()+": "+obs.getMeas()+" +-"+obs.getMeas_error());
+        }
+
+        test_output_log.debug("\nLat: "+geoMission.getTarget().getCurrent_loc()[0]+"\nLon: "+geoMission.getTarget().getCurrent_loc()[1]+"\nCEP major: "+geoMission.getTarget().getElp_major()+"\nCEP minor: "+geoMission.getTarget().getElp_minor()+"\nCEP rotation: "+geoMission.getTarget().getElp_rot());
+        test_output_log.debug("ATE: "+ATEStats.getMean());
     }
 
     @Test
@@ -155,6 +172,7 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         {{
             put(asset_a.getId(), asset_a);
         }};
+
         simulatedTargetObserver.setTestAssets(assets);
         simulatedTargetObserver.run();
 
@@ -325,7 +343,7 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         printPerformance();
     }
 
-    @Test
+    @Test // doesnt seem to work
     public void test124() {
         /* 1.2.4 Converge to TDOA, TDOA */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT

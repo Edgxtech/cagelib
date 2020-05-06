@@ -405,7 +405,7 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
     }
 
 
-    @Test
+    @Test // Occasionally fails to calculate a minor CEP length
     public void test231() {
         /* 2.3.1 Converge to AOA, TDOA, Range */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT

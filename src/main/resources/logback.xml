@@ -23,6 +23,16 @@
         </encoder>
     </appender>
 
+    <!-- Specifically to output test data -->
+    <appender name="TEST_OUTPUT_FILE"
+              class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/efusionlib/efusionlib_testoutput.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
     <logger name="tech.tgo.efusion" level="DEBUG" />
     <logger name="tech.tgo.efusion.compute.ComputeProcessor" level="DEBUG" />
 
@@ -33,5 +43,11 @@
     <root level="INFO">
         <appender-ref ref="FILE" />
     </root>
+
+
+    <!-- additivity=false ensures testoutput data only goes to the testoutput log -->
+    <logger name="test_output" level="DEBUG" additivity="false">
+        <appender-ref ref="TEST_OUTPUT_FILE"/>
+    </logger>
 
 </configuration>

@@ -9,6 +9,8 @@ import tech.tgo.efusion.util.EfusionValidator;
 import tech.tgo.efusion.util.Helpers;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
+
+import java.beans.PropertyChangeEvent;
 import java.io.*;
 import java.util.*;
 
@@ -67,6 +69,96 @@ public class EfusionProcessManager implements Serializable {
     public void addObservation(Observation obs) throws Exception {
         EfusionValidator.validate(obs);
 
+//        /* Set previous measurement here, if this is a repeated measurement */
+//        if (this.getGeoMission().getObservations().get(obs.getId()) != null) {
+//            Observation prev_obs = this.getGeoMission().getObservations().get(obs.getId());
+//            if (prev_obs.getMeas()!=null) {
+//                log.trace("Setting previous observation for: "+prev_obs.getId()+", type: "+prev_obs.getObservationType().name()+", as: "+prev_obs.getMeas());
+//                obs.setMeas_prev(prev_obs.getMeas());
+//            }
+//        }
+//
+//        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+","+obs.getMeas()+",ID:"+obs.getId());
+//        this.geoMission.getObservations().put(obs.getId(), obs);
+//
+//        Object[] zones = Helpers.getUtmLatZoneLonZone(obs.getLat(), obs.getLon());
+//        obs.setY_latZone((char)zones[0]);
+//        obs.setX_lonZone((int)zones[1]);
+//
+//        /* Rudimentary - use zones attached to the most recent observation */
+//        this.geoMission.setLatZone(obs.getY_latZone());
+//        this.geoMission.setLonZone(obs.getX_lonZone());
+//
+//        double[] utm_coords = Helpers.convertLatLngToUtmNthingEasting(obs.getLat(), obs.getLon());
+//        obs.setY(utm_coords[0]);
+//        obs.setX(utm_coords[1]);
+//        log.debug("Asset:"+obs.getY()+","+obs.getX());
+//
+//        Asset asset = new Asset(obs.getAssetId(),new double[]{obs.getLat(),obs.getLon()});
+//        this.geoMission.getAssets().put(obs.getAssetId(),asset);
+
+        /* Enrich the base image further, required for filter operation */
+        configureObservation(obs);
+
+        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+","+obs.getMeas()+",ID:"+obs.getId());
+        this.geoMission.getObservations().put(obs.getId(), obs);
+
+        /* Update the live observations - if a 'tracking' mission type */
+        if (computeProcessor !=null && computeProcessor.isRunning()) {
+            log.trace("Algorithm was running, will update observations list for tracking mode runs only");
+            if (this.geoMission.getMissionMode().equals(MissionMode.track)) {
+                // TEMP REMOVED TO FIX BUG
+//                log.trace("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
+//                computeProcessor.setObservations(this.geoMission.observations);
+            }
+            else {
+                log.debug("Not adding this OBSERVATION to filter since is configured to produce a single FIX, run again with different observations");
+            }
+        }
+        else {
+            log.debug("Algorithm was not running, observation will be available for future runs");
+        }
+    }
+
+    public void stop() throws Exception {
+        computeProcessor.stopThread();
+    }
+
+    /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
+    /* For Fixer - add observations (one per asset) then start, monitor output in result() callback */
+    public Thread start() throws Exception {
+        Iterator it = this.geoMission.observations.values().iterator();
+        if (!it.hasNext() && this.geoMission.getMissionMode().equals(MissionMode.fix)) {
+            throw new ConfigurationException("There were no observations, couldn't start the process");
+        }
+
+        computeProcessor = new ComputeProcessorAL1(this.actionListener, this.geoMission.observations, this.geoMission);
+
+        Thread thread = new Thread(computeProcessor);
+        thread.start();
+
+        return thread;
+    }
+
+    public GeoMission getGeoMission() {
+        return geoMission;
+    }
+
+    public void configureObservation(Observation obs) throws Exception {
+        Properties properties = this.geoMission.getProperties();
+//        Properties properties = new Properties();
+//        String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";
+//        try {
+//            properties.load(new FileInputStream(appConfigPath));
+//            this.geoMission.setProperties(properties);
+//        }
+//        catch(IOException ioe) {
+//            log.error(ioe.getMessage());
+//            ioe.printStackTrace();
+//            log.error("Error reading application properties");
+//            throw new ConfigurationException("Trouble loading common application properties, reinstall the application");
+//        }
+
         /* Set previous measurement here, if this is a repeated measurement */
         if (this.getGeoMission().getObservations().get(obs.getId()) != null) {
             Observation prev_obs = this.getGeoMission().getObservations().get(obs.getId());
@@ -76,8 +168,9 @@ public class EfusionProcessManager implements Serializable {
             }
         }
 
-        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+","+obs.getMeas()+",ID:"+obs.getId());
-        this.geoMission.getObservations().put(obs.getId(), obs);
+        // MOVED UP
+//        log.debug("Adding observation: "+obs.getAssetId()+","+obs.getObservationType().name()+","+obs.getMeas()+",ID:"+obs.getId());
+//        this.geoMission.getObservations().put(obs.getId(), obs);
 
         Object[] zones = Helpers.getUtmLatZoneLonZone(obs.getLat(), obs.getLon());
         obs.setY_latZone((char)zones[0]);
@@ -103,6 +196,31 @@ public class EfusionProcessManager implements Serializable {
 
             Asset asset_b = new Asset(obs.getAssetId_b(),new double[]{obs.getLat_b(),obs.getLon_b()});
             this.geoMission.getAssets().put(obs.getAssetId_b(),asset_b);
+        }
+
+        /* Extract default measurement error if not provided with observation */
+        if (obs.getMeas_error()==null) {
+            if (obs.getObservationType().equals(ObservationType.range)) {
+                if (properties.getProperty("ekf.filter.default.range.meas_error") != null && !properties.getProperty("ekf.filter.default.range.meas_error").isEmpty()) {
+                    obs.setMeas_error(new Double(properties.getProperty("ekf.filter.default.range.meas_error")));
+                } else {
+                    throw new ConfigurationException("No range meas error specified");
+                }
+            }
+            else if (obs.getObservationType().equals(ObservationType.aoa)) {
+                if (properties.getProperty("ekf.filter.default.aoa.meas_error") != null && !properties.getProperty("ekf.filter.default.aoa.meas_error").isEmpty()) {
+                    obs.setMeas_error(new Double(properties.getProperty("ekf.filter.default.aoa.meas_error")));
+                } else {
+                    throw new ConfigurationException("No aoa meas error specified");
+                }
+            }
+            else if (obs.getObservationType().equals(ObservationType.tdoa)) {
+                if (properties.getProperty("ekf.filter.default.tdoa.meas_error") != null && !properties.getProperty("ekf.filter.default.tdoa.meas_error").isEmpty()) {
+                    obs.setMeas_error(new Double(properties.getProperty("ekf.filter.default.tdoa.meas_error")));
+                } else {
+                    throw new ConfigurationException("No tdoa meas error specified");
+                }
+            }
         }
 
         if (this.geoMission.getShowMeas()) {
@@ -162,45 +280,7 @@ public class EfusionProcessManager implements Serializable {
             }
         }
 
-        /* Update the live observations - if a 'tracking' mission type */
-        if (computeProcessor !=null && computeProcessor.isRunning()) {
-            log.trace("Algorithm was running, will update observations list for tracking mode runs only");
-            if (this.geoMission.getMissionMode().equals(MissionMode.track)) {
-                // TEMP REMOVED TO FIX BUG
-//                log.trace("Setting OBSERVATIONS in the filter, new size: "+this.geoMission.observations.size());
-//                computeProcessor.setObservations(this.geoMission.observations);
-            }
-            else {
-                log.debug("Not adding this OBSERVATION to filter since is configured to produce a single FIX, run again with different observations");
-            }
-        }
-        else {
-            log.debug("Algorithm was not running, observation will be available for future runs");
-        }
-    }
-
-    public void stop() throws Exception {
-        computeProcessor.stopThread();
-    }
-
-    /* For Tracker - start process and continually add new observations (one per asset), monitor result in result() callback */
-    /* For Fixer - add observations (one per asset) then start, monitor output in result() callback */
-    public Thread start() throws Exception {
-        Iterator it = this.geoMission.observations.values().iterator();
-        if (!it.hasNext() && this.geoMission.getMissionMode().equals(MissionMode.fix)) {
-            throw new ConfigurationException("There were no observations, couldn't start the process");
-        }
-
-        computeProcessor = new ComputeProcessorAL1(this.actionListener, this.geoMission.observations, this.geoMission);
-
-        Thread thread = new Thread(computeProcessor);
-        thread.start();
-
-        return thread;
-    }
-
-    public GeoMission getGeoMission() {
-        return geoMission;
+        log.debug("Configured Observation");
     }
 
     public void configure(GeoMission geoMission) throws Exception {
@@ -208,9 +288,10 @@ public class EfusionProcessManager implements Serializable {
 
         EfusionValidator.validate(geoMission);
 
+        // MOVED TO BELOW
         /* Uses defaults - overridden by some implementations (required for pur tdoa processing) */
         //geoMission.setFilterProcessNoise(new double[][]{{0.01, 0, 0, 0}, {0, 0.01 ,0, 0}, {0, 0, 0.01, 0}, {0, 0, 0 ,0.01}});  // 4x4 for AL0 engine
-        geoMission.setFilterProcessNoise(new double[][]{{0.01, 0}, {0, 0.01}});
+        //geoMission.setFilterProcessNoise(new double[][]{{0.01, 0}, {0, 0.01}});
 
         Properties properties = new Properties();
         String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "application.properties";
@@ -235,6 +316,17 @@ public class EfusionProcessManager implements Serializable {
             log.debug("Creating new kml output file as: "+ properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
             File kmlFilterStateOutput = new File(properties.getProperty("working.directory")+"output/"+geoMission.getOutputFilterStateKmlFilename());
             kmlFilterStateOutput.createNewFile();
+        }
+
+        /* Extract filter process noise */
+        if (geoMission.getFilterProcessNoise()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.process_noise") != null && !geoMission.getProperties().getProperty("ekf.filter.default.process_noise").isEmpty()) {
+                double process_noise = Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.process_noise"));
+                geoMission.setFilterProcessNoise(new double[][]{{process_noise, 0}, {0, process_noise}});
+            }
+            else {
+                throw new ConfigurationException("No filter process noise specified");
+            }
         }
 
         /* Extract results dispatch period */
@@ -279,44 +371,44 @@ public class EfusionProcessManager implements Serializable {
             }
         }
 
-        /* Extract filter measurement error setting */
-        if (geoMission.getFilterMeasurementError()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.measurement.error") != null && !geoMission.getProperties().getProperty("ekf.filter.default.measurement.error").isEmpty()) {
-                geoMission.setFilterMeasurementError(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.measurement.error")));
-            }
-            else {
-                throw new ConfigurationException("No filter measurement error specified");
-            }
-        }
+        /* Extract filter measurement error setting */ //-- DEPRECATED, applies to each meas type
+//        if (geoMission.getFilterMeasurementError()==null) {
+//            if (geoMission.getProperties().getProperty("ekf.filter.default.measurement.error") != null && !geoMission.getProperties().getProperty("ekf.filter.default.measurement.error").isEmpty()) {
+//                geoMission.setFilterMeasurementError(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.measurement.error")));
+//            }
+//            else {
+//                throw new ConfigurationException("No filter measurement error specified");
+//            }
+//        }
 
-        /* Extract filter bias settings */
-        if (geoMission.getFilterAOABias()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias").isEmpty()) {
-                geoMission.setFilterAOABias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias")));
-            }
-            else {
-                throw new ConfigurationException("No filter aoa bias specified");
-            }
-        }
-
-        /* Extract filter bias settings */
-        if (geoMission.getFilterTDOABias()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias").isEmpty()) {
-                geoMission.setFilterTDOABias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias")));
-            }
-            else {
-                throw new ConfigurationException("No filter tdoa bias specified");
-            }
-        }
-
-        /* Extract filter bias settings */
-        if (geoMission.getFilterRangeBias()==null) {
-            if (geoMission.getProperties().getProperty("ekf.filter.default.range.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.range.bias").isEmpty()) {
-                geoMission.setFilterRangeBias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.range.bias")));
-            }
-            else {
-                throw new ConfigurationException("No filter range bias specified");
-            }
-        }
+        /* Extract filter bias settings */ // DEPRECATED
+//        if (geoMission.getFilterAOABias()==null) {
+//            if (geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias").isEmpty()) {
+//                geoMission.setFilterAOABias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.aoa.bias")));
+//            }
+//            else {
+//                throw new ConfigurationException("No filter aoa bias specified");
+//            }
+//        }
+//
+//        /* Extract filter bias settings */
+//        if (geoMission.getFilterTDOABias()==null) {
+//            if (geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias").isEmpty()) {
+//                geoMission.setFilterTDOABias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.tdoa.bias")));
+//            }
+//            else {
+//                throw new ConfigurationException("No filter tdoa bias specified");
+//            }
+//        }
+//
+//        /* Extract filter bias settings */
+//        if (geoMission.getFilterRangeBias()==null) {
+//            if (geoMission.getProperties().getProperty("ekf.filter.default.range.bias") != null && !geoMission.getProperties().getProperty("ekf.filter.default.range.bias").isEmpty()) {
+//                geoMission.setFilterRangeBias(Double.parseDouble(geoMission.getProperties().getProperty("ekf.filter.default.range.bias")));
+//            }
+//            else {
+//                throw new ConfigurationException("No filter range bias specified");
+//            }
+//        }
     }
 }
