@@ -12,15 +12,14 @@ import tech.tgo.efusion.util.KmlFileStaticHelpers;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * Extended Kalman Filter Fusion Processor
  * @author Timothy Edge (timmyedge)
  */
-public class ComputeProcessorAL1 implements Runnable {
+public class ComputeProcessorAL0_1 implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(ComputeProcessorAL1.class);
+    private static final Logger log = LoggerFactory.getLogger(ComputeProcessorAL0_1.class);
 
     private EfusionListener efusionListener;
 
@@ -63,18 +62,61 @@ public class ComputeProcessorAL1 implements Runnable {
 
     KmlFileHelpers kmlFileHelpers = null;
 
-    List<FilterExecution> filterExecutions = null;
-
     /*
      * Create processor for the given config, observations and client implemented listener
      */
-    public ComputeProcessorAL1(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
+    public ComputeProcessorAL0_1(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
     {
         this.efusionListener = efusionListener;
         this.geoMission = geoMission;
 
         setObservations(observations);
         initialiseFilter();
+    }
+
+    public void initialiseFilter() {
+//        double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}}; DEPRECATED
+//        Rk = new Array2DRowRealMatrix(measurementNoiseData);
+
+        double[][] procNoiseData = geoMission.getFilterProcessNoise();
+        Qu = new Array2DRowRealMatrix(procNoiseData);
+
+        /* Initialise filter state */
+        double[] start_x_y;
+        if (this.geoMission.getFilterUseSpecificInitialCondition()!=null && this.geoMission.getFilterUseSpecificInitialCondition()) {
+            double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(this.geoMission.getFilterSpecificInitialLat(), this.geoMission.getFilterSpecificInitialLon());
+            start_x_y = new double[]{asset_utm[1], asset_utm[0]};
+            log.debug("Using SPECIFIC initial condition: "+this.geoMission.getFilterSpecificInitialLat()+", "+this.geoMission.getFilterSpecificInitialLon()+" ["+start_x_y[1]+", "+start_x_y[0]+"]");
+        }
+        else {
+            List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
+            if (assetList.size() > 1) {
+                Random rand = new Random();
+                Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
+                assetList.remove(randAssetA);
+                Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
+                //log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
+                start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random() - 0.5) * 100000);
+                log.debug("Using RANDOM initial condition: near asset(s) ['"+randAssetA.getId() + "' & '" + randAssetB.getId()+"']: "+start_x_y[1]+", "+start_x_y[0]);
+
+                log.debug("Dist between assets: "+Math.sqrt(Math.pow(randAssetA.getCurrent_loc()[0] - randAssetB.getCurrent_loc()[0], 2) + Math.pow(randAssetA.getCurrent_loc()[1] - randAssetB.getCurrent_loc()[1], 2)));
+            } else {
+                Asset asset = assetList.get(0);
+                double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+                start_x_y = new double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
+                log.debug("Using RANDOM initial condition: near asset ["+asset.getId()+"]: "+start_x_y[1]+", "+start_x_y[0]);
+            }
+        }
+
+        log.debug("Filter start state: "+start_x_y[0]+","+start_x_y[1]);
+        double[] initStateData = {start_x_y[0], start_x_y[1]};
+
+        RealVector Xinit = new ArrayRealVector(initStateData);
+        Xk = Xinit;
+        Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
+
+        log.trace("Initialising Stage Observations as current observations, #: "+this.geoMission.observations.size());
+        setStaged_observations(this.geoMission.observations);
     }
 
     public void setObservations(Map<Long, Observation> observations) {
@@ -97,129 +139,8 @@ public class ComputeProcessorAL1 implements Runnable {
         this.observations = sortedByValue;
     }
 
-    public void initialiseFilter() {
-//        double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}}; DEPRECATED
-//        Rk = new Array2DRowRealMatrix(measurementNoiseData);
-
-        double[][] procNoiseData = geoMission.getFilterProcessNoise();
-        Qu = new Array2DRowRealMatrix(procNoiseData);
-
-        /* Initialise filter state */
-        filterExecutions = new ArrayList<FilterExecution>();
-        Double[] start_x_y;
-        // Specific Initial State
-        if (geoMission.getInitialStateMode().equals(InitialStateMode.specified)) {
-
-            //if (this.geoMission.getFilterUseSpecificInitialCondition()!=null && this.geoMission.getFilterUseSpecificInitialCondition()) {
-            double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(this.geoMission.getFilterSpecificInitialLat(), this.geoMission.getFilterSpecificInitialLon());
-            start_x_y = new Double[]{asset_utm[1], asset_utm[0]};
-            log.debug("Using SPECIFIC initial condition: "+this.geoMission.getFilterSpecificInitialLat()+", "+this.geoMission.getFilterSpecificInitialLon()+" ["+start_x_y[1]+", "+start_x_y[0]+"]");
-            filterExecutions.add(new FilterExecution(start_x_y));
-        }
-        // Random Initial State
-        else if (geoMission.getInitialStateMode().equals(InitialStateMode.random)){
-            List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
-            if (assetList.size() > 1) {
-                Random rand = new Random();
-                Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
-                assetList.remove(randAssetA);
-                Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
-                //log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
-                start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random() - 0.5) * 100000);
-                log.debug("Using RANDOM initial condition: near asset(s) ['"+randAssetA.getId() + "' & '" + randAssetB.getId()+"']: "+start_x_y[1]+", "+start_x_y[0]);
-
-                log.debug("Dist between assets: "+Math.sqrt(Math.pow(randAssetA.getCurrent_loc()[0] - randAssetB.getCurrent_loc()[0], 2) + Math.pow(randAssetA.getCurrent_loc()[1] - randAssetB.getCurrent_loc()[1], 2)));
-            } else {
-                Asset asset = assetList.get(0);
-                double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
-                start_x_y = new Double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
-                log.debug("Using RANDOM initial condition: near asset ["+asset.getId()+"]: "+start_x_y[1]+", "+start_x_y[0]);
-            }
-            filterExecutions.add(new FilterExecution(start_x_y));
-        }
-        else if (geoMission.getInitialStateMode().equals(InitialStateMode.specified_box_corner)) {
-            Double[] cornerLatLon = getCornerLatLon(geoMission.getFilterSpecificInitialBoxCorner(), geoMission.getAssets().values());
-            if (cornerLatLon==null) {
-                log.error("Error getting corner lat lon for corner: "+geoMission.getFilterSpecificInitialBoxCorner());
-            }
-            filterExecutions.add(new FilterExecution(cornerLatLon));
-        }
-        else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_single_out)) {
-            // Use all corners, iterate until first result and exit
-            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
-            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
-            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
-            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
-
-            // TODO, need to send a signal that it should exit once found
-        }
-        else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_all_out)) {
-            // use all corners, report all results
-
-            // TODO, need to send a signal that it should explore all box corners
-
-            //filterExecutions.add(new FilterExecution(start_x_y));
-        }
-
-        log.debug("# Filter Executions: "+ filterExecutions.size());
-        for (FilterExecution filterExecution : filterExecutions) {
-            log.debug("Start State: "+ filterExecution.getLatlon()[0]+","+ filterExecution.getLatlon()[1]);
-        }
-        //log.debug("Filter start state: "+start_x_y[0]+","+start_x_y[1]);
-        //double[] initStateData = start_x_y; //{start_x_y[0], start_x_y[1]};
-
-        // MOVED to runExecution
-//        RealVector Xinit = new ArrayRealVector(start_x_y);
-//        Xk = Xinit;
-//        Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
-
-        log.trace("Initialising Stage Observations as current observations, #: "+this.geoMission.observations.size());
-        setStaged_observations(this.geoMission.observations);
-    }
-
-    public Double[] getCornerLatLon(InitialStateBoxCorner corner, Collection<Asset> assets) {
-        double standardUTMOffset = 5000;
-        List<Double> lats = new ArrayList<Double>();
-        List<Double> lons = new ArrayList<Double>();
-        for (Asset asset : assets) {
-            lats.add(asset.getCurrent_loc()[0]);
-            lons.add(asset.getCurrent_loc()[1]);
-        }
-        if (corner.equals(InitialStateBoxCorner.TOP_RIGHT)) {
-            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.max(lons) + standardUTMOffset};
-        }
-        else if (corner.equals(InitialStateBoxCorner.BOTTOM_RIGHT)) {
-            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.max(lons) + standardUTMOffset};
-        }
-        else if (corner.equals(InitialStateBoxCorner.BOTTOM_LEFT)) {
-            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.min(lons) - standardUTMOffset};
-        }
-        else if (corner.equals(InitialStateBoxCorner.TOP_LEFT)) {
-            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.min(lons) - standardUTMOffset};
-        }
-        else {
-            return null;
-        }
-    }
-
-    public void run() {
-        // Run each execution
-        int j=0;
-        for (FilterExecution filterExecution : filterExecutions) {
-            log.debug("Running execution: "+j+" / "+filterExecutions.size());
-            runExecution(filterExecution);
-            j++;
-        }
-    }
-
-    public void runExecution(FilterExecution filterExecution)
+    public void run()
     {
-        // Set Xk,Pk
-        RealVector Xinit = new ArrayRealVector(filterExecution.getLatlon());
-        Xk = Xinit;
-        Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
-
-
         log.info("Running for # observations:"+observations.size());
         if (observations.size()==0) {
             log.info("No observations returning");
@@ -249,11 +170,7 @@ public class ComputeProcessorAL1 implements Runnable {
         //     support mode where it can box until getting first result.
         //     support mode where it can simply just run from preconfigured box corner and if fails then too bad, dont get a result.
 
-        // init conditions modes: random, specified, specified box corner, box single output, box all output
-
-        //this should now be, for specified number of iterations
-        //while(true)
-        for (int k=0;k<this.geoMission.getMaxFilterIterations();k++)
+        while(true)
         {
             if (!running.get()) {
                 log.debug("Thread was stopped");
@@ -542,10 +459,7 @@ public class ComputeProcessorAL1 implements Runnable {
                     log.trace("Residual not low enough to export result: "+residual);
                 }
             }
-        } // End for number of iterations
-        dispatchResult(Xk);
-
-        log.debug("Finished "+this.geoMission.getMaxFilterIterations()+", for this Execution");
+        }
     }
 
     public RealMatrix recalculateH(double x_rssi, double y_rssi, double Xk1, double Xk2) {
@@ -585,7 +499,7 @@ public class ComputeProcessorAL1 implements Runnable {
         return H;
     }
 
-    public Double[] findRudimentaryStartPoint(Asset asset_a, Asset asset_b, double addition) {
+    public double[] findRudimentaryStartPoint(Asset asset_a, Asset asset_b, double addition) {
         double x_init=0; double y_init=0;
         double[] asset_a_utm = Helpers.convertLatLngToUtmNthingEasting(asset_a.getCurrent_loc()[0],asset_a.getCurrent_loc()[1]);
         double[] asset_b_utm = Helpers.convertLatLngToUtmNthingEasting(asset_b.getCurrent_loc()[0],asset_b.getCurrent_loc()[1]);
@@ -601,7 +515,15 @@ public class ComputeProcessorAL1 implements Runnable {
             x_init = x_init + (x_init - x_n) / 2;
             y_init = y_init + (y_init - y_n) / 2;
         }
-        return new Double[]{x_init,y_init};
+        return new double[]{x_init,y_init};
+    }
+
+    public boolean isRunning() {
+        return this.running.get();
+    }
+
+    public void stopThread() {
+        this.running.set(false);
     }
 
     public void dispatchResult(RealVector Xk) {
@@ -662,15 +584,13 @@ public class ComputeProcessorAL1 implements Runnable {
         Xk = Xinit;
     }
 
+    public void resetCovariances(){
+        log.debug("Resetting covariances, from: "+Pk);
+        Pk = Pinit.scalarMultiply(1000.0);
+        log.debug("Resetting covariances, to: "+Pk);
+    }
+
     public synchronized void setStaged_observations(Map<Long, Observation> staged_observations) {
         this.staged_observations = staged_observations;
-    }
-
-    public boolean isRunning() {
-        return this.running.get();
-    }
-
-    public void stopThread() {
-        this.running.set(false);
     }
 }

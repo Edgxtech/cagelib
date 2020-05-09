@@ -34,11 +34,6 @@ public class GeoMission {
     Boolean showGEOs = false;
     Boolean showTrueLoc = false;
 
-    /* Allow specific conditions, otherwise default uses random conditions geographically nearby observing assets */
-    Boolean filterUseSpecificInitialCondition = null;
-    Double filterSpecificInitialLat = null;
-    Double filterSpecificInitialLon = null;
-
     /* Memory store of assets contributing to the mission */
     Map<String,Asset> assets = new HashMap<String,Asset>();
 
@@ -80,6 +75,19 @@ public class GeoMission {
     public Double filterTDOABias;
 
     public Double filterRangeBias;
+
+    public InitialStateMode initialStateMode;
+
+    /* Allow specific conditions, otherwise default uses random conditions geographically nearby observing assets */
+    //Boolean filterUseSpecificInitialCondition = null;  DEPRECATE IN FAVOUR OF INITIALSTATEMODES enum
+    // Options
+    Double filterSpecificInitialLat = null;
+    Double filterSpecificInitialLon = null;
+
+    /* 0=TR, 1=BR, 2=BL, 3=TL */
+    InitialStateBoxCorner filterSpecificInitialBoxCorner = null;
+
+    Long maxFilterIterations = null;
 
     public MissionMode getMissionMode() {
         return missionMode;
@@ -281,13 +289,13 @@ public class GeoMission {
         this.filterProcessNoise = filterProcessNoise;
     }
 
-    public Boolean getFilterUseSpecificInitialCondition() {
-        return filterUseSpecificInitialCondition;
-    }
-
-    public void setFilterUseSpecificInitialCondition(Boolean filterUseSpecificInitialCondition) {
-        this.filterUseSpecificInitialCondition = filterUseSpecificInitialCondition;
-    }
+//    public Boolean getFilterUseSpecificInitialCondition() {
+//        return filterUseSpecificInitialCondition;
+//    }
+//
+//    public void setFilterUseSpecificInitialCondition(Boolean filterUseSpecificInitialCondition) {
+//        this.filterUseSpecificInitialCondition = filterUseSpecificInitialCondition;
+//    }
 
     public Double getFilterSpecificInitialLat() {
         return filterSpecificInitialLat;
@@ -311,5 +319,29 @@ public class GeoMission {
 
     public void setFinished(Boolean finished) {
         this.finished = finished;
+    }
+
+    public InitialStateMode getInitialStateMode() {
+        return initialStateMode;
+    }
+
+    public void setInitialStateMode(InitialStateMode initialStateMode) {
+        this.initialStateMode = initialStateMode;
+    }
+
+    public Long getMaxFilterIterations() {
+        return maxFilterIterations;
+    }
+
+    public void setMaxFilterIterations(Long maxFilterIterations) {
+        this.maxFilterIterations = maxFilterIterations;
+    }
+
+    public InitialStateBoxCorner getFilterSpecificInitialBoxCorner() {
+        return filterSpecificInitialBoxCorner;
+    }
+
+    public void setFilterSpecificInitialBoxCorner(InitialStateBoxCorner filterSpecificInitialBoxCorner) {
+        this.filterSpecificInitialBoxCorner = filterSpecificInitialBoxCorner;
     }
 }

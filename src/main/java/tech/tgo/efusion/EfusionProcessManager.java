@@ -339,6 +339,16 @@ public class EfusionProcessManager implements Serializable {
             }
         }
 
+        /* Extract max filter iterations */
+        if (geoMission.getMaxFilterIterations()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.max_iterations") != null && !geoMission.getProperties().getProperty("ekf.filter.default.max_iterations").isEmpty()) {
+                geoMission.setMaxFilterIterations(new Long(properties.getProperty("ekf.filter.default.max_iterations")));
+            }
+            else {
+                throw new ConfigurationException("No dispatch results period specified");
+            }
+        }
+
         /* Extract throttle setting - NULL is allowed */
         if (geoMission.getFilterThrottle()==null) {
             if (geoMission.getProperties().getProperty("ekf.filter.default.throttle") != null) {
