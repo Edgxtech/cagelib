@@ -133,6 +133,7 @@ public class EfusionProcessManager implements Serializable {
         }
 
         computeProcessor = new ComputeProcessorAL1(this.actionListener, this.geoMission.observations, this.geoMission);
+        computeProcessor.initialiseFilter();
 
         Thread thread = new Thread(computeProcessor);
         thread.start();
@@ -346,6 +347,16 @@ public class EfusionProcessManager implements Serializable {
             }
             else {
                 throw new ConfigurationException("No dispatch results period specified");
+            }
+        }
+
+        /* Extract Initial State Mode */
+        if (geoMission.getInitialStateMode()==null) {
+            if (geoMission.getProperties().getProperty("ekf.filter.default.initial_state_mode") != null && !geoMission.getProperties().getProperty("ekf.filter.default.initial_state_mode").isEmpty()) {
+                geoMission.setInitialStateMode(InitialStateMode.valueOf(properties.getProperty("ekf.filter.default.initial_state_mode")));
+            }
+            else {
+                throw new ConfigurationException("No initial_state_mode specified");
             }
         }
 

@@ -331,8 +331,7 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         asset_a.setProvide_aoa(true);
         asset_b.setProvide_range(true);
 
-        //geoMission.setFilterUseSpecificInitialCondition(true);
-        // TODO, add initStateMode
+        geoMission.setInitialStateMode(InitialStateMode.specified);
         geoMission.setFilterSpecificInitialLat(-34.90);
         geoMission.setFilterSpecificInitialLon(138.0);
 

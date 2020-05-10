@@ -1,5 +1,7 @@
 package tech.tgo.efusion.model;
 
+import tech.tgo.efusion.compute.ComputeResults;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -85,9 +87,11 @@ public class GeoMission {
     Double filterSpecificInitialLon = null;
 
     /* 0=TR, 1=BR, 2=BL, 3=TL */
-    InitialStateBoxCorner filterSpecificInitialBoxCorner = null;
+    //InitialStateBoxCorner filterSpecificInitialBoxCorner = null;
 
     Long maxFilterIterations = null;
+
+    ComputeResults computeResults = null;
 
     public MissionMode getMissionMode() {
         return missionMode;
@@ -337,11 +341,19 @@ public class GeoMission {
         this.maxFilterIterations = maxFilterIterations;
     }
 
-    public InitialStateBoxCorner getFilterSpecificInitialBoxCorner() {
-        return filterSpecificInitialBoxCorner;
+//    public InitialStateBoxCorner getFilterSpecificInitialBoxCorner() {
+//        return filterSpecificInitialBoxCorner;
+//    }
+//
+//    public void setFilterSpecificInitialBoxCorner(InitialStateBoxCorner filterSpecificInitialBoxCorner) {
+//        this.filterSpecificInitialBoxCorner = filterSpecificInitialBoxCorner;
+//    }
+
+    public ComputeResults getComputeResults() {
+        return computeResults;
     }
 
-    public void setFilterSpecificInitialBoxCorner(InitialStateBoxCorner filterSpecificInitialBoxCorner) {
-        this.filterSpecificInitialBoxCorner = filterSpecificInitialBoxCorner;
+    public void setComputeResults(ComputeResults computeResults) {
+        this.computeResults = computeResults;
     }
 }

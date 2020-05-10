@@ -9,6 +9,7 @@ import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.EfusionProcessManager;
 import tech.tgo.efusion.compute.ComputeResults;
 import tech.tgo.efusion.model.GeoMission;
+import tech.tgo.efusion.model.InitialStateMode;
 import tech.tgo.efusion.model.MissionMode;
 import tech.tgo.efusion.model.Target;
 import tech.tgo.efusion.util.ConfigurationException;
@@ -308,14 +309,109 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
     public void test223a() {
         /* 2.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
+        // THIS shows that starting too far away, requires higher max filter iterations to get on target. Change to 1000 iterations to see
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
         asset_b.setProvide_range(true);
 
-        //geoMission.setFilterUseSpecificInitialCondition(true);  TODO, uncomment
+        geoMission.setInitialStateMode(InitialStateMode.specified);
         geoMission.setFilterSpecificInitialLat(-34.90);
         geoMission.setFilterSpecificInitialLon(138.0);
+        geoMission.setMaxFilterIterations(new Long(100000));
+
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void test223b() {
+        /* 2.2.3 Converge to AOA, Range */
+        // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
+        // Shows that TOP_LEFT/RIGHT converge wrong, BOTTOM_LEFT/RIGHT converge correct
+        simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
+        simulatedTargetObserver.setTrue_lon(138.596404);
+        asset_a.setProvide_aoa(true);
+        asset_b.setProvide_range(true);
+
+        geoMission.setInitialStateMode(InitialStateMode.bottom_right);
+        geoMission.setMaxFilterIterations(new Long(1000000));
+
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void test223c() {
+        /* 2.2.3 Converge to AOA, Range */
+        // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
+        // Shows that first identified solution is incorrect one, should have used box_all_out
+        simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
+        simulatedTargetObserver.setTrue_lon(138.596404);
+        asset_a.setProvide_aoa(true);
+        asset_b.setProvide_range(true);
+
+        geoMission.setInitialStateMode(InitialStateMode.box_single_out);
+        geoMission.setMaxFilterIterations(new Long(100000));
+
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void test223d() {
+        /* 2.2.3 Converge to AOA, Range */
+        // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
+        // Shows that all results are obtained.
+        simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
+        simulatedTargetObserver.setTrue_lon(138.596404);
+        asset_a.setProvide_aoa(true);
+        asset_b.setProvide_range(true);
+
+        geoMission.setInitialStateMode(InitialStateMode.box_all_out);
+        geoMission.setMaxFilterIterations(new Long(1000000));
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{

@@ -68,6 +68,7 @@ public class InitStateModeITs implements EfusionListener {
         geoMission.setOutputFilterStateKmlFilename("filterState.kml");
 
 
+
         // Optional test
 //        geoMission.setFilterUseSpecificInitialCondition(true);
 //        geoMission.setFilterSpecificInitialLat(-32.0);
@@ -226,11 +227,101 @@ public class InitStateModeITs implements EfusionListener {
     }
 
     @Test
-    public void testSpecifiedBoxCorner() {
+    public void testTopRightCorner() {
+        geoMission.setInitialStateMode(InitialStateMode.top_right);
 
-        //geoMission.setMaxFilterIterations();
-        geoMission.setInitialStateMode(InitialStateMode.specified_box_corner);
-        geoMission.setFilterSpecificInitialBoxCorner(InitialStateBoxCorner.TOP_RIGHT);
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setRange_rand_factor(200);
+        simulatedTargetObserver.setLat_move(0.0); // STATIC
+        simulatedTargetObserver.setLon_move(0.0);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void testBottomRightCorner() {
+        geoMission.setInitialStateMode(InitialStateMode.bottom_right);
+
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setRange_rand_factor(200);
+        simulatedTargetObserver.setLat_move(0.0); // STATIC
+        simulatedTargetObserver.setLon_move(0.0);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void testBottomLeftCorner() {
+        geoMission.setInitialStateMode(InitialStateMode.bottom_left);
+
+        simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
+        simulatedTargetObserver.setTrue_lon(116.000);
+        simulatedTargetObserver.setAoa_rand_factor(0.1);
+        simulatedTargetObserver.setTdoa_rand_factor(0.0000001);
+        simulatedTargetObserver.setRange_rand_factor(200);
+        simulatedTargetObserver.setLat_move(0.0); // STATIC
+        simulatedTargetObserver.setLon_move(0.0);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            put(asset_d.getId(), asset_d);
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void testTopLeftCorner() {
+        geoMission.setInitialStateMode(InitialStateMode.top_left);
 
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
@@ -261,8 +352,6 @@ public class InitStateModeITs implements EfusionListener {
 
     @Test
     public void testBoxSingleOut() {
-
-        //geoMission.setMaxFilterIterations();
         geoMission.setInitialStateMode(InitialStateMode.box_single_out);
 
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
@@ -294,8 +383,6 @@ public class InitStateModeITs implements EfusionListener {
 
     @Test
     public void testBoxAllOut() {
-
-        //geoMission.setMaxFilterIterations();
         geoMission.setInitialStateMode(InitialStateMode.box_all_out);
 
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM

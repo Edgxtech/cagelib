@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
+import tech.tgo.efusion.compute.GeolocationResult;
 import tech.tgo.efusion.model.Asset;
 import tech.tgo.efusion.model.GeoMission;
 import uk.me.jstott.jcoord.LatLng;
@@ -88,13 +89,20 @@ public class KmlFileStaticHelpers {
             /* PLOT the geo result */
             if (gm.getShowGEOs())
             {
-                exportTargetEstimationResult(doc,dnode,geoMission);
+                exportTargetEstimationResult(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), true);
+                for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
+                    exportTargetEstimationResult(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), false);
+                }
             }
 
             /* PLOT the geo probability ELP result */
             if (geoMission.getShowCEPs())
             {
-                exportTargetEstimationCEP(doc,dnode,geoMission);
+                //exportTargetEstimationCEP(doc,dnode,geoMission);
+                exportTargetEstimationCEP(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), true);
+                for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
+                    exportTargetEstimationCEP(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), false);
+                }
             }
 
             /* PLOT the true target loc - for experiment purposes */
@@ -167,7 +175,7 @@ public class KmlFileStaticHelpers {
         }
     }
 
-    public static void exportTargetEstimationResult(Document doc, Element dnode, GeoMission geoMission) {
+    public static void exportTargetEstimationResult(Document doc, Element dnode, GeoMission geoMission, GeolocationResult geolocationResult, boolean highlight) {
         try
         {
             Element crosshairStyle = doc.createElement("Style");
@@ -179,8 +187,14 @@ public class KmlFileStaticHelpers {
             Element crosshairIcon = doc.createElement("Icon");
 
             Element crosshairIconHref = doc.createElement("href");
-            /* http://maps.google.com/mapfiles/kml/shapes/earthquake.png */
-            crosshairIconHref.appendChild(doc.createTextNode("styles/estimated_target.png"));
+            /* http://maps.google.com/mapfiles/kml/shapes/earthquake.png
+            *  http://maps.google.com/mapfiles/kml/shapes/caution.png */
+            if (highlight) {
+                crosshairIconHref.appendChild(doc.createTextNode("styles/estimated_target.png"));
+            }
+            else {
+                crosshairIconHref.appendChild(doc.createTextNode("styles/alt_estimated_target.png"));
+            }
 
             crosshairStyle.appendChild(crosshairIconStyle);
             crosshairIcon.appendChild(crosshairIconHref);
@@ -205,7 +219,8 @@ public class KmlFileStaticHelpers {
             Element PFpoint = doc.createElement("Point");
             Element coordinates = doc.createElement("coordinates");
 
-            Text textNode = doc.createTextNode(geoMission.getTarget().getCurrent_loc()[1]+ "," + geoMission.getTarget().getCurrent_loc()[0]);
+            //Text textNode = doc.createTextNode(geoMission.getTarget().getCurrent_loc()[1]+ "," + geoMission.getTarget().getCurrent_loc()[0]);
+            Text textNode = doc.createTextNode(geolocationResult.getLon()+","+geolocationResult.getLat());
             coordinates.appendChild(textNode);
             PFpoint.appendChild(coordinates);
 
@@ -217,21 +232,29 @@ public class KmlFileStaticHelpers {
         }
     }
 
-    public static void exportTargetEstimationCEP(Document doc, Element dnode, GeoMission geoMission) {
+    public static void exportTargetEstimationCEP(Document doc, Element dnode, GeoMission geoMission, GeolocationResult geolocationResult, boolean highlight) {
         try {
             try
             {
                 List<double[]> geometryCoords = new ArrayList<double[]>();
 
-                double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(geoMission.getTarget().getCurrent_loc()[0], geoMission.getTarget().getCurrent_loc()[1]);
+                double lat = geolocationResult.getLat();
+                double lon = geolocationResult.getLon();
+                double elp_long = geolocationResult.getElp_long();
+                double elp_short = geolocationResult.getElp_short();
+                double elp_rot = geolocationResult.getElp_rot();
+
+                //double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(geoMission.getTarget().getCurrent_loc()[0], geoMission.getTarget().getCurrent_loc()[1]);
+                double[] utm_target_loc = Helpers.convertLatLngToUtmNthingEasting(lat, lon);
                 log.debug("UTM Target Loc: "+utm_target_loc[0]+", "+utm_target_loc[1]);
 
                 // temp swapped bottom row to cos,sin
-                double[][] M_rot = new double[][]{{Math.cos(geoMission.getTarget().getElp_rot()), -Math.sin(geoMission.getTarget().getElp_rot())}, {Math.sin(geoMission.getTarget().getElp_rot()), Math.cos(geoMission.getTarget().getElp_rot())}};
+                //double[][] M_rot = new double[][]{{Math.cos(geoMission.getTarget().getElp_rot()), -Math.sin(geoMission.getTarget().getElp_rot())}, {Math.sin(geoMission.getTarget().getElp_rot()), Math.cos(geoMission.getTarget().getElp_rot())}};
+                double[][] M_rot = new double[][]{{Math.cos(elp_rot), -Math.sin(elp_rot)}, {Math.sin(elp_rot), Math.cos(elp_rot)}};
 
                 for (double theta = (1 / 2) * Math.PI; theta <= (5 / 2) * Math.PI; theta += 0.2) {
-                    double a = geoMission.getTarget().getElp_major() * Math.cos(theta);
-                    double b = geoMission.getTarget().getElp_minor() * Math.sin(theta);
+                    double a = elp_long * Math.cos(theta);
+                    double b = elp_short * Math.sin(theta);
 
                     double x = M_rot[0][0] * (a) + M_rot[0][1] * (b);
                     double y = M_rot[1][0] * (a) + M_rot[1][1] * (b);
@@ -247,7 +270,13 @@ public class KmlFileStaticHelpers {
 
                 Element polyStyle = doc.createElement("PolyStyle");
                 Element color = doc.createElement("color");
-                color.appendChild(doc.createTextNode("3f2002e4"));
+
+                if (highlight) {
+                    color.appendChild(doc.createTextNode("3f2002e4"));
+                }
+                else {
+                    color.appendChild(doc.createTextNode("501478C8"));
+                }
 
                 polyStyle.appendChild(color);
                 style.appendChild(polyStyle);
@@ -268,7 +297,7 @@ public class KmlFileStaticHelpers {
                 Element polygon = doc.createElement("Polygon");
 
                 Element altitudeMode = doc.createElement("altitudeMode");
-                altitudeMode.appendChild(doc.createTextNode("relativeToGround"));
+                altitudeMode.appendChild(doc.createTextNode("Absolute"));
                 polygon.appendChild(altitudeMode);
 
                 Element altitude = doc.createElement("extrude");

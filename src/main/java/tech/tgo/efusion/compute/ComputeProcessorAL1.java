@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.model.*;
+import tech.tgo.efusion.util.ConfigurationException;
 import tech.tgo.efusion.util.Helpers;
 import tech.tgo.efusion.util.KmlFileHelpers;
 import tech.tgo.efusion.util.KmlFileStaticHelpers;
@@ -74,7 +75,6 @@ public class ComputeProcessorAL1 implements Runnable {
         this.geoMission = geoMission;
 
         setObservations(observations);
-        initialiseFilter();
     }
 
     public void setObservations(Map<Long, Observation> observations) {
@@ -97,7 +97,7 @@ public class ComputeProcessorAL1 implements Runnable {
         this.observations = sortedByValue;
     }
 
-    public void initialiseFilter() {
+    public void initialiseFilter() throws Exception {
 //        double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}}; DEPRECATED
 //        Rk = new Array2DRowRealMatrix(measurementNoiseData);
 
@@ -105,6 +105,7 @@ public class ComputeProcessorAL1 implements Runnable {
         Qu = new Array2DRowRealMatrix(procNoiseData);
 
         /* Initialise filter state */
+        log.debug("Using InitialStateMode: "+geoMission.getInitialStateMode());
         filterExecutions = new ArrayList<FilterExecution>();
         Double[] start_x_y;
         // Specific Initial State
@@ -137,10 +138,35 @@ public class ComputeProcessorAL1 implements Runnable {
             }
             filterExecutions.add(new FilterExecution(start_x_y));
         }
-        else if (geoMission.getInitialStateMode().equals(InitialStateMode.specified_box_corner)) {
-            Double[] cornerLatLon = getCornerLatLon(geoMission.getFilterSpecificInitialBoxCorner(), geoMission.getAssets().values());
+        else if (geoMission.getInitialStateMode().equals(InitialStateMode.top_right)) {
+            Double[] cornerLatLon = getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values());
             if (cornerLatLon==null) {
-                log.error("Error getting corner lat lon for corner: "+geoMission.getFilterSpecificInitialBoxCorner());
+                log.error("Error getting corner lat lon for corner TOP_RIGHT");
+                throw new ConfigurationException("Error getting corner lat lon for corner TOP_RIGHT");
+            }
+            filterExecutions.add(new FilterExecution(cornerLatLon));
+        }
+        else if (geoMission.getInitialStateMode().equals(InitialStateMode.bottom_right)) {
+            Double[] cornerLatLon = getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values());
+            if (cornerLatLon==null) {
+                log.error("Error getting corner lat lon for corner BOTTOM_RIGHT");
+                throw new ConfigurationException("Error getting corner lat lon for corner BOTTOM_RIGHT");
+            }
+            filterExecutions.add(new FilterExecution(cornerLatLon));
+        }
+        else if (geoMission.getInitialStateMode().equals(InitialStateMode.bottom_left)) {
+            Double[] cornerLatLon = getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values());
+            if (cornerLatLon==null) {
+                log.error("Error getting corner lat lon for corner BOTTOM_LEFT");
+                throw new ConfigurationException("Error getting corner lat lon for corner BOTTOM_LEFT");
+            }
+            filterExecutions.add(new FilterExecution(cornerLatLon));
+        }
+        else if (geoMission.getInitialStateMode().equals(InitialStateMode.top_left)) {
+            Double[] cornerLatLon = getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values());
+            if (cornerLatLon==null) {
+                log.error("Error getting corner lat lon for corner TOP_LEFT");
+                throw new ConfigurationException("Error getting corner lat lon for corner TOP_LEFT");
             }
             filterExecutions.add(new FilterExecution(cornerLatLon));
         }
@@ -151,8 +177,6 @@ public class ComputeProcessorAL1 implements Runnable {
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
-
-            // TODO, need to send a signal that it should exit once found
         }
         else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_all_out)) {
             // use all corners, report all results
@@ -160,12 +184,15 @@ public class ComputeProcessorAL1 implements Runnable {
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
-            // TODO, need to send a signal that it should explore all box corners
+        }
+        else {
+            throw new ConfigurationException("Could not identify a valid 'Initial State' search strategy, check configuration");
         }
 
         log.debug("# Filter Executions: "+ filterExecutions.size());
         for (FilterExecution filterExecution : filterExecutions) {
-            log.debug("Start State: "+ filterExecution.getLatlon()[0]+","+ filterExecution.getLatlon()[1]);
+            double[] latLon = Helpers.convertUtmNthingEastingToLatLng(filterExecution.getLatlon()[1],filterExecution.getLatlon()[0], this.geoMission.getLatZone(), this.geoMission.getLonZone());
+            log.debug("Start State: lat/lon: "+latLon[0]+","+latLon[1]+" UTM: ["+ filterExecution.getLatlon()[0]+","+ filterExecution.getLatlon()[1]+"]");
         }
 
         // MOVED to runExecution
@@ -187,16 +214,26 @@ public class ComputeProcessorAL1 implements Runnable {
             int j = 0;
             List<GeolocationResult> geolocationResults = new ArrayList<GeolocationResult>();
             for (FilterExecution filterExecution : filterExecutions) {
-                log.debug("Running execution: " + j + " / " + filterExecutions.size());
+                log.debug("Running execution: " + (j+1) + " / " + filterExecutions.size());
                 GeolocationResult geolocationResult = runFixExecution(filterExecution);
-
-                // compute performance, record into result object
-                // if result has converged, and the initStateMode says to, can exit early
-
                 geolocationResults.add(geolocationResult);
+
+                if (this.geoMission.getInitialStateMode().equals(InitialStateMode.box_single_out)) {
+                    if (geolocationResult.getResidual() < this.geoMission.getFilterConvergenceResidualThreshold()) {
+                        log.debug("Box Single Out initial search strategy, this result is good enough, exiting and reporting");
+                        break;
+                    }
+                }
+                j++;
+                log.debug("Finished first execution");
             }
+            log.debug("Finished all executions");
+
             /* Sort by residual_rk */
             List<GeolocationResult> sorted = sortByResidualRk(geolocationResults);
+            for (GeolocationResult gr : sorted) {
+                log.debug("GeoResult: resk: "+ gr.getResidual_rk()+", "+gr.getLat()+","+gr.getLon()+", elp:"+gr.getElp_long()+", res:"+gr.getResidual());
+            }
             ComputeResults computeResults = new ComputeResults();
             computeResults.setGeolocationResult(sorted.get(0));
             sorted.remove(0);
@@ -230,7 +267,6 @@ public class ComputeProcessorAL1 implements Runnable {
         Xk = Xinit;
         Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
 
-
         log.info("Running for # observations:"+observations.size());
         if (observations.size()==0) {
             log.info("No observations returning");
@@ -242,10 +278,7 @@ public class ComputeProcessorAL1 implements Runnable {
         // May want to just clear the kml output state here, plot the asset locations, instead of full dispatch
         //dispatchResult(Xk);
 
-        //Vector<FilterObservationDTO> filterObservationDTOs = new Vector<FilterObservationDTO>();  moved into FilterExecutions
-
         FilterStateDTO filterStateDTO = new FilterStateDTO();
-
 
         if (this.geoMission.getOutputFilterState()) {
             kmlFileHelpers = new KmlFileHelpers();
@@ -324,11 +357,9 @@ public class ComputeProcessorAL1 implements Runnable {
 
     public void runTrackingExecution(FilterExecution filterExecution) {
 
-        // Set Xk,Pk
         RealVector Xinit = new ArrayRealVector(filterExecution.getLatlon());
         Xk = Xinit;
         Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
-
 
         log.info("Running for # observations:"+observations.size());
         if (observations.size()==0) {
@@ -338,11 +369,7 @@ public class ComputeProcessorAL1 implements Runnable {
 
         running.set(true);
 
-        //dispatchResult(Xk);
-        //Vector<FilterObservationDTO> filterObservationDTOs = new Vector<FilterObservationDTO>();  moved into FilterExecutions
-
         FilterStateDTO filterStateDTO = new FilterStateDTO();
-
 
         if (this.geoMission.getOutputFilterState()) {
             kmlFileHelpers = new KmlFileHelpers();
@@ -376,10 +403,7 @@ public class ComputeProcessorAL1 implements Runnable {
 
             filterExecution = runFilterIteration(filterExecution);
 
-            // RUN Export and Exit Criteria
-            // FOR FIX, will report after all iterations been run
-            ///    TRACK, report at fixed interval
-                /* Export filter state - development debugging */
+            /* Export filter state - development debugging */
             if (this.geoMission.getOutputFilterState()) {
                 filterStateExportCounter++;
                 if (filterStateExportCounter == 10) {
@@ -400,11 +424,8 @@ public class ComputeProcessorAL1 implements Runnable {
                 /* A measure of consistency between types of observations */
                 double residual_rk = findResidualRk(filterExecution.getFilterObservationDTOs());
 
-                    /* A measure of residual changes the filter intends to make */
+                /* A measure of residual changes the filter intends to make */
                 double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
-
-                //double variance_sum = Pk.getEntry(0,0) + Pk.getEntry(1,1);
-                //log.debug("Variance Sum: " + variance_sum);
 
                 if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
                     log.debug("Dispatching Result From # Observations: " + this.observations.size());
@@ -428,11 +449,9 @@ public class ComputeProcessorAL1 implements Runnable {
 
                     startTime = Calendar.getInstance().getTimeInMillis();
 
-
                     GeolocationResult result = summariseResult(Xk, filterExecution);
                     computeResults.setGeolocationResult(result);
                     dispatchResult(computeResults);
-                    //dispatchResult(Xk);
 
                     log.debug("This is a Tracking mode run, using latest observations (as held in staging) and continuing...");
 
@@ -644,11 +663,12 @@ public class ComputeProcessorAL1 implements Runnable {
     public void dispatchResult(ComputeResults computeResults) {
 
         this.geoMission.getTarget().setCurrent_loc(new double[]{computeResults.getGeolocationResult().getLat(),computeResults.getGeolocationResult().getLon()});
+        this.geoMission.setComputeResults(computeResults);
         //this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], this.geoMission.getTarget().getElp_major(), this.geoMission.getTarget().getElp_minor(), rot);
         this.efusionListener.result(computeResults);
 
-        // TODO, write exports based on the primary result, and additional results
         if (this.geoMission.getOutputFilterState() && kmlFileHelpers !=null) {
+            /* Write non-static file exports, includes filter state data stored in mem */
             kmlFileHelpers.writeCurrentExports(this.geoMission);
         }
 
@@ -722,8 +742,9 @@ public class ComputeProcessorAL1 implements Runnable {
         List<Double> lats = new ArrayList<Double>();
         List<Double> lons = new ArrayList<Double>();
         for (Asset asset : assets) {
-            lats.add(asset.getCurrent_loc()[0]);
-            lons.add(asset.getCurrent_loc()[1]);
+            double[] utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0],asset.getCurrent_loc()[1]);
+            lats.add(utm[0]);
+            lons.add(utm[1]);
         }
         if (corner.equals(InitialStateBoxCorner.TOP_RIGHT)) {
             return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.max(lons) + standardUTMOffset};
