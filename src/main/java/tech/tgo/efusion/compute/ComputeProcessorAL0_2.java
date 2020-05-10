@@ -17,9 +17,9 @@
 // * Extended Kalman Filter Fusion Processor
 // * @author Timothy Edge (timmyedge)
 // */
-//public class ComputeProcessor implements Runnable {
+//public class ComputeProcessorAL0_2 implements Runnable {
 //
-//    private static final Logger log = LoggerFactory.getLogger(ComputeProcessor.class);
+//    private static final Logger log = LoggerFactory.getLogger(ComputeProcessorAL0_2.class);
 //
 //    private EfusionListener efusionListener;
 //
@@ -31,13 +31,13 @@
 //
 //    private final AtomicBoolean running = new AtomicBoolean(false);
 //
-//    double[][] ThiData = { {1,0,1, 0}, {0,1,0,1}, {0,0,0,0}, {0,0,0,0}};
+//    double[][] ThiData = { {1,0}, {0,1}};
 //    RealMatrix Thi = new Array2DRowRealMatrix(ThiData);
 //
-//    double[][] controlData = { {0}, {0}, {0}, {0}};
+//    double[][] controlData = { {0}, {0}};
 //    RealMatrix B = new Array2DRowRealMatrix(controlData);
 //
-//    double[][] initCovarData = {{1, 0, 0, 0}, {0, 1, 0 ,0}, {0, 0, 1, 0}, {0, 0, 0 ,1}};
+//    double[][] initCovarData = {{1, 0}, {0, 1}};
 //    RealMatrix Pinit = new Array2DRowRealMatrix(initCovarData);
 //
 //    RealMatrix Qu;
@@ -46,13 +46,13 @@
 //    RealVector Xk;
 //    RealMatrix Pk;
 //
-//    double[] innovd = {0,0,0,0};
+//    double[] innovd = {0,0};
 //    RealVector innov;
 //
-//    double[][] P_innovd = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
+//    double[][] P_innovd = {{0,0}, {0,0}};
 //    RealMatrix P_innov;
 //
-//    double[][] eyeData = {{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}};
+//    double[][] eyeData = {{1,0}, {0,1}};
 //    RealMatrix eye = new Array2DRowRealMatrix(eyeData);
 //
 //    RealMatrix H;
@@ -62,59 +62,18 @@
 //
 //    KmlFileHelpers kmlFileHelpers = null;
 //
+//    List<FilterExecution> filterExecutions = null;
+//
 //    /*
 //     * Create processor for the given config, observations and client implemented listener
 //     */
-//    public ComputeProcessor(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
+//    public ComputeProcessorAL0_2(EfusionListener efusionListener, Map<Long,Observation> observations, GeoMission geoMission)
 //    {
 //        this.efusionListener = efusionListener;
 //        this.geoMission = geoMission;
 //
 //        setObservations(observations);
 //        initialiseFilter();
-//    }
-//
-//    public void initialiseFilter() {
-//        double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}};
-//        Rk = new Array2DRowRealMatrix(measurementNoiseData);
-//
-//        double[][] procNoiseData = geoMission.getFilterProcessNoise();
-//        Qu = new Array2DRowRealMatrix(procNoiseData);
-//
-//        /* Initialise filter state */
-//        double[] start_x_y;
-//        if (this.geoMission.getFilterUseSpecificInitialCondition()!=null && this.geoMission.getFilterUseSpecificInitialCondition()) {
-//            double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(this.geoMission.getFilterSpecificInitialLat(), this.geoMission.getFilterSpecificInitialLon());
-//            start_x_y = new double[]{asset_utm[1], asset_utm[0]};
-//            log.debug("Using SPECIFIC initial condition: "+this.geoMission.getFilterSpecificInitialLat()+", "+this.geoMission.getFilterSpecificInitialLon()+" ["+start_x_y[1]+", "+start_x_y[0]+"]");
-//        }
-//        else {
-//            List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
-//            if (assetList.size() > 1) {
-//                Random rand = new Random();
-//                Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
-//                assetList.remove(randAssetA);
-//                Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
-//                //log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
-//                start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random() - 0.5) * 100000);
-//                log.debug("Using RANDOM initial condition: near asset(s) ['"+randAssetA.getId() + "' & '" + randAssetB.getId()+"']: "+start_x_y[1]+", "+start_x_y[0]);
-//            } else {
-//                Asset asset = assetList.get(0);
-//                double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
-//                start_x_y = new double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
-//                log.debug("Using RANDOM initial condition: near asset ["+asset.getId()+"]: "+start_x_y[1]+", "+start_x_y[0]);
-//            }
-//        }
-//
-//        log.debug("Filter start state: "+start_x_y[0]+","+start_x_y[1]);
-//        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
-//
-//        RealVector Xinit = new ArrayRealVector(initStateData);
-//        Xk = Xinit;
-//        Pk = Pinit.scalarMultiply(1000.0);
-//
-//        log.trace("Initialising Stage Observations as current observations, #: "+this.geoMission.observations.size());
-//        setStaged_observations(this.geoMission.observations);
 //    }
 //
 //    public void setObservations(Map<Long, Observation> observations) {
@@ -127,6 +86,7 @@
 //            }
 //        };
 //
+//        /* Sort such that AOA last, for applying the 360-0 conundrum fix */
 //        List<Map.Entry<Long, Observation>> listOfEntries = new ArrayList<Map.Entry<Long, Observation>>(observations.entrySet());
 //        Collections.sort(listOfEntries, valueComparator);
 //        LinkedHashMap<Long, Observation> sortedByValue = new LinkedHashMap<Long, Observation>(listOfEntries.size());
@@ -136,8 +96,143 @@
 //        this.observations = sortedByValue;
 //    }
 //
-//    public void run()
+//    public void initialiseFilter() {
+////        double[][] measurementNoiseData = {{geoMission.getFilterMeasurementError()}}; DEPRECATED
+////        Rk = new Array2DRowRealMatrix(measurementNoiseData);
+//
+//        double[][] procNoiseData = geoMission.getFilterProcessNoise();
+//        Qu = new Array2DRowRealMatrix(procNoiseData);
+//
+//        /* Initialise filter state */
+//        filterExecutions = new ArrayList<FilterExecution>();
+//        Double[] start_x_y;
+//        // Specific Initial State
+//        if (geoMission.getInitialStateMode().equals(InitialStateMode.specified)) {
+//
+//            //if (this.geoMission.getFilterUseSpecificInitialCondition()!=null && this.geoMission.getFilterUseSpecificInitialCondition()) {
+//            double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(this.geoMission.getFilterSpecificInitialLat(), this.geoMission.getFilterSpecificInitialLon());
+//            start_x_y = new Double[]{asset_utm[1], asset_utm[0]};
+//            log.debug("Using SPECIFIC initial condition: "+this.geoMission.getFilterSpecificInitialLat()+", "+this.geoMission.getFilterSpecificInitialLon()+" ["+start_x_y[1]+", "+start_x_y[0]+"]");
+//            filterExecutions.add(new FilterExecution(start_x_y));
+//        }
+//        // Random Initial State
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.random)){
+//            List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
+//            if (assetList.size() > 1) {
+//                Random rand = new Random();
+//                Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
+//                assetList.remove(randAssetA);
+//                Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
+//                //log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
+//                start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random() - 0.5) * 100000);
+//                log.debug("Using RANDOM initial condition: near asset(s) ['"+randAssetA.getId() + "' & '" + randAssetB.getId()+"']: "+start_x_y[1]+", "+start_x_y[0]);
+//
+//                log.debug("Dist between assets: "+Math.sqrt(Math.pow(randAssetA.getCurrent_loc()[0] - randAssetB.getCurrent_loc()[0], 2) + Math.pow(randAssetA.getCurrent_loc()[1] - randAssetB.getCurrent_loc()[1], 2)));
+//            } else {
+//                Asset asset = assetList.get(0);
+//                double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+//                start_x_y = new Double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
+//                log.debug("Using RANDOM initial condition: near asset ["+asset.getId()+"]: "+start_x_y[1]+", "+start_x_y[0]);
+//            }
+//            filterExecutions.add(new FilterExecution(start_x_y));
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.specified_box_corner)) {
+//            Double[] cornerLatLon = getCornerLatLon(geoMission.getFilterSpecificInitialBoxCorner(), geoMission.getAssets().values());
+//            if (cornerLatLon==null) {
+//                log.error("Error getting corner lat lon for corner: "+geoMission.getFilterSpecificInitialBoxCorner());
+//            }
+//            filterExecutions.add(new FilterExecution(cornerLatLon));
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_single_out)) {
+//            // Use all corners, iterate until first result and exit
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
+//
+//            // TODO, need to send a signal that it should exit once found
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_all_out)) {
+//            // use all corners, report all results
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
+//            // TODO, need to send a signal that it should explore all box corners
+//        }
+//
+//        log.debug("# Filter Executions: "+ filterExecutions.size());
+//        for (FilterExecution filterExecution : filterExecutions) {
+//            log.debug("Start State: "+ filterExecution.getLatlon()[0]+","+ filterExecution.getLatlon()[1]);
+//        }
+//
+//        // MOVED to runExecution
+////        RealVector Xinit = new ArrayRealVector(start_x_y);
+////        Xk = Xinit;
+////        Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
+//
+//        log.trace("Initialising Stage Observations as current observations, #: "+this.geoMission.observations.size());
+//        setStaged_observations(this.geoMission.observations);
+//    }
+//
+//    public Double[] getCornerLatLon(InitialStateBoxCorner corner, Collection<Asset> assets) {
+//        double standardUTMOffset = 5000;
+//        List<Double> lats = new ArrayList<Double>();
+//        List<Double> lons = new ArrayList<Double>();
+//        for (Asset asset : assets) {
+//            lats.add(asset.getCurrent_loc()[0]);
+//            lons.add(asset.getCurrent_loc()[1]);
+//        }
+//        if (corner.equals(InitialStateBoxCorner.TOP_RIGHT)) {
+//            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.max(lons) + standardUTMOffset};
+//        }
+//        else if (corner.equals(InitialStateBoxCorner.BOTTOM_RIGHT)) {
+//            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.max(lons) + standardUTMOffset};
+//        }
+//        else if (corner.equals(InitialStateBoxCorner.BOTTOM_LEFT)) {
+//            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.min(lons) - standardUTMOffset};
+//        }
+//        else if (corner.equals(InitialStateBoxCorner.TOP_LEFT)) {
+//            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.min(lons) - standardUTMOffset};
+//        }
+//        else {
+//            return null;
+//        }
+//    }
+//
+//    public void run() {
+//        // Run each execution
+//        int j=0;
+//        for (FilterExecution filterExecution : filterExecutions) {
+//            log.debug("Running execution: "+j+" / "+filterExecutions.size());
+//            boolean complete = runExecution(filterExecution);
+//            j++;
+//
+//            if (complete) {
+//                break;
+//            }
+//        }
+//    }
+//
+//    public boolean runExecution(FilterExecution filterExecution) {
+//        // if fix or tracking
+//
+//        if (this.geoMission.getMissionMode().equals(MissionMode.fix)) {
+//
+//        }
+//        else if (this.geoMission.getMissionMode().equals(MissionMode.track)) {
+//
+//        }
+//    }
+//
+//    public boolean runFilter(FilterExecution filterExecution)
 //    {
+//        // Set Xk,Pk
+//        RealVector Xinit = new ArrayRealVector(filterExecution.getLatlon());
+//        Xk = Xinit;
+//        Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
+//
+//
 //        log.info("Running for # observations:"+observations.size());
 //        if (observations.size()==0) {
 //            log.info("No observations returning");
@@ -161,7 +256,21 @@
 //        }
 //        int filterStateExportCounter = 0;
 //
-//        while(true)
+//
+//        // TODO, for each of four box corner init conditions, or just one corner, run for preconfigured number of iterations
+//        //     if in 4 box mode, dont exit and report result until all four corners tested
+//        //     support mode where it can box until getting first result.
+//        //     support mode where it can simply just run from preconfigured box corner and if fails then too bad, dont get a result.
+//
+//        // init conditions modes: random, specified, specified box corner, box single output, box all output
+//
+//        //this should now be, for specified number of iterations
+//
+//        /// If its tracking mode, stay online
+//        // If its fix mode, run for number of iterations
+//
+//        //while(true)
+//        for (int k=0;k<this.geoMission.getMaxFilterIterations();k++)
 //        {
 //            if (!running.get()) {
 //                log.debug("Thread was stopped");
@@ -180,13 +289,22 @@
 //
 //            Xk = Thi.operate(Xk);
 //
+////            log.info("Pk:");
+////                log.info("Pk: "+ Pk);
+////
+////                log.info("Thi:");
+////                log.info("val: "+ Thi);
+////
+//                //log.info("Qu:");
+//                //log.info("val: "+ Qu);
+//
 //            Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
 //
 //            /* reinitialise various collections */
 //            innov = new ArrayRealVector(innovd);
 //            P_innov = new Array2DRowRealMatrix(P_innovd);
 //            filterObservationDTOs.removeAllElements();
-//            RealVector nonAoaNextState = null;
+//            RealVector nextOtherMeasurementExclusiveState = null;
 //            Iterator obsIterator = this.observations.values().iterator();
 //
 //            while (obsIterator.hasNext()) {
@@ -199,6 +317,7 @@
 //                double f_est = 0.0;
 //                double d = 0.0;
 //                H = null;
+//                RealMatrix Inverse = null;
 //
 //                if (obs.getObservationType().equals(ObservationType.range)) {
 //
@@ -209,6 +328,9 @@
 //                    d = obs.getMeas();
 //
 //                    log.trace("RANGE innovation: " + f_est + ", vs d: " + d);
+//
+//                    RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{obs.getMeas_error()}})));
+//                    Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
 //                }
 //                else if (obs.getObservationType().equals(ObservationType.tdoa)) {
 //
@@ -219,6 +341,13 @@
 //                    d = obs.getMeas() * Helpers.SPEED_OF_LIGHT;
 //
 //                    log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
+//
+//                    //log.info("Pk: "+ Pk);
+//                    //log.debug("H: "+H);
+//
+//                    RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{obs.getMeas_error()}})));
+//                    Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
+//
 //                }
 //                else if (obs.getObservationType().equals(ObservationType.aoa)) {
 //
@@ -237,81 +366,96 @@
 //                    d = obs.getMeas() * 180 / Math.PI;
 //
 //                    log.trace("AOA innovation: " + f_est + ", vs d: " + d);
+//
+//                    //log.info("Pk: "+ Pk);
+//                    //log.debug("H: "+H);
+//
+//
+//                    RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{obs.getMeas_error()}})));
+//                    Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
 //                }
 //
-//                RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(Rk));
-//                RealMatrix Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
-////                log.info("To Invert:");
-////                log.info(toInvert.toString());
-////                log.info("Inverse:");
-////                log.info(Inverse.toString());
 //
-//                /* Measurement balancer -  TO BE DEPRECATED */
-//                if (obs.getObservationType().equals(ObservationType.range)) {
-//                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterRangeBias());
-//                }
-//                else if (obs.getObservationType().equals(ObservationType.tdoa)) {
-//                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterTDOABias());
-//                }
-//                else {
-//                    K = Pk.multiply(H.transpose()).multiply(Inverse).scalarMultiply(this.geoMission.getFilterAOABias());
-//                }
-//                log.info("K:");
-//                log.info(K.toString());
+//
+//                K = Pk.multiply(H.transpose()).multiply(Inverse);  //.scalarMultiply(this.geoMission.getFilterRangeBias());
+//                //log.info("K:"+K);
+//                //log.info(K.toString());
 //
 //                double rk = d - f_est;
 //
-//                /* '360-0 Conundrum' adjustment */
+//                //log.info("RUNNING CONUNDRUM TEST");
+//                /* '360-0 Conundrum' adjustment. NOTE: AOA types always processed last due to sorting during setObservations */
 //                if (obs.getObservationType().equals(ObservationType.aoa)) {
+//
 //                    if (innov.getEntry(0) != 0.0) {
-//                        if (nonAoaNextState == null) {
-//                            nonAoaNextState = Xk.add(innov);
+//                        if (nextOtherMeasurementExclusiveState == null) {
+//                            nextOtherMeasurementExclusiveState = Xk.add(innov);
 //                        }
 //
 //                        /* gradient from obs to prevailing pressure direction */
-//                        double pressure_angle = Math.atan((nonAoaNextState.getEntry(2) - obs.getY()) / (nonAoaNextState.getEntry(0) - obs.getX())) * 180 / Math.PI;
-//                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Yp: "+innov.getEntry(3)+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
-//                        if (nonAoaNextState.getEntry(0) < obs.getX()) {
-//                            pressure_angle = pressure_angle + 180;
-//                        }
+//                        double pressure_angle = Math.atan((nextOtherMeasurementExclusiveState.getEntry(1) - obs.getY()) / (nextOtherMeasurementExclusiveState.getEntry(0) - obs.getX())) * 180 / Math.PI;
+//                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
 //
-//                        if (nonAoaNextState.getEntry(1) < obs.getY() && nonAoaNextState.getEntry(0) >= obs.getX()) {
-//                            pressure_angle = 360 - Math.abs(pressure_angle);
-//                        }
-//                        //log.debug("P-ang (adjusted): "+pressure_angle);
+//                        // QUADRANT specific
+////                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) >= obs.getY()) {
+////                            pressure_angle = 180 - pressure_angle;
+////                        }
+////
+////                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY()) {
+////                            pressure_angle = 180 + Math.abs(pressure_angle);
+////                        }
+////
+////                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY()) {
+////                            pressure_angle = -Math.abs(pressure_angle);
+////                        }
 //
-//                        if (Math.abs(pressure_angle) > Math.abs(f_est)) {
-//                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            }
-//                        } else {
-//                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            }
-//                        }
+//
+//                        // ORIGINAL METHOD USED
+////                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX()) {
+////                            pressure_angle = pressure_angle + 180;
+////                        }
+////
+////                        if (nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY() && nextOtherMeasurementExclusiveState.getEntry(0) >= obs.getX()) {
+////                            pressure_angle = 360 - Math.abs(pressure_angle);
+////                        }
+////
+////                        // This may only be useful for low numbers of predom AOA scenarios, and only for TRACK MODE runs (TBD)
+////                        /* For the case where the prevailing direction is above the intended innovation direction of the measurement in question */
+////                        if (Math.abs(pressure_angle) > Math.abs(f_est)) {
+////                            /* 1st to 4th quadrant, choose positive or negative angle respectively */
+////                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+////                                rk = Math.abs(rk);
+////                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+////                                rk = -Math.abs(rk);
+////                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+////                                rk = Math.abs(rk);
+////                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+////                                rk = -Math.abs(rk);
+////                            }
+////                        }
+////                        /* For the case where the prevailing direction is below the intended innovation direction of the measurement in question */
+////                        else {
+////                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
+////                                rk = -Math.abs(rk);
+////                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
+////                                rk = Math.abs(rk);
+////                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
+////                                rk = -Math.abs(rk);
+////                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
+////                                rk = Math.abs(rk);
+////                            }
+////                        }
 //                    }
 //                }
 //
-//                double[] HXk = H.operate(Xk).toArray();
-//                RealVector innov_ = K.scalarMultiply(rk - HXk[0]).getColumnVector(0);
-////                log.info("r - HXk:");
-////                log.info("val: "+ (rk - HXk[0]));
+//                //double[] HXk = H.operate(Xk).toArray();  /// REMOVED in AL1
+//                RealVector innov_ = K.scalarMultiply(rk).getColumnVector(0);    /// rk - HXk[0]  -removed in AL1
 //
 //                innov = innov_.add(innov);
 //
 //                P_innov = K.multiply(H).multiply(Pk).add(P_innov);
+//                //log.info("P_innov:"+P_innov);
+//
 ////                log.info("K:");
 ////                log.info("val: "+ K);
 ////
@@ -329,13 +473,14 @@
 //
 //            Xk = Xk.add(innov);
 //            Pk = (eye.multiply(Pk)).subtract(P_innov);
+//            //log.debug("Pk: "+Pk);
 //
 //            /* Export filter state - development debugging */
 //            if (this.geoMission.getOutputFilterState()) {
 //                filterStateExportCounter++;
 //                if (filterStateExportCounter == 10) {
 //                    // Only if it is changing significantly
-//                    double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
+//                    double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
 //                    if (residual > 0.5) {
 //                        filterStateDTO.setFilterObservationDTOs(filterObservationDTOs);
 //                        filterStateDTO.setXk(Xk);
@@ -364,11 +509,15 @@
 //                residual_rk = residual_rk / this.observations.size();
 //
 //                /* A measure of residual changes the filter intends to make */
-//                double residual = Math.abs(innov.getEntry(2)) + Math.abs(innov.getEntry(3));
+//                double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+//
+//                //double variance_sum = Pk.getEntry(0,0) + Pk.getEntry(1,1);
+//                //log.debug("Variance Sum: " + variance_sum);
 //
 //                if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
 //                    log.debug("Dispatching Result From # Observations: " + this.observations.size());
 //                    log.debug("Residual Movements: "+residual);
+//                    //log.debug("Residual Variance: "+variance_sum);
 //                    log.debug("Residual Measurement Delta: "+residual_rk);
 //                    log.debug("Residual Innovation: "+innov);
 //                    log.debug("Covariance: "+Pk);
@@ -382,7 +531,7 @@
 //                            else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
 //                                f_est_adj = f_est_adj * Math.PI / 180;
 //                            }
-//                            log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov());
+//                            log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov()+", MeasError: "+obs_state.getObs().getMeas_error());
 //                        }
 //                    }
 //
@@ -391,6 +540,7 @@
 //                    dispatchResult(Xk);
 //
 //                    if (geoMission.getMissionMode().equals(MissionMode.fix)) {
+//                        // if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
 //                        if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
 //                            log.debug("Exiting since this is a FIX Mode run and filter has converged to threshold");
 //                            running.set(false);
@@ -409,7 +559,12 @@
 //                    log.trace("Residual not low enough to export result: "+residual);
 //                }
 //            }
-//        }
+//        } // End for number of iterations
+//        //dispatchResult(Xk);
+//
+//        //
+//
+//        log.debug("Finished "+this.geoMission.getMaxFilterIterations()+", for this Execution");
 //    }
 //
 //    public RealMatrix recalculateH(double x_rssi, double y_rssi, double Xk1, double Xk2) {
@@ -419,7 +574,7 @@
 //        double dfdx = -(x_rssi-Xk1)/R1;
 //        double dfdy = -(y_rssi-Xk2)/R1;
 //
-//        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+//        double[][] jacobianData = {{dfdx, dfdy}};
 //        RealMatrix H = new Array2DRowRealMatrix(jacobianData);
 //        return H;
 //    }
@@ -432,7 +587,7 @@
 //        double dfdx = (-x+Xk1)/R1 - (-x2+Xk1)/R2;
 //        double dfdy = (-y+Xk2)/R1 - (-y2+Xk2)/R2;
 //
-//        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+//        double[][] jacobianData = {{dfdx, dfdy}};
 //        RealMatrix H = new Array2DRowRealMatrix(jacobianData);
 //        return H;
 //    }
@@ -444,12 +599,12 @@
 //        double dfdx = (y-Xk2)/R1;  // Note d/d"x" = "y - y_est"/..... on purpose linearisation
 //        double dfdy = -(x-Xk1)/R1;
 //
-//        double[][] jacobianData = {{0, 0, dfdx, dfdy}};
+//        double[][] jacobianData = {{dfdx, dfdy}};
 //        RealMatrix H = new Array2DRowRealMatrix(jacobianData);
 //        return H;
 //    }
 //
-//    public double[] findRudimentaryStartPoint(Asset asset_a, Asset asset_b, double addition) {
+//    public Double[] findRudimentaryStartPoint(Asset asset_a, Asset asset_b, double addition) {
 //        double x_init=0; double y_init=0;
 //        double[] asset_a_utm = Helpers.convertLatLngToUtmNthingEasting(asset_a.getCurrent_loc()[0],asset_a.getCurrent_loc()[1]);
 //        double[] asset_b_utm = Helpers.convertLatLngToUtmNthingEasting(asset_b.getCurrent_loc()[0],asset_b.getCurrent_loc()[1]);
@@ -465,15 +620,7 @@
 //            x_init = x_init + (x_init - x_n) / 2;
 //            y_init = y_init + (y_init - y_n) / 2;
 //        }
-//        return new double[]{x_init,y_init};
-//    }
-//
-//    public boolean isRunning() {
-//        return this.running.get();
-//    }
-//
-//    public void stopThread() {
-//        this.running.set(false);
+//        return new Double[]{x_init,y_init};
 //    }
 //
 //    public void dispatchResult(RealVector Xk) {
@@ -484,70 +631,27 @@
 //        /* Compute probability ELP */
 //        double[][] covMatrix=new double[][]{{Pk.getEntry(0,0),Pk.getEntry(0,1)},{Pk.getEntry(1,0),Pk.getEntry(1,1)}};
 //        double[] evalues = Helpers.getEigenvalues(covMatrix);
-//        log.debug("#1 E-values: "+evalues[0]+","+evalues[1]);
 //        double largestEvalue = Math.max(evalues[0],evalues[1]);
 //        double smallestEvalue = Math.min(evalues[0],evalues[1]);
 //        double[] evector = Helpers.getEigenvector(covMatrix, largestEvalue);
-//        log.debug("#1 E-vector: "+evector[0]+","+evector[1]);
+//        /* Alternative is to use this
+//         *  RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
+//            EigenDecomposition eig = new EigenDecomposition(J2);
+//            double[] evalues = eig.getRealEigenvalues();
+//            log.debug("#4 E-values: "+evalues[0]+","+evalues[1]);
+//            log.debug("#1 E-vector: "+evector[0]+","+evector[1]);*/
 //        double rot = Math.atan(evector[1] / evector[0]);
-//        // TODO, confirm the rotation angle is coming out correct, if not apply this correction
-//        // This angle is between -pi and pi, adjust
+//        /* This angle is between -pi -> pi, adjust 0->2pi */
 //        if (rot<0)
 //            rot = rot + 2*Math.PI;
-//
-//        double half_major_axis_length = Math.sqrt(largestEvalue)*5.991; // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I ch-square distribution, two unknowns / i.e. two degrees freedom
-//        double half_minor_axis_length = Math.sqrt(smallestEvalue)*5.991;
-//        /* I believe this original below is incorrect, the chi-square value was supposed to be outside the sqrt */
-//            //double major = 2*Math.sqrt(9.210*largestEvalue); // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I ch-square distribution, two unknowns / i.e. two degrees freedom
-//            //double minor = 2*Math.sqrt(9.210*smallestEvalue);
-//
-//        this.geoMission.getTarget().setElp_major(half_major_axis_length);
-//        this.geoMission.getTarget().setElp_minor(half_minor_axis_length);
+//        /* Ch-square distribution for two degrees freedom: 1.39 equiv 50% (i.e. CEP), 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I */
+//        double half_major_axis_length = Math.sqrt(largestEvalue)*1.39; // Orig used: 2*Math.sqrt(9.210*largestEvalue);
+//        double half_minor_axis_length = Math.sqrt(smallestEvalue)*1.39;
+//        this.geoMission.getTarget().setElp_major(half_major_axis_length*10000); /* UTM -> [m]: X10^4 */
+//        this.geoMission.getTarget().setElp_minor(half_minor_axis_length*10000);
 //        this.geoMission.getTarget().setElp_rot(rot);
-//        log.debug("#1 CEP major: "+half_major_axis_length+", CEP minor: "+half_minor_axis_length+", CEP rotation: "+rot);
 //
-//
-//
-//        //// ALL BELOW EXPERIMENTAL
-//
-//            /* TEMP - Compute probability delta ELP */
-//            double[][] covMatrixB=new double[][]{{Pk.getEntry(2,2),Pk.getEntry(2,3)},{Pk.getEntry(3,2),Pk.getEntry(3,3)}};
-//            double[] evaluesB = Helpers.getEigenvalues(covMatrixB);
-//            log.debug("#2 E-values: "+evaluesB[0]+","+evaluesB[1]);
-//            double largestEvalueB = Math.max(evaluesB[0],evaluesB[1]);
-//            double smallestEvalueB = Math.min(evaluesB[0],evaluesB[1]);
-//            double[] evectorB = Helpers.getEigenvector(covMatrixB, largestEvalueB);
-//            double rotB = Math.atan(evectorB[1] / evectorB[0]);
-//            double majorB = Math.sqrt(largestEvalueB)*9.210; // 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I z-value
-//            double minorB = Math.sqrt(smallestEvalueB)*9.210;
-//            log.debug("#2 CEP major: "+majorB+", CEP minor: "+minorB+", CEP rotation: "+rotB);
-//            //this.geoMission.getTarget().setElp_major(majorB*1000);
-//            //this.geoMission.getTarget().setElp_minor(minorB*1000);
-//            //this.geoMission.getTarget().setElp_rot(rot);
-//
-//
-//            double cep = 0.75*(Pk.getEntry(0,0) + Pk.getEntry(1,1));
-//            log.debug("#3 CEP: "+cep);
-//
-//            //this.geoMission.getTarget().setElp_major(cep/2);
-//            //this.geoMission.getTarget().setElp_minor(cep/2);
-//
-//
-//            RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
-//            EigenDecomposition eig = new EigenDecomposition(J2);
-//            double[] evaluesC = eig.getRealEigenvalues();
-//            log.debug("#4 E-values: "+evaluesC[0]+","+evaluesC[1]);
-//            log.debug("#1 E-vector: "+evector[0]+","+evector[1]);
-//            RealMatrix V = eig.getV();
-//            RealMatrix D = eig.getD();
-//            log.debug("#4 V: "+V);
-//            log.debug("#4 D: "+D);
-//
-//        //// ALL ABOVE EXPERIMENTAL
-//
-//
-//
-//        this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], half_major_axis_length, half_minor_axis_length, rot);
+//        this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], this.geoMission.getTarget().getElp_major(), this.geoMission.getTarget().getElp_minor(), rot);
 //
 //        if (this.geoMission.getOutputFilterState() && kmlFileHelpers !=null) {
 //            kmlFileHelpers.writeCurrentExports(this.geoMission);
@@ -577,13 +681,15 @@
 //        Xk = Xinit;
 //    }
 //
-//    public void resetCovariances(){
-//        log.debug("Resetting covariances, from: "+Pk);
-//        Pk = Pinit.scalarMultiply(1000.0);
-//        log.debug("Resetting covariances, to: "+Pk);
-//    }
-//
 //    public synchronized void setStaged_observations(Map<Long, Observation> staged_observations) {
 //        this.staged_observations = staged_observations;
+//    }
+//
+//    public boolean isRunning() {
+//        return this.running.get();
+//    }
+//
+//    public void stopThread() {
+//        this.running.set(false);
 //    }
 //}

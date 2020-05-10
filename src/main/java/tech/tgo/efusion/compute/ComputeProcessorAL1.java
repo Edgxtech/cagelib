@@ -9,10 +9,10 @@ import tech.tgo.efusion.util.Helpers;
 import tech.tgo.efusion.util.KmlFileHelpers;
 import tech.tgo.efusion.util.KmlFileStaticHelpers;
 
+import javax.imageio.spi.ServiceRegistry;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * Extended Kalman Filter Fusion Processor
@@ -144,6 +144,7 @@ public class ComputeProcessorAL1 implements Runnable {
             }
             filterExecutions.add(new FilterExecution(cornerLatLon));
         }
+        // NOTE: Box executions only apply to FIX, since TRACKING just uses the previous state
         else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_single_out)) {
             // Use all corners, iterate until first result and exit
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
@@ -155,18 +156,17 @@ public class ComputeProcessorAL1 implements Runnable {
         }
         else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_all_out)) {
             // use all corners, report all results
-
+            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
+            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
+            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
+            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
             // TODO, need to send a signal that it should explore all box corners
-
-            //filterExecutions.add(new FilterExecution(start_x_y));
         }
 
         log.debug("# Filter Executions: "+ filterExecutions.size());
         for (FilterExecution filterExecution : filterExecutions) {
             log.debug("Start State: "+ filterExecution.getLatlon()[0]+","+ filterExecution.getLatlon()[1]);
         }
-        //log.debug("Filter start state: "+start_x_y[0]+","+start_x_y[1]);
-        //double[] initStateData = start_x_y; //{start_x_y[0], start_x_y[1]};
 
         // MOVED to runExecution
 //        RealVector Xinit = new ArrayRealVector(start_x_y);
@@ -177,43 +177,153 @@ public class ComputeProcessorAL1 implements Runnable {
         setStaged_observations(this.geoMission.observations);
     }
 
-    public Double[] getCornerLatLon(InitialStateBoxCorner corner, Collection<Asset> assets) {
-        double standardUTMOffset = 5000;
-        List<Double> lats = new ArrayList<Double>();
-        List<Double> lons = new ArrayList<Double>();
-        for (Asset asset : assets) {
-            lats.add(asset.getCurrent_loc()[0]);
-            lons.add(asset.getCurrent_loc()[1]);
-        }
-        if (corner.equals(InitialStateBoxCorner.TOP_RIGHT)) {
-            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.max(lons) + standardUTMOffset};
-        }
-        else if (corner.equals(InitialStateBoxCorner.BOTTOM_RIGHT)) {
-            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.max(lons) + standardUTMOffset};
-        }
-        else if (corner.equals(InitialStateBoxCorner.BOTTOM_LEFT)) {
-            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.min(lons) - standardUTMOffset};
-        }
-        else if (corner.equals(InitialStateBoxCorner.TOP_LEFT)) {
-            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.min(lons) - standardUTMOffset};
-        }
-        else {
-            return null;
-        }
-    }
-
     public void run() {
-        // Run each execution
-        int j=0;
-        for (FilterExecution filterExecution : filterExecutions) {
-            log.debug("Running execution: "+j+" / "+filterExecutions.size());
-            runExecution(filterExecution);
-            j++;
+
+        // IF FIX MODE, run all executions, combine results and report
+        // IF TRACKING MODE, run the single execution, exit once process manually stopped
+
+        if (this.geoMission.getMissionMode().equals(MissionMode.fix)) {
+            // Run each execution
+            int j = 0;
+            List<GeolocationResult> geolocationResults = new ArrayList<GeolocationResult>();
+            for (FilterExecution filterExecution : filterExecutions) {
+                log.debug("Running execution: " + j + " / " + filterExecutions.size());
+                GeolocationResult geolocationResult = runFixExecution(filterExecution);
+
+                // compute performance, record into result object
+                // if result has converged, and the initStateMode says to, can exit early
+
+                geolocationResults.add(geolocationResult);
+            }
+            /* Sort by residual_rk */
+            List<GeolocationResult> sorted = sortByResidualRk(geolocationResults);
+            ComputeResults computeResults = new ComputeResults();
+            computeResults.setGeolocationResult(sorted.get(0));
+            sorted.remove(0);
+            computeResults.setAdditionalResults(sorted);
+            computeResults.setGeoId(this.geoMission.getGeoId());
+
+            /* Dispatch Result */
+            dispatchResult(computeResults);
         }
+
+        else if (this.geoMission.getMissionMode().equals(MissionMode.track)) {
+            // simply just start it up and run always
+
+            // Run each execution
+            int j = 0;
+            List<GeolocationResult> geolocationResults = new ArrayList<GeolocationResult>();
+            FilterExecution filterExecution = filterExecutions.iterator().next();
+
+            /* BEGIN ONLINE LOOP */
+            runTrackingExecution(filterExecution);
+        }
+
+        log.debug("FINISHED FILTER THREAD");
     }
 
-    public void runExecution(FilterExecution filterExecution)
-    {
+    // Runs a single FIX execution
+    public GeolocationResult runFixExecution(FilterExecution filterExecution) {
+
+        // Set Xk,Pk
+        RealVector Xinit = new ArrayRealVector(filterExecution.getLatlon());
+        Xk = Xinit;
+        Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
+
+
+        log.info("Running for # observations:"+observations.size());
+        if (observations.size()==0) {
+            log.info("No observations returning");
+            return new GeolocationResult();
+        }
+
+        running.set(true);
+
+        // May want to just clear the kml output state here, plot the asset locations, instead of full dispatch
+        //dispatchResult(Xk);
+
+        //Vector<FilterObservationDTO> filterObservationDTOs = new Vector<FilterObservationDTO>();  moved into FilterExecutions
+
+        FilterStateDTO filterStateDTO = new FilterStateDTO();
+
+
+        if (this.geoMission.getOutputFilterState()) {
+            kmlFileHelpers = new KmlFileHelpers();
+            kmlFileHelpers.provisionFilterStateExport();
+            log.debug("Provisioned filter state export");
+        }
+        int filterStateExportCounter = 0;
+
+        // APPLY FOR FIX OR TRACKING EXECUTION CONTROL
+        log.debug("Running for Max # filter iterations: "+geoMission.getMaxFilterIterations());
+            for (int k=0;k<this.geoMission.getMaxFilterIterations();k++)
+            {
+                // RUN THROTTLING
+                if (!running.get()) {
+                    log.debug("Thread was stopped");
+                    break;
+                }
+
+                if (this.geoMission.getFilterThrottle()!=null) {
+                    try {
+                        log.trace("Throttling for miliseconds: "+this.geoMission.getFilterThrottle());
+                        Thread.sleep(this.geoMission.getFilterThrottle());
+                    }
+                    catch(InterruptedException ie) {
+                        log.warn("Error throttling filter");
+                    }
+                }
+
+                filterExecution = runFilterIteration(filterExecution);
+
+                /* A measure of residual changes the filter intends to make */
+                double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+
+                if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
+                    log.debug("Exiting since this is a FIX Mode run and filter has converged to threshold. Number of iterations: "+k);
+                    running.set(false);
+                    break;
+                }
+
+            } // END FOR MAX ITERATIONS
+            log.debug("Finished FIX iterations for this Execution");
+
+            // After the max iterations, OR the desired accuracy level reached, dispatch result??
+
+            /* Export filter state - development debugging */
+            if (this.geoMission.getOutputFilterState()) {
+                filterStateExportCounter++;
+                if (filterStateExportCounter == 10) {
+                    // Only if it is changing significantly
+                    double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+                    if (residual > 0.5) {
+                        filterStateDTO.setFilterObservationDTOs(filterExecution.getFilterObservationDTOs());
+                        filterStateDTO.setXk(Xk);
+                        kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
+                        filterStateExportCounter = 0;
+                    }
+                }
+            }
+
+            if (log.isDebugEnabled()) {
+                for (FilterObservationDTO obs_state : filterExecution.getFilterObservationDTOs()) {
+                    double f_est_adj = obs_state.getF_est();
+                    if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa)) {
+                        f_est_adj = f_est_adj / Helpers.SPEED_OF_LIGHT;
+                    }
+                    else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
+                        f_est_adj = f_est_adj * Math.PI / 180;
+                    }
+                    log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov()+", MeasError: "+obs_state.getObs().getMeas_error());
+                }
+            }
+
+        GeolocationResult geolocationResult = summariseResult(Xk, filterExecution);
+        return geolocationResult;
+    }
+
+    public void runTrackingExecution(FilterExecution filterExecution) {
+
         // Set Xk,Pk
         RealVector Xinit = new ArrayRealVector(filterExecution.getLatlon());
         Xk = Xinit;
@@ -228,13 +338,11 @@ public class ComputeProcessorAL1 implements Runnable {
 
         running.set(true);
 
-        dispatchResult(Xk);
-
-        Vector<FilterObservationDTO> filterObservationDTOs = new Vector<FilterObservationDTO>();
+        //dispatchResult(Xk);
+        //Vector<FilterObservationDTO> filterObservationDTOs = new Vector<FilterObservationDTO>();  moved into FilterExecutions
 
         FilterStateDTO filterStateDTO = new FilterStateDTO();
 
-        long startTime = Calendar.getInstance().getTimeInMillis();
 
         if (this.geoMission.getOutputFilterState()) {
             kmlFileHelpers = new KmlFileHelpers();
@@ -243,18 +351,14 @@ public class ComputeProcessorAL1 implements Runnable {
         }
         int filterStateExportCounter = 0;
 
+        long startTime = Calendar.getInstance().getTimeInMillis();
 
-        // TODO, for each of four box corner init conditions, or just one corner, run for preconfigured number of iterations
-        //     if in 4 box mode, dont exit and report result until all four corners tested
-        //     support mode where it can box until getting first result.
-        //     support mode where it can simply just run from preconfigured box corner and if fails then too bad, dont get a result.
+        ComputeResults computeResults = new ComputeResults();
+        computeResults.setGeoId(this.geoMission.getGeoId());
 
-        // init conditions modes: random, specified, specified box corner, box single output, box all output
+        while (true) {
 
-        //this should now be, for specified number of iterations
-        //while(true)
-        for (int k=0;k<this.geoMission.getMaxFilterIterations();k++)
-        {
+            // RUN THROTTLING
             if (!running.get()) {
                 log.debug("Thread was stopped");
                 break;
@@ -270,23 +374,89 @@ public class ComputeProcessorAL1 implements Runnable {
                 }
             }
 
-            Xk = Thi.operate(Xk);
+            filterExecution = runFilterIteration(filterExecution);
 
-//            log.info("Pk:");
-//                log.info("Pk: "+ Pk);
-//
-//                log.info("Thi:");
-//                log.info("val: "+ Thi);
-//
-                //log.info("Qu:");
-                //log.info("val: "+ Qu);
+            // RUN Export and Exit Criteria
+            // FOR FIX, will report after all iterations been run
+            ///    TRACK, report at fixed interval
+                /* Export filter state - development debugging */
+            if (this.geoMission.getOutputFilterState()) {
+                filterStateExportCounter++;
+                if (filterStateExportCounter == 10) {
+                    // Only if it is changing significantly
+                    double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+                    if (residual > 0.5) {
+                        filterStateDTO.setFilterObservationDTOs(filterExecution.getFilterObservationDTOs());
+                        filterStateDTO.setXk(Xk);
+                        kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
+                        filterStateExportCounter = 0;
+                    }
+                }
+            }
+
+            /* Export Result - FOR TRACKING, EXPORT ONLY AFTER CERTAIN TIMINGS */
+            if ((Calendar.getInstance().getTimeInMillis() - startTime) > this.geoMission.getDispatchResultsPeriod()) {
+
+                /* A measure of consistency between types of observations */
+                double residual_rk = findResidualRk(filterExecution.getFilterObservationDTOs());
+
+                    /* A measure of residual changes the filter intends to make */
+                double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+
+                //double variance_sum = Pk.getEntry(0,0) + Pk.getEntry(1,1);
+                //log.debug("Variance Sum: " + variance_sum);
+
+                if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
+                    log.debug("Dispatching Result From # Observations: " + this.observations.size());
+                    log.debug("Residual Movements: "+residual);
+                    log.debug("Residual Measurement Delta: "+residual_rk);
+                    log.debug("Residual Innovation: "+innov);
+                    log.debug("Covariance: "+Pk);
+
+                    if (log.isDebugEnabled()) {
+                        for (FilterObservationDTO obs_state : filterExecution.getFilterObservationDTOs()) {
+                            double f_est_adj = obs_state.getF_est();
+                            if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa)) {
+                                f_est_adj = f_est_adj / Helpers.SPEED_OF_LIGHT;
+                            }
+                            else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
+                                f_est_adj = f_est_adj * Math.PI / 180;
+                            }
+                            log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov()+", MeasError: "+obs_state.getObs().getMeas_error());
+                        }
+                    }
+
+                    startTime = Calendar.getInstance().getTimeInMillis();
+
+
+                    GeolocationResult result = summariseResult(Xk, filterExecution);
+                    computeResults.setGeolocationResult(result);
+                    dispatchResult(computeResults);
+                    //dispatchResult(Xk);
+
+                    log.debug("This is a Tracking mode run, using latest observations (as held in staging) and continuing...");
+
+                    /* Resynch latest observations, and reinitialise with current state estimate */
+                    log.debug("# Staged observations: "+this.staged_observations.size());
+                    setObservations(this.staged_observations);
+                }
+                else {
+                    log.trace("Residual not low enough to export result: "+residual);
+                }
+            }
+        }
+    }
+
+    public FilterExecution runFilterIteration(FilterExecution filterExecution)
+    {
+            Xk = Thi.operate(Xk);
 
             Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
 
             /* reinitialise various collections */
             innov = new ArrayRealVector(innovd);
             P_innov = new Array2DRowRealMatrix(P_innovd);
-            filterObservationDTOs.removeAllElements();
+            filterExecution.getFilterObservationDTOs().removeAllElements();
             RealVector nextOtherMeasurementExclusiveState = null;
             Iterator obsIterator = this.observations.values().iterator();
 
@@ -325,9 +495,6 @@ public class ComputeProcessorAL1 implements Runnable {
 
                     log.trace("TDOA innovation: " + f_est + ", vs d: " + d);
 
-                    //log.info("Pk: "+ Pk);
-                    //log.debug("H: "+H);
-
                     RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{obs.getMeas_error()}})));
                     Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
 
@@ -350,202 +517,31 @@ public class ComputeProcessorAL1 implements Runnable {
 
                     log.trace("AOA innovation: " + f_est + ", vs d: " + d);
 
-                    //log.info("Pk: "+ Pk);
-                    //log.debug("H: "+H);
-
 
                     RealMatrix toInvert = (H.multiply(Pk).multiply(H.transpose()).add(new Array2DRowRealMatrix(new double[][]{{obs.getMeas_error()}})));
                     Inverse = (new LUDecomposition(toInvert)).getSolver().getInverse();
                 }
 
-
-
-                K = Pk.multiply(H.transpose()).multiply(Inverse);  //.scalarMultiply(this.geoMission.getFilterRangeBias());
-                //log.info("K:"+K);
-                //log.info(K.toString());
+                K = Pk.multiply(H.transpose()).multiply(Inverse);
 
                 double rk = d - f_est;
 
-                //log.info("RUNNING CONUNDRUM TEST");
-                /* '360-0 Conundrum' adjustment. NOTE: AOA types always processed last due to sorting during setObservations */
-                if (obs.getObservationType().equals(ObservationType.aoa)) {
+                /* RUN 360-0 CONUNDRUM FIX */
+                //log.info("RUNNING CONUNDRUM TEST AND FIX");
 
-                    if (innov.getEntry(0) != 0.0) {
-                        if (nextOtherMeasurementExclusiveState == null) {
-                            nextOtherMeasurementExclusiveState = Xk.add(innov);
-                        }
-
-                        /* gradient from obs to prevailing pressure direction */
-                        double pressure_angle = Math.atan((nextOtherMeasurementExclusiveState.getEntry(1) - obs.getY()) / (nextOtherMeasurementExclusiveState.getEntry(0) - obs.getX())) * 180 / Math.PI;
-                        //log.debug("P-ang: "+pressure_angle+", f_est: "+f_est+", Pressure: "+nonAoaNextState+", INNOV: "+innov);
-
-                        // QUADRANT specific
-//                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) >= obs.getY()) {
-//                            pressure_angle = 180 - pressure_angle;
-//                        }
-//
-//                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY()) {
-//                            pressure_angle = 180 + Math.abs(pressure_angle);
-//                        }
-//
-//                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX() && nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY()) {
-//                            pressure_angle = -Math.abs(pressure_angle);
-//                        }
-
-
-                        // ORIGINAL METHOD USED
-//                        if (nextOtherMeasurementExclusiveState.getEntry(0) < obs.getX()) {
-//                            pressure_angle = pressure_angle + 180;
-//                        }
-//
-//                        if (nextOtherMeasurementExclusiveState.getEntry(1) < obs.getY() && nextOtherMeasurementExclusiveState.getEntry(0) >= obs.getX()) {
-//                            pressure_angle = 360 - Math.abs(pressure_angle);
-//                        }
-//
-//                        // This may only be useful for low numbers of predom AOA scenarios, and only for TRACK MODE runs (TBD)
-//                        /* For the case where the prevailing direction is above the intended innovation direction of the measurement in question */
-//                        if (Math.abs(pressure_angle) > Math.abs(f_est)) {
-//                            /* 1st to 4th quadrant, choose positive or negative angle respectively */
-//                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            }
-//                        }
-//                        /* For the case where the prevailing direction is below the intended innovation direction of the measurement in question */
-//                        else {
-//                            if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            } else if (Xk.getEntry(1) > obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) < obs.getX()) {
-//                                rk = -Math.abs(rk);
-//                            } else if (Xk.getEntry(1) < obs.getY() && Xk.getEntry(0) > obs.getX()) {
-//                                rk = Math.abs(rk);
-//                            }
-//                        }
-                    }
-                }
-
-                //double[] HXk = H.operate(Xk).toArray();  /// REMOVED in AL1
                 RealVector innov_ = K.scalarMultiply(rk).getColumnVector(0);    /// rk - HXk[0]  -removed in AL1
 
                 innov = innov_.add(innov);
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
-                //log.info("P_innov:"+P_innov);
 
-//                log.info("K:");
-//                log.info("val: "+ K);
-//
-//                log.info("H:");
-//                log.info("val: "+ H);
-//
-//                log.info("KH:");
-//                log.info("val: "+ K.multiply(H));
-//
-//                log.info("KHPk:");
-//                log.info("val: "+ K.multiply(H).multiply(Pk));
-
-                filterObservationDTOs.add(new FilterObservationDTO(obs, f_est, innov_));
+                filterExecution.getFilterObservationDTOs().add(new FilterObservationDTO(obs, f_est, innov_));
             }
 
             Xk = Xk.add(innov);
             Pk = (eye.multiply(Pk)).subtract(P_innov);
-            //log.debug("Pk: "+Pk);
 
-            /* Export filter state - development debugging */
-            if (this.geoMission.getOutputFilterState()) {
-                filterStateExportCounter++;
-                if (filterStateExportCounter == 10) {
-                    // Only if it is changing significantly
-                    double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
-                    if (residual > 0.5) {
-                        filterStateDTO.setFilterObservationDTOs(filterObservationDTOs);
-                        filterStateDTO.setXk(Xk);
-                        kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
-                        filterStateExportCounter = 0;
-                    }
-                }
-            }
-
-            /* Export Result */
-            if ((Calendar.getInstance().getTimeInMillis() - startTime) > this.geoMission.getDispatchResultsPeriod()) {
-
-                /* A measure of consistency between types of observations */
-                double residual_rk = 0.0;
-                for (FilterObservationDTO obs_state: filterObservationDTOs) {
-                    if (obs_state.getObs().getObservationType().equals(ObservationType.range)) {
-                        residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 1000;
-                    }
-                    else if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa)) {
-                        residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 1000;
-                    }
-                    else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
-                        residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 360;
-                    }
-                }
-                residual_rk = residual_rk / this.observations.size();
-
-                /* A measure of residual changes the filter intends to make */
-                double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
-
-                //double variance_sum = Pk.getEntry(0,0) + Pk.getEntry(1,1);
-                //log.debug("Variance Sum: " + variance_sum);
-
-                if (residual < this.geoMission.getFilterDispatchResidualThreshold()) {
-                    log.debug("Dispatching Result From # Observations: " + this.observations.size());
-                    log.debug("Residual Movements: "+residual);
-                    //log.debug("Residual Variance: "+variance_sum);
-                    log.debug("Residual Measurement Delta: "+residual_rk);
-                    log.debug("Residual Innovation: "+innov);
-                    log.debug("Covariance: "+Pk);
-
-                    if (log.isDebugEnabled()) {
-                        for (FilterObservationDTO obs_state : filterObservationDTOs) {
-                            double f_est_adj = obs_state.getF_est();
-                            if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa)) {
-                                f_est_adj = f_est_adj / Helpers.SPEED_OF_LIGHT;
-                            }
-                            else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
-                                f_est_adj = f_est_adj * Math.PI / 180;
-                            }
-                            log.debug("Observation utilisation: assets: ["+obs_state.getObs().getAssetId()+"/"+obs_state.getObs().getAssetId_b()+"_"+obs_state.getObs().getObservationType().name()+":"+obs_state.getObs().getMeas()+"] [meas], f_est(adj): " + f_est_adj + ", innov: "+obs_state.getInnov()+", MeasError: "+obs_state.getObs().getMeas_error());
-                        }
-                    }
-
-                    startTime = Calendar.getInstance().getTimeInMillis();
-
-                    dispatchResult(Xk);
-
-                    if (geoMission.getMissionMode().equals(MissionMode.fix)) {
-                        // if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
-                        if (residual < this.geoMission.getFilterConvergenceResidualThreshold()) {
-                            log.debug("Exiting since this is a FIX Mode run and filter has converged to threshold");
-                            running.set(false);
-                            break;
-                        }
-                    }
-                    else {
-                        log.debug("This is a Tracking mode run, using latest observations (as held in staging) and continuing...");
-
-                        /* Resynch latest observations, and reinitialise with current state estimate */
-                        log.debug("# Staged observations: "+this.staged_observations.size());
-                        setObservations(this.staged_observations);
-                    }
-                }
-                else {
-                    log.trace("Residual not low enough to export result: "+residual);
-                }
-            }
-        } // End for number of iterations
-        dispatchResult(Xk);
-
-        log.debug("Finished "+this.geoMission.getMaxFilterIterations()+", for this Execution");
+            return filterExecution;
     }
 
     public RealMatrix recalculateH(double x_rssi, double y_rssi, double Xk1, double Xk2) {
@@ -585,6 +581,82 @@ public class ComputeProcessorAL1 implements Runnable {
         return H;
     }
 
+    /* A measure of difference in contributions of each observation, for relative comparison of disparate optimal estimates */
+    public double findResidualRk(Vector<FilterObservationDTO> filterObservationDTOs) {
+        double residual_rk = 0.0;
+        for (FilterObservationDTO obs_state: filterObservationDTOs) {
+            if (obs_state.getObs().getObservationType().equals(ObservationType.range)) {
+                residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 1000;
+            }
+            else if (obs_state.getObs().getObservationType().equals(ObservationType.tdoa)) {
+                residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 1000;
+            }
+            else if (obs_state.getObs().getObservationType().equals(ObservationType.aoa)) {
+                residual_rk += (double) Math.abs(obs_state.getF_est() - obs_state.getObs().getMeas()) / 360;
+            }
+        }
+        residual_rk = residual_rk / this.observations.size();
+        return residual_rk;
+    }
+
+    public GeolocationResult summariseResult(RealVector Xk, FilterExecution filterExecution) {
+
+        double[] latLon = Helpers.convertUtmNthingEastingToLatLng(Xk.getEntry(0),Xk.getEntry(1), this.geoMission.getLatZone(), this.geoMission.getLonZone());
+
+        /* Compute probability ELP */
+        double[][] covMatrix=new double[][]{{Pk.getEntry(0,0),Pk.getEntry(0,1)},{Pk.getEntry(1,0),Pk.getEntry(1,1)}};
+        double[] evalues = Helpers.getEigenvalues(covMatrix);
+        double largestEvalue = Math.max(evalues[0],evalues[1]);
+        double smallestEvalue = Math.min(evalues[0],evalues[1]);
+        double[] evector = Helpers.getEigenvector(covMatrix, largestEvalue);
+        double rot = Math.atan(evector[1] / evector[0]);
+        /* This angle is between -pi -> pi, adjust 0->2pi */
+        if (rot<0)
+            rot = rot + 2*Math.PI;
+        /* Ch-square distribution for two degrees freedom: 1.39 equiv 50% (i.e. CEP), 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I */
+        double half_major_axis_length = Math.sqrt(largestEvalue)*1.39; // Orig used: 2*Math.sqrt(9.210*largestEvalue);
+        double half_minor_axis_length = Math.sqrt(smallestEvalue)*1.39;
+
+        /* A measure of the aggreance by all measurements */
+        double residual_rk = findResidualRk(filterExecution.getFilterObservationDTOs());
+
+        /* A measure of residual changes the filter intends to make */
+        double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+
+        log.debug("Dispatching Result From # Observations: " + this.observations.size());
+        log.debug("Residual Movements: "+residual);
+        log.debug("Residual Measurement Delta: "+residual_rk);
+        log.debug("Residual Innovation: "+innov);
+        log.debug("Covariance: "+Pk);
+
+        GeolocationResult geolocationResult = new GeolocationResult();
+        geolocationResult.setLat(latLon[0]);
+        geolocationResult.setLon(latLon[1]);
+        geolocationResult.setElp_long(half_major_axis_length*10000);
+        geolocationResult.setElp_short(half_minor_axis_length*10000);
+        geolocationResult.setElp_rot(rot);
+        geolocationResult.setResidual(residual);
+        geolocationResult.setResidual_rk(residual_rk);
+
+        return geolocationResult;
+    }
+
+    public void dispatchResult(ComputeResults computeResults) {
+
+        this.geoMission.getTarget().setCurrent_loc(new double[]{computeResults.getGeolocationResult().getLat(),computeResults.getGeolocationResult().getLon()});
+        //this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], this.geoMission.getTarget().getElp_major(), this.geoMission.getTarget().getElp_minor(), rot);
+        this.efusionListener.result(computeResults);
+
+        // TODO, write exports based on the primary result, and additional results
+        if (this.geoMission.getOutputFilterState() && kmlFileHelpers !=null) {
+            kmlFileHelpers.writeCurrentExports(this.geoMission);
+        }
+
+        if (this.geoMission.getOutputKml()) {
+            KmlFileStaticHelpers.exportGeoMissionToKml(this.geoMission);
+        }
+    }
+
     public Double[] findRudimentaryStartPoint(Asset asset_a, Asset asset_b, double addition) {
         double x_init=0; double y_init=0;
         double[] asset_a_utm = Helpers.convertLatLngToUtmNthingEasting(asset_a.getCurrent_loc()[0],asset_a.getCurrent_loc()[1]);
@@ -604,63 +676,116 @@ public class ComputeProcessorAL1 implements Runnable {
         return new Double[]{x_init,y_init};
     }
 
-    public void dispatchResult(RealVector Xk) {
 
-        double[] latLon = Helpers.convertUtmNthingEastingToLatLng(Xk.getEntry(0),Xk.getEntry(1), this.geoMission.getLatZone(), this.geoMission.getLonZone());
-        this.geoMission.getTarget().setCurrent_loc(latLon);
 
-        /* Compute probability ELP */
-        double[][] covMatrix=new double[][]{{Pk.getEntry(0,0),Pk.getEntry(0,1)},{Pk.getEntry(1,0),Pk.getEntry(1,1)}};
-        double[] evalues = Helpers.getEigenvalues(covMatrix);
-        double largestEvalue = Math.max(evalues[0],evalues[1]);
-        double smallestEvalue = Math.min(evalues[0],evalues[1]);
-        double[] evector = Helpers.getEigenvector(covMatrix, largestEvalue);
-        /* Alternative is to use this
-         *  RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
-            EigenDecomposition eig = new EigenDecomposition(J2);
-            double[] evalues = eig.getRealEigenvalues();
-            log.debug("#4 E-values: "+evalues[0]+","+evalues[1]);
-            log.debug("#1 E-vector: "+evector[0]+","+evector[1]);*/
-        double rot = Math.atan(evector[1] / evector[0]);
-        /* This angle is between -pi -> pi, adjust 0->2pi */
-        if (rot<0)
-            rot = rot + 2*Math.PI;
-        /* Ch-square distribution for two degrees freedom: 1.39 equiv 50% (i.e. CEP), 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I */
-        double half_major_axis_length = Math.sqrt(largestEvalue)*1.39; // Orig used: 2*Math.sqrt(9.210*largestEvalue);
-        double half_minor_axis_length = Math.sqrt(smallestEvalue)*1.39;
-        this.geoMission.getTarget().setElp_major(half_major_axis_length*10000); /* UTM -> [m]: X10^4 */
-        this.geoMission.getTarget().setElp_minor(half_minor_axis_length*10000);
-        this.geoMission.getTarget().setElp_rot(rot);
+//    public void dispatchResult(RealVector Xk) {
+//
+//        double[] latLon = Helpers.convertUtmNthingEastingToLatLng(Xk.getEntry(0),Xk.getEntry(1), this.geoMission.getLatZone(), this.geoMission.getLonZone());
+//        this.geoMission.getTarget().setCurrent_loc(latLon);
+//
+//        /* Compute probability ELP */
+//        double[][] covMatrix=new double[][]{{Pk.getEntry(0,0),Pk.getEntry(0,1)},{Pk.getEntry(1,0),Pk.getEntry(1,1)}};
+//        double[] evalues = Helpers.getEigenvalues(covMatrix);
+//        double largestEvalue = Math.max(evalues[0],evalues[1]);
+//        double smallestEvalue = Math.min(evalues[0],evalues[1]);
+//        double[] evector = Helpers.getEigenvector(covMatrix, largestEvalue);
+//        /* Alternative is to use this
+//         *  RealMatrix J2 = new Array2DRowRealMatrix(covMatrix);
+//            EigenDecomposition eig = new EigenDecomposition(J2);
+//            double[] evalues = eig.getRealEigenvalues();
+//            log.debug("#4 E-values: "+evalues[0]+","+evalues[1]);
+//            log.debug("#1 E-vector: "+evector[0]+","+evector[1]);*/
+//        double rot = Math.atan(evector[1] / evector[0]);
+//        /* This angle is between -pi -> pi, adjust 0->2pi */
+//        if (rot<0)
+//            rot = rot + 2*Math.PI;
+//        /* Ch-square distribution for two degrees freedom: 1.39 equiv 50% (i.e. CEP), 5.991 equiv 95% C.I, 4.605 equiv 90% C.I, 9.210 equiv 99% C.I */
+//        double half_major_axis_length = Math.sqrt(largestEvalue)*1.39; // Orig used: 2*Math.sqrt(9.210*largestEvalue);
+//        double half_minor_axis_length = Math.sqrt(smallestEvalue)*1.39;
+//        this.geoMission.getTarget().setElp_major(half_major_axis_length*10000); /* UTM -> [m]: X10^4 */
+//        this.geoMission.getTarget().setElp_minor(half_minor_axis_length*10000);
+//        this.geoMission.getTarget().setElp_rot(rot);
+//
+//        this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], this.geoMission.getTarget().getElp_major(), this.geoMission.getTarget().getElp_minor(), rot);
+//
+//        if (this.geoMission.getOutputFilterState() && kmlFileHelpers !=null) {
+//            kmlFileHelpers.writeCurrentExports(this.geoMission);
+//        }
+//
+//        if (this.geoMission.getOutputKml()) {
+//            KmlFileStaticHelpers.exportGeoMissionToKml(this.geoMission);
+//        }
+//    }
 
-        this.efusionListener.result(geoMission.getGeoId(),latLon[0],latLon[1], this.geoMission.getTarget().getElp_major(), this.geoMission.getTarget().getElp_minor(), rot);
-
-        if (this.geoMission.getOutputFilterState() && kmlFileHelpers !=null) {
-            kmlFileHelpers.writeCurrentExports(this.geoMission);
+    public Double[] getCornerLatLon(InitialStateBoxCorner corner, Collection<Asset> assets) {
+        double standardUTMOffset = 5000;
+        List<Double> lats = new ArrayList<Double>();
+        List<Double> lons = new ArrayList<Double>();
+        for (Asset asset : assets) {
+            lats.add(asset.getCurrent_loc()[0]);
+            lons.add(asset.getCurrent_loc()[1]);
         }
-
-        if (this.geoMission.getOutputKml()) {
-            KmlFileStaticHelpers.exportGeoMissionToKml(this.geoMission);
+        if (corner.equals(InitialStateBoxCorner.TOP_RIGHT)) {
+            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.max(lons) + standardUTMOffset};
+        }
+        else if (corner.equals(InitialStateBoxCorner.BOTTOM_RIGHT)) {
+            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.max(lons) + standardUTMOffset};
+        }
+        else if (corner.equals(InitialStateBoxCorner.BOTTOM_LEFT)) {
+            return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.min(lons) - standardUTMOffset};
+        }
+        else if (corner.equals(InitialStateBoxCorner.TOP_LEFT)) {
+            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.min(lons) - standardUTMOffset};
+        }
+        else {
+            return null;
         }
     }
 
-    public void reinitialiseFilter() {
-        /* Select two assets by random and use their middle point */
-        Random rand = new Random();
-        List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
-        Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
-        assetList.remove(randAssetA);
-        Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
-        log.debug("Finding rudimentary start point between two random observations: "+randAssetA.getId()+","+randAssetB.getId());
+    public List<GeolocationResult> sortByResidualRk(List<GeolocationResult> geolocationResults) {
 
-        double[] start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, -500);
-        log.debug("(Re) Filter start point: "+start_x_y[0]+","+start_x_y[1]);
-        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
-        log.info("(Re) Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
-        double[] latLonStart = Helpers.convertUtmNthingEastingToLatLng(initStateData[0], initStateData[1], geoMission.getLatZone(), geoMission.getLonZone());
-        log.info("(Re) Init start point: "+latLonStart[0]+","+latLonStart[1]);
-        RealVector Xinit = new ArrayRealVector(initStateData);
-        Xk = Xinit;
+        Collections.sort(geolocationResults, (o1, o2) -> (((Double)o1.residual_rk).compareTo((Double)o2.getResidual_rk())));
+//        Comparator<GeolocationResult> valueComparator = new Comparator<GeolocationResult>() {
+//            @Override
+//            public int compare (GeolocationResult g1, GeolocationResult g2){
+//                return g1.getResidual_rk().compareTo(g2.getResidual_rk());
+//            }
+//        };
+////            @Override
+////            public int compare(Map.Entry<Long, GeolocationResult> e1, Map.Entry<Long, GeolocationResult> e2) {
+////                Double v1 = e1.getValue().getResidual_rk();
+////                Double v2 = e2.getValue().getResidual_rk();
+////                return v1.compareTo(v2);
+////            }
+//
+//        //List<Map.Entry<Long, GeolocationResult>> listOfEntries = new ArrayList<Map.Entry<Long, GeolocationResult>>(geolocationResults);
+//        Collections.sort(geolocationResults, valueComparator);
+//        List<GeolocationResult> sorted = new ArrayList<GeolocationResult>();
+//        for(List<GeolocationResult> entry : geolocationResults){
+//            sorted.add(entry.getValue());
+//        }
+        return geolocationResults;
     }
+
+
+//    public void reinitialiseFilter() {
+//        /* Select two assets by random and use their middle point */
+//        Random rand = new Random();
+//        List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
+//        Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
+//        assetList.remove(randAssetA);
+//        Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
+//        log.debug("Finding rudimentary start point between two random observations: "+randAssetA.getId()+","+randAssetB.getId());
+//
+//        double[] start_x_y = findRudimentaryStartPoint(randAssetA, randAssetB, -500);
+//        log.debug("(Re) Filter start point: "+start_x_y[0]+","+start_x_y[1]);
+//        double[] initStateData = {start_x_y[0], start_x_y[1], 1, 1};
+//        log.info("(Re) Init State Data Easting/Northing: "+initStateData[0]+","+initStateData[1]+",1,1");
+//        double[] latLonStart = Helpers.convertUtmNthingEastingToLatLng(initStateData[0], initStateData[1], geoMission.getLatZone(), geoMission.getLonZone());
+//        log.info("(Re) Init start point: "+latLonStart[0]+","+latLonStart[1]);
+//        RealVector Xinit = new ArrayRealVector(initStateData);
+//        Xk = Xinit;
+//    }
 
     public synchronized void setStaged_observations(Map<Long, Observation> staged_observations) {
         this.staged_observations = staged_observations;

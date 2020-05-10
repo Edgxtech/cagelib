@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.EfusionProcessManager;
+import tech.tgo.efusion.compute.ComputeResults;
 import tech.tgo.efusion.model.MissionMode;
 import tech.tgo.efusion.model.GeoMission;
 import tech.tgo.efusion.model.Target;
@@ -43,6 +44,8 @@ public class TDOA_AOAObservationFixITs implements EfusionListener {
     TestAsset asset_d = new TestAsset();
 
     GeoMission geoMission;
+
+    double[] latest_est_latlon;
 
     @Before
     public void configure() {
@@ -115,6 +118,15 @@ public class TDOA_AOAObservationFixITs implements EfusionListener {
     @Override
     public void result(String geoId, double lat, double lon, double cep_elp_maj, double cep_elp_min, double cep_elp_rot) {
         log.debug("Result -> GeoId: " + geoId + ", Lat: " + lat + ", Lon: " + lon + ", CEP major: " + cep_elp_maj + ", CEP minor: " + cep_elp_min + ", CEP rotation: " + cep_elp_rot);
+    }
+
+    /* Result callback */
+    @Override
+    public void result(ComputeResults results) {
+        log.debug("Result [NEW] -> GeoId: "+results.getGeoId()+", Lat: "+results.getGeolocationResult().getLat()+", Lon: "+results.getGeolocationResult().getLon()+", CEP major: "+results.getGeolocationResult().getElp_long()+", CEP minor: "+results.getGeolocationResult().getElp_short()+", CEP rotation: "+results.getGeolocationResult().getElp_rot());
+
+        // buffer just the latest value - ok for fix tests, need to hold all est since first convergence for track tests
+        latest_est_latlon = new double[]{results.getGeolocationResult().getLat(),results.getGeolocationResult().getLon()};
     }
 
     // With wrong starting condition, can fail by drifting off into distance

@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.EfusionProcessManager;
+import tech.tgo.efusion.compute.ComputeResults;
+import tech.tgo.efusion.model.InitialStateMode;
 import tech.tgo.efusion.util.SimulatedTargetObservationRemover;
 import tech.tgo.efusion.util.SimulatedTargetObserver;
 import tech.tgo.efusion.model.MissionMode;
@@ -52,6 +54,8 @@ public class AllObservationITs implements EfusionListener {
 
     GeoMission geoMission;
 
+    double[] latest_est_latlon;
+
     @Before
     public void configure() {
         simulatedTargetObserver.setEfusionProcessManager(efusionProcessManager);
@@ -70,10 +74,7 @@ public class AllObservationITs implements EfusionListener {
         geoMission.setShowTrueLoc(true);
         geoMission.setOutputFilterState(true);
         geoMission.setOutputFilterStateKmlFilename("filterState.kml");
-
-        geoMission.setFilterAOABias(1.0);
-        geoMission.setFilterTDOABias(1.0);
-        geoMission.setFilterRangeBias(1.0);
+        geoMission.setInitialStateMode(InitialStateMode.random);
 
         try {
             efusionProcessManager.configure(geoMission);
@@ -132,6 +133,15 @@ public class AllObservationITs implements EfusionListener {
     @Override
     public void result(String geoId, double lat, double lon, double cep_elp_maj, double cep_elp_min, double cep_elp_rot) {
         log.debug("Result -> GeoId: " + geoId + ", Lat: " + lat + ", Lon: " + lon + ", CEP major: " + cep_elp_maj + ", CEP minor: " + cep_elp_min + ", CEP rotation: " + cep_elp_rot);
+    }
+
+    /* Result callback */
+    @Override
+    public void result(ComputeResults results) {
+        log.debug("Result [NEW] -> GeoId: "+results.getGeoId()+", Lat: "+results.getGeolocationResult().getLat()+", Lon: "+results.getGeolocationResult().getLon()+", CEP major: "+results.getGeolocationResult().getElp_long()+", CEP minor: "+results.getGeolocationResult().getElp_short()+", CEP rotation: "+results.getGeolocationResult().getElp_rot());
+
+        // buffer just the latest value - ok for fix tests, need to hold all est since first convergence for track tests
+        latest_est_latlon = new double[]{results.getGeolocationResult().getLat(),results.getGeolocationResult().getLon()};
     }
 
     @Test

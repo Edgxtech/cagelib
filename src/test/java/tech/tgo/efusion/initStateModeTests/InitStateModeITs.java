@@ -7,10 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.EfusionListener;
 import tech.tgo.efusion.EfusionProcessManager;
-import tech.tgo.efusion.model.GeoMission;
-import tech.tgo.efusion.model.InitialStateMode;
-import tech.tgo.efusion.model.MissionMode;
-import tech.tgo.efusion.model.Target;
+import tech.tgo.efusion.compute.ComputeResults;
+import tech.tgo.efusion.model.*;
 import tech.tgo.efusion.util.ConfigurationException;
 import tech.tgo.efusion.util.Helpers;
 import tech.tgo.efusion.util.SimulatedTargetObserver;
@@ -139,6 +137,15 @@ public class InitStateModeITs implements EfusionListener {
         latest_est_latlon = new double[]{lat,lon};
     }
 
+    /* Result callback */
+    @Override
+    public void result(ComputeResults results) {
+        log.debug("Result [NEW] -> GeoId: "+results.getGeoId()+", Lat: "+results.getGeolocationResult().getLat()+", Lon: "+results.getGeolocationResult().getLon()+", CEP major: "+results.getGeolocationResult().getElp_long()+", CEP minor: "+results.getGeolocationResult().getElp_short()+", CEP rotation: "+results.getGeolocationResult().getElp_rot());
+
+        // buffer just the latest value - ok for fix tests, need to hold all est since first convergence for track tests
+        latest_est_latlon = new double[]{results.getGeolocationResult().getLat(),results.getGeolocationResult().getLon()};
+    }
+
     public void printPerformance() {
         /* Performance analysis - Average True Error (ATE) */
         Double[] true_lat_lon = this.geoMission.getTarget().getTrue_current_loc();
@@ -223,7 +230,7 @@ public class InitStateModeITs implements EfusionListener {
 
         //geoMission.setMaxFilterIterations();
         geoMission.setInitialStateMode(InitialStateMode.specified_box_corner);
-        geoMission.setFilterSpecificInitialBoxCorner(0);
+        geoMission.setFilterSpecificInitialBoxCorner(InitialStateBoxCorner.TOP_RIGHT);
 
         simulatedTargetObserver.setTrue_lat(-31.98); // BOTTOM
         simulatedTargetObserver.setTrue_lon(116.000);
