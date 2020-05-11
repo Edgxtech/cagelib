@@ -91,7 +91,7 @@ public class KmlFileStaticHelpers {
             {
                 exportTargetEstimationResult(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), true);
                 for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
-                    exportTargetEstimationResult(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), false);
+                    exportTargetEstimationResult(doc,dnode,geoMission,result, false);
                 }
             }
 
@@ -101,7 +101,7 @@ public class KmlFileStaticHelpers {
                 //exportTargetEstimationCEP(doc,dnode,geoMission);
                 exportTargetEstimationCEP(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), true);
                 for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
-                    exportTargetEstimationCEP(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), false);
+                    exportTargetEstimationCEP(doc,dnode,geoMission,result, false);
                 }
             }
 

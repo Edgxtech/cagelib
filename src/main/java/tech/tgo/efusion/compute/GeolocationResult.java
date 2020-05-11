@@ -10,6 +10,8 @@ public class GeolocationResult {
     double elp_short;
     double elp_rot;
 
+
+
 //    public GeolocationResult(Boolean processed_ok) {
 //        this.processed_ok = processed_ok;
 //    }

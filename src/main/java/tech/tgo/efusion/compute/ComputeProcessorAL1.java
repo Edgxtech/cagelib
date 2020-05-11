@@ -139,7 +139,19 @@ public class ComputeProcessorAL1 implements Runnable {
             filterExecutions.add(new FilterExecution(start_x_y));
         }
         else if (geoMission.getInitialStateMode().equals(InitialStateMode.top_right)) {
-            Double[] cornerLatLon = getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values());
+
+
+            // TEMP, TODO delete
+            Double[] cornerLatLon = getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values());
+            if (cornerLatLon==null) {
+                log.error("Error getting corner lat lon for corner BOTTOM_RIGHT");
+                throw new ConfigurationException("Error getting corner lat lon for corner BOTTOM_RIGHT");
+            }
+            filterExecutions.add(new FilterExecution(cornerLatLon));
+
+
+
+            cornerLatLon = getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values());
             if (cornerLatLon==null) {
                 log.error("Error getting corner lat lon for corner TOP_RIGHT");
                 throw new ConfigurationException("Error getting corner lat lon for corner TOP_RIGHT");
@@ -180,10 +192,10 @@ public class ComputeProcessorAL1 implements Runnable {
         }
         else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_all_out)) {
             // use all corners, report all results
-            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
             filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
-            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
-            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
+            //filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
+            filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
+            //filterExecutions.add(new FilterExecution(getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
         }
         else {
             throw new ConfigurationException("Could not identify a valid 'Initial State' search strategy, check configuration");
@@ -225,7 +237,7 @@ public class ComputeProcessorAL1 implements Runnable {
                     }
                 }
                 j++;
-                log.debug("Finished first execution");
+                log.debug("Finished execution: "+j);
             }
             log.debug("Finished all executions");
 
@@ -239,6 +251,10 @@ public class ComputeProcessorAL1 implements Runnable {
             sorted.remove(0);
             computeResults.setAdditionalResults(sorted);
             computeResults.setGeoId(this.geoMission.getGeoId());
+//            ComputeResults computeResults = new ComputeResults();
+//            computeResults.setGeolocationResult(geolocationResults.get(0));
+//            computeResults.setAdditionalResults(geolocationResults);
+//            computeResults.setGeoId(this.geoMission.getGeoId());
 
             /* Dispatch Result */
             dispatchResult(computeResults);
@@ -263,9 +279,12 @@ public class ComputeProcessorAL1 implements Runnable {
     public GeolocationResult runFixExecution(FilterExecution filterExecution) {
 
         // Set Xk,Pk
+        log.debug("Running Fix Execution with init conds: "+filterExecution.getLatlon()[0]+","+filterExecution.getLatlon()[1]);
         RealVector Xinit = new ArrayRealVector(filterExecution.getLatlon());
         Xk = Xinit;
         Pk = Pinit.scalarMultiply(0.01);  // AL1 Tends to lose itself fail to converge, unless this kept small (i.e. ~0.01). AL0 Originally used 1000
+        log.debug("Running Fix Execution with Init State: "+Xk);
+        log.debug("Running Fix Execution with Init State Covariance: "+Pk);
 
         log.info("Running for # observations:"+observations.size());
         if (observations.size()==0) {
@@ -352,6 +371,12 @@ public class ComputeProcessorAL1 implements Runnable {
             }
 
         GeolocationResult geolocationResult = summariseResult(Xk, filterExecution);
+        Xk = null;
+        Pk=null;
+        K=null;
+        Thi = new Array2DRowRealMatrix(ThiData);
+        Pinit = new Array2DRowRealMatrix(initCovarData);
+
         return geolocationResult;
     }
 
@@ -468,7 +493,9 @@ public class ComputeProcessorAL1 implements Runnable {
 
     public FilterExecution runFilterIteration(FilterExecution filterExecution)
     {
-            Xk = Thi.operate(Xk);
+        //log.debug("Xk: "+Xk);
+
+        Xk = Thi.operate(Xk);
 
             Pk = (Thi.multiply(Pk).multiply(Thi.transpose())).add(Qu);
 
@@ -643,6 +670,7 @@ public class ComputeProcessorAL1 implements Runnable {
         double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
 
         log.debug("Dispatching Result From # Observations: " + this.observations.size());
+        log.debug("Result: "+latLon[0]+","+latLon[1]);
         log.debug("Residual Movements: "+residual);
         log.debug("Residual Measurement Delta: "+residual_rk);
         log.debug("Residual Innovation: "+innov);
@@ -738,7 +766,7 @@ public class ComputeProcessorAL1 implements Runnable {
 //    }
 
     public Double[] getCornerLatLon(InitialStateBoxCorner corner, Collection<Asset> assets) {
-        double standardUTMOffset = 5000;
+        double standardUTMOffset = 50000;
         List<Double> lats = new ArrayList<Double>();
         List<Double> lons = new ArrayList<Double>();
         for (Asset asset : assets) {
@@ -756,7 +784,8 @@ public class ComputeProcessorAL1 implements Runnable {
             return new Double[]{Collections.min(lats) - standardUTMOffset, Collections.min(lons) - standardUTMOffset};
         }
         else if (corner.equals(InitialStateBoxCorner.TOP_LEFT)) {
-            return new Double[]{Collections.max(lats) + standardUTMOffset, Collections.min(lons) - standardUTMOffset};
+            return new Double[]{Collections.max(lats) +standardUTMOffset, Collections.min(lons) - standardUTMOffset}; //+ standardUTMOffset
+            //return new Double[]{Helpers.convertLatLngToUtmNthingEasting(-34.9,138.0)[0],Helpers.convertLatLngToUtmNthingEasting(-34.9,138.0)[1]};
         }
         else {
             return null;

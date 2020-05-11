@@ -348,7 +348,7 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
         asset_a.setProvide_aoa(true);
         asset_b.setProvide_range(true);
 
-        geoMission.setInitialStateMode(InitialStateMode.bottom_right);
+        geoMission.setInitialStateMode(InitialStateMode.bottom_left);
         geoMission.setMaxFilterIterations(new Long(1000000));
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
@@ -405,6 +405,7 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
         /* 2.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
         // Shows that all results are obtained.
+        // SHows that minimal, no substantial different in resk between two branches, both equally likely
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
