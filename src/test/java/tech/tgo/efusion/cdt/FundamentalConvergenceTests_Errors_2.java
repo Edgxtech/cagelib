@@ -20,6 +20,7 @@ import tech.tgo.efusion.util.TestAsset;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,7 +28,7 @@ import java.util.Map;
  */
 public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
 
-    private static final Logger log = LoggerFactory.getLogger(tech.tgo.efusion.fix.AllObservationFixITs.class);
+    private static final Logger log = LoggerFactory.getLogger(tech.tgo.efusion.cdt.FundamentalConvergenceTests_Errors_2.class);
 
     Map<String,GeoMission> missionsMap = new HashMap<String,GeoMission>();
 
@@ -140,6 +141,7 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
     @Override
     public void result(ComputeResults results) {
         log.debug("Result [NEW] -> GeoId: "+results.getGeoId()+", Lat: "+results.getGeolocationResult().getLat()+", Lon: "+results.getGeolocationResult().getLon()+", CEP major: "+results.getGeolocationResult().getElp_long()+", CEP minor: "+results.getGeolocationResult().getElp_short()+", CEP rotation: "+results.getGeolocationResult().getElp_rot());
+        log.debug("Result [NEW] -> GeoId: "+results.getGeoId()+", Number of additional results: "+results.getAdditionalResults().size());
 
         // buffer just the latest value - ok for fix tests, need to hold all est since first convergence for track tests
         latest_est_latlon = new double[]{results.getGeolocationResult().getLat(),results.getGeolocationResult().getLon()};
@@ -194,7 +196,9 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
 
         try {
             Thread thread = efusionProcessManager.start();
+//            for (Thread thread : threads) {
             thread.join();
+            //}
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -234,6 +238,11 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
         asset_b.setProvide_aoa(true);
+        //geoMission.setInitialStateMode(InitialStateMode.top_left);
+        geoMission.setInitialStateMode(InitialStateMode.random);
+//        geoMission.setInitialStateMode(InitialStateMode.specified);
+//        geoMission.setFilterSpecificInitialLat(-34.90);
+//        geoMission.setFilterSpecificInitialLon(138.0);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -349,7 +358,6 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
         asset_b.setProvide_range(true);
 
         geoMission.setInitialStateMode(InitialStateMode.bottom_left);
-        geoMission.setMaxFilterIterations(new Long(1000000));
 
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{

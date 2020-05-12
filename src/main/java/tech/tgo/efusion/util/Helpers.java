@@ -1,7 +1,14 @@
 package tech.tgo.efusion.util;
 
+import tech.tgo.efusion.model.Asset;
+import tech.tgo.efusion.model.InitialStateBoxCorner;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Timothy Edge (timmyedge)
@@ -71,5 +78,51 @@ public class Helpers {
             }
         }
         return new double[]{x,y};
+    }
+
+    public static Double[] findRudimentaryStartPoint(Asset asset_a, Asset asset_b, double addition) {
+        double x_init=0; double y_init=0;
+        double[] asset_a_utm = Helpers.convertLatLngToUtmNthingEasting(asset_a.getCurrent_loc()[0],asset_a.getCurrent_loc()[1]);
+        double[] asset_b_utm = Helpers.convertLatLngToUtmNthingEasting(asset_b.getCurrent_loc()[0],asset_b.getCurrent_loc()[1]);
+        if (asset_b == null) {
+            x_init = asset_a_utm[1] + addition;
+            y_init = asset_a_utm[0] - addition;
+        }
+        else {
+            x_init = asset_a_utm[1];
+            y_init = asset_a_utm[0];
+            double x_n = asset_b_utm[1];
+            double y_n = asset_b_utm[0];
+            x_init = x_init + (x_init - x_n) / 2;
+            y_init = y_init + (y_init - y_n) / 2;
+        }
+        return new Double[]{x_init,y_init};
+    }
+
+    public static Double[] getCornerLatLon(InitialStateBoxCorner corner, Collection<Asset> assets) {
+        double standardUTMOffset = 5000;
+        List<Double> lats = new ArrayList<Double>();
+        List<Double> lons = new ArrayList<Double>();
+        for (Asset asset : assets) {
+            double[] utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0],asset.getCurrent_loc()[1]);
+            lats.add(utm[0]);
+            lons.add(utm[1]);
+        }
+        if (corner.equals(InitialStateBoxCorner.TOP_RIGHT)) {
+            return new Double[]{Collections.max(lons) + standardUTMOffset, Collections.max(lats) + standardUTMOffset};
+        }
+        else if (corner.equals(InitialStateBoxCorner.BOTTOM_RIGHT)) {
+            return new Double[]{Collections.min(lons) - standardUTMOffset, Collections.max(lats) + standardUTMOffset};
+        }
+        else if (corner.equals(InitialStateBoxCorner.BOTTOM_LEFT)) {
+            return new Double[]{Collections.min(lons) - standardUTMOffset, Collections.min(lats) - standardUTMOffset};
+        }
+        else if (corner.equals(InitialStateBoxCorner.TOP_LEFT)) {
+            return new Double[]{Collections.max(lons) + standardUTMOffset, Collections.min(lats) - standardUTMOffset}; //+ standardUTMOffset
+            //return new Double[]{Helpers.convertLatLngToUtmNthingEasting(-34.9,138.0)[0],Helpers.convertLatLngToUtmNthingEasting(-34.9,138.0)[1]};
+        }
+        else {
+            return null;
+        }
     }
 }

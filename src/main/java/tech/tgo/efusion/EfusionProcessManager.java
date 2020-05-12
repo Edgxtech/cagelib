@@ -3,6 +3,7 @@ package tech.tgo.efusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.tgo.efusion.compute.ComputeProcessorAL1;
+import tech.tgo.efusion.compute.FilterExecution;
 import tech.tgo.efusion.model.*;
 import tech.tgo.efusion.util.ConfigurationException;
 import tech.tgo.efusion.util.EfusionValidator;
@@ -13,6 +14,7 @@ import uk.me.jstott.jcoord.UTMRef;
 import java.beans.PropertyChangeEvent;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Filter;
 
 /**
  * Geolocation fusion and tracking, using custom extended kalman filter implementation
@@ -132,14 +134,127 @@ public class EfusionProcessManager implements Serializable {
             throw new ConfigurationException("There were no observations, couldn't start the process");
         }
 
-        computeProcessor = new ComputeProcessorAL1(this.actionListener, this.geoMission.observations, this.geoMission);
-        computeProcessor.initialiseFilter();
+        /* Generate FilterExecutions for given Initial State Mode */
+//        List<FilterExecution> filterExecutions = initialiseFilterExecutions();
+//        List<Thread> threads = new ArrayList<Thread>();
+//        for (FilterExecution filterExecution : filterExecutions) {
+            computeProcessor = new ComputeProcessorAL1(this.actionListener, this.geoMission.observations, this.geoMission);
+            computeProcessor.initialiseFilter();
 
-        Thread thread = new Thread(computeProcessor);
-        thread.start();
+            Thread thread = new Thread(computeProcessor);
+            thread.start();
+            //threads.add(thread);
+        //}
 
         return thread;
     }
+
+//    public List<FilterExecution> initialiseFilterExecutions() throws ConfigurationException {
+//        /* Initialise filter state */
+//        log.debug("Using InitialStateMode: "+geoMission.getInitialStateMode());
+//        List<FilterExecution> filterExecutions = new ArrayList<FilterExecution>();
+//        Double[] start_x_y;
+//        // Specific Initial State
+//        if (geoMission.getInitialStateMode().equals(InitialStateMode.specified)) {
+//
+//            //if (this.geoMission.getFilterUseSpecificInitialCondition()!=null && this.geoMission.getFilterUseSpecificInitialCondition()) {
+//            double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(this.geoMission.getFilterSpecificInitialLat(), this.geoMission.getFilterSpecificInitialLon());
+//            start_x_y = new Double[]{asset_utm[1], asset_utm[0]};
+//            log.debug("Using SPECIFIC initial condition: "+this.geoMission.getFilterSpecificInitialLat()+", "+this.geoMission.getFilterSpecificInitialLon()+" ["+start_x_y[1]+", "+start_x_y[0]+"]");
+//            filterExecutions.add(new FilterExecution(start_x_y));
+//        }
+//        // Random Initial State
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.random)){
+//            List<Asset> assetList = new ArrayList<Asset>(this.geoMission.getAssets().values());
+//            if (assetList.size() > 1) {
+//                Random rand = new Random();
+//                Asset randAssetA = assetList.get(rand.nextInt(assetList.size()));
+//                assetList.remove(randAssetA);
+//                Asset randAssetB = assetList.get(rand.nextInt(assetList.size()));
+//                //log.debug("Finding rudimentary start point between two random observations: " + randAssetA.getId() + "," + randAssetB.getId());
+//                start_x_y = Helpers.findRudimentaryStartPoint(randAssetA, randAssetB, (Math.random() - 0.5) * 100000);
+//                log.debug("Using RANDOM initial condition: near asset(s) ['"+randAssetA.getId() + "' & '" + randAssetB.getId()+"']: "+start_x_y[1]+", "+start_x_y[0]);
+//
+//                log.debug("Dist between assets: "+Math.sqrt(Math.pow(randAssetA.getCurrent_loc()[0] - randAssetB.getCurrent_loc()[0], 2) + Math.pow(randAssetA.getCurrent_loc()[1] - randAssetB.getCurrent_loc()[1], 2)));
+//            } else {
+//                Asset asset = assetList.get(0);
+//                double[] asset_utm = Helpers.convertLatLngToUtmNthingEasting(asset.getCurrent_loc()[0], asset.getCurrent_loc()[1]);
+//                start_x_y = new Double[]{asset_utm[1] + 5000, asset_utm[0] - 5000};
+//                log.debug("Using RANDOM initial condition: near asset ["+asset.getId()+"]: "+start_x_y[1]+", "+start_x_y[0]);
+//            }
+//            filterExecutions.add(new FilterExecution(start_x_y));
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.top_right)) {
+//
+//
+////            // TEMP, TODO delete
+////            Double[] cornerLatLon = Helpers.getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values());
+////            if (cornerLatLon==null) {
+////                log.error("Error getting corner lat lon for corner BOTTOM_RIGHT");
+////                throw new ConfigurationException("Error getting corner lat lon for corner BOTTOM_RIGHT");
+////            }
+////            filterExecutions.add(new FilterExecution(cornerLatLon));
+//
+//
+//
+//            Double[] cornerLatLon = Helpers.getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values());
+//            if (cornerLatLon==null) {
+//                log.error("Error getting corner lat lon for corner TOP_RIGHT");
+//                throw new ConfigurationException("Error getting corner lat lon for corner TOP_RIGHT");
+//            }
+//            filterExecutions.add(new FilterExecution(cornerLatLon));
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.bottom_right)) {
+//            Double[] cornerLatLon = Helpers.getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values());
+//            if (cornerLatLon==null) {
+//                log.error("Error getting corner lat lon for corner BOTTOM_RIGHT");
+//                throw new ConfigurationException("Error getting corner lat lon for corner BOTTOM_RIGHT");
+//            }
+//            filterExecutions.add(new FilterExecution(cornerLatLon));
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.bottom_left)) {
+//            Double[] cornerLatLon = Helpers.getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values());
+//            if (cornerLatLon==null) {
+//                log.error("Error getting corner lat lon for corner BOTTOM_LEFT");
+//                throw new ConfigurationException("Error getting corner lat lon for corner BOTTOM_LEFT");
+//            }
+//            filterExecutions.add(new FilterExecution(cornerLatLon));
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.top_left)) {
+//            Double[] cornerLatLon = Helpers.getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values());
+//            if (cornerLatLon==null) {
+//                log.error("Error getting corner lat lon for corner TOP_LEFT");
+//                throw new ConfigurationException("Error getting corner lat lon for corner TOP_LEFT");
+//            }
+//            filterExecutions.add(new FilterExecution(cornerLatLon));
+//        }
+//        // NOTE: Box executions only apply to FIX, since TRACKING just uses the previous state
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_single_out)) {
+//            // Use all corners, iterate until first result and exit
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
+//        }
+//        else if (geoMission.getInitialStateMode().equals(InitialStateMode.box_all_out)) {
+//            // use all corners, report all results
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.BOTTOM_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.TOP_LEFT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.TOP_RIGHT, geoMission.getAssets().values())));
+//            filterExecutions.add(new FilterExecution(Helpers.getCornerLatLon(InitialStateBoxCorner.BOTTOM_LEFT, geoMission.getAssets().values())));
+//        }
+//        else {
+//            throw new ConfigurationException("Could not identify a valid 'Initial State' search strategy, check configuration");
+//        }
+//
+//        log.debug("# Filter Executions: "+ filterExecutions.size());
+//        for (FilterExecution filterExecution : filterExecutions) {
+//            double[] latLon = Helpers.convertUtmNthingEastingToLatLng(filterExecution.getLatlon()[1],filterExecution.getLatlon()[0], this.geoMission.getLatZone(), this.geoMission.getLonZone());
+//            log.debug("Start State: lat/lon: "+latLon[0]+","+latLon[1]+" UTM: ["+ filterExecution.getLatlon()[0]+","+ filterExecution.getLatlon()[1]+"]");
+//        }
+//
+//        return filterExecutions;
+//    }
 
     public GeoMission getGeoMission() {
         return geoMission;
@@ -431,5 +546,6 @@ public class EfusionProcessManager implements Serializable {
 //                throw new ConfigurationException("No filter range bias specified");
 //            }
 //        }
+
     }
 }
