@@ -65,7 +65,6 @@ public class ComputeProcessorAL1 implements Runnable {
     KmlFileHelpers kmlFileHelpers = null;
 
     List<FilterExecution> filterExecutions = null;
-    //FilterExecution filterExecution = null;
 
     /*
      * Create processor for the given config, observations and client implemented listener
@@ -74,7 +73,6 @@ public class ComputeProcessorAL1 implements Runnable {
     {
         this.efusionListener = efusionListener;
         this.geoMission = geoMission;
-        //this.filterExecution = filterExecution;
 
         setObservations(observations);
     }
@@ -253,19 +251,14 @@ public class ComputeProcessorAL1 implements Runnable {
             sorted.remove(0);
             computeResults.setAdditionalResults(sorted);
             computeResults.setGeoId(this.geoMission.getGeoId());
-//            ComputeResults computeResults = new ComputeResults();
-//            computeResults.setGeolocationResult(geolocationResults.get(0));
-//            computeResults.setAdditionalResults(geolocationResults);
-//            computeResults.setGeoId(this.geoMission.getGeoId());
 
             /* Dispatch Result */
             dispatchResult(computeResults);
         }
 
         else if (this.geoMission.getMissionMode().equals(MissionMode.track)) {
-            // simply just start it up and run always
 
-            // Run each execution
+            // Run single tracking execution
             int j = 0;
             List<GeolocationResult> geolocationResults = new ArrayList<GeolocationResult>();
             FilterExecution filterExecution = filterExecutions.iterator().next();
@@ -339,25 +332,23 @@ public class ComputeProcessorAL1 implements Runnable {
                     break;
                 }
 
-            } // END FOR MAX ITERATIONS
-            log.debug("Finished FIX iterations for this Execution");
-
-            // After the max iterations, OR the desired accuracy level reached, dispatch result??
-
-            /* Export filter state - development debugging */
-            if (this.geoMission.getOutputFilterState()) {
-                filterStateExportCounter++;
-                if (filterStateExportCounter == 10) {
-                    // Only if it is changing significantly
-                    double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
-                    if (residual > 0.5) {
-                        filterStateDTO.setFilterObservationDTOs(filterExecution.getFilterObservationDTOs());
-                        filterStateDTO.setXk(Xk);
-                        kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
-                        filterStateExportCounter = 0;
+                /* Export filter state - development debugging */
+                if (this.geoMission.getOutputFilterState()) {
+                    filterStateExportCounter++;
+                    if (filterStateExportCounter == 10) {
+                        // Only if it is changing significantly
+                        double residual_innov = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+                        if (residual_innov > 0.5) {
+                            filterStateDTO.setFilterObservationDTOs(filterExecution.getFilterObservationDTOs());
+                            filterStateDTO.setXk(Xk);
+                            kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
+                            filterStateExportCounter = 0;
+                        }
                     }
                 }
-            }
+
+            } // END FOR MAX ITERATIONS
+            log.debug("Finished FIX iterations for this Execution");
 
             if (log.isDebugEnabled()) {
                 for (FilterObservationDTO obs_state : filterExecution.getFilterObservationDTOs()) {
@@ -373,12 +364,12 @@ public class ComputeProcessorAL1 implements Runnable {
             }
 
         GeolocationResult geolocationResult = summariseResult(Xk, filterExecution);
-        Xk = null;
-        Pk=null;
-        K=null;
-        Thi = new Array2DRowRealMatrix(ThiData);
-        Pinit = new Array2DRowRealMatrix(initCovarData);
-        setStaged_observations(this.geoMission.observations);
+//        Xk = null;
+//        Pk=null;
+//        K=null;
+//        Thi = new Array2DRowRealMatrix(ThiData);
+//        Pinit = new Array2DRowRealMatrix(initCovarData);
+//        setStaged_observations(this.geoMission.observations);
 
         return geolocationResult;
     }
@@ -437,8 +428,13 @@ public class ComputeProcessorAL1 implements Runnable {
                 if (filterStateExportCounter == 10) {
                     // Only if it is changing significantly
                     double residual = Math.abs(innov.getEntry(0)) + Math.abs(innov.getEntry(1));
+                    log.debug("Residual changes to implement: "+residual);
                     if (residual > 0.5) {
                         filterStateDTO.setFilterObservationDTOs(filterExecution.getFilterObservationDTOs());
+                        log.debug("# filter obs DTOs: "+filterExecution.getFilterObservationDTOs().size());
+                        for (FilterObservationDTO dto : filterExecution.getFilterObservationDTOs()) {
+                            log.debug("dto: "+dto.getF_est());
+                        }
                         filterStateDTO.setXk(Xk);
                         kmlFileHelpers.exportAdditionalFilterState(this.geoMission, filterStateDTO, residual);
                         filterStateExportCounter = 0;
@@ -584,7 +580,9 @@ public class ComputeProcessorAL1 implements Runnable {
 
                 P_innov = K.multiply(H).multiply(Pk).add(P_innov);
 
+                //log.debug("# filter obs DTOs before: "+filterExecution.getFilterObservationDTOs().size());
                 filterExecution.getFilterObservationDTOs().add(new FilterObservationDTO(obs, f_est, innov_));
+                //log.debug("# filter obs DTOs after: "+filterExecution.getFilterObservationDTOs().size());
             }
 
             Xk = Xk.add(innov);

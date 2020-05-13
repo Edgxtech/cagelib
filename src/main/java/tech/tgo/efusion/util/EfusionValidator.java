@@ -29,7 +29,7 @@ public class EfusionValidator {
         if (geoMission.getGeoId()==null) {
             throw new ConfigurationException("Mission id was not set: specify a unique string label");
         }
-        // TODO , reimplement
+        // TODO , reimplement?
 //        if (geoMission.getFilterUseSpecificInitialCondition()==null) {
 //            // Use default: false, i.e. use random initial condition
 //            log.debug("'Filter use specific initial condition' property not set, using default: false i.e. select at random");
