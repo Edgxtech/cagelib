@@ -90,8 +90,10 @@ public class KmlFileStaticHelpers {
             if (gm.getShowGEOs())
             {
                 exportTargetEstimationResult(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), true);
-                for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
-                    exportTargetEstimationResult(doc,dnode,geoMission,result, false);
+                if (geoMission.getComputeResults().getAdditionalResults() != null) {
+                    for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
+                        exportTargetEstimationResult(doc, dnode, geoMission, result, false);
+                    }
                 }
             }
 
@@ -100,8 +102,10 @@ public class KmlFileStaticHelpers {
             {
                 //exportTargetEstimationCEP(doc,dnode,geoMission);
                 exportTargetEstimationCEP(doc,dnode,geoMission,geoMission.getComputeResults().getGeolocationResult(), true);
-                for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
-                    exportTargetEstimationCEP(doc,dnode,geoMission,result, false);
+                if (geoMission.getComputeResults().getAdditionalResults() != null) {
+                    for (GeolocationResult result : geoMission.getComputeResults().getAdditionalResults()) {
+                        exportTargetEstimationCEP(doc, dnode, geoMission, result, false);
+                    }
                 }
             }
 
@@ -119,7 +123,8 @@ public class KmlFileStaticHelpers {
         }
         catch (Exception e)
         {
-            log.error(e.getMessage());}
+            log.error("Error exporting data to kml",e);
+        }
     }
 
     public static void exportTargetTrueLocation(Document doc, Element dnode, GeoMission geoMission) {
@@ -227,7 +232,7 @@ public class KmlFileStaticHelpers {
             PFplacemark.appendChild(PFpoint);
         }
         catch(Exception egeo){
-            log.trace("error exporting geo position to kml");
+            log.error("error exporting geo position to kml",egeo);
             egeo.printStackTrace();
         }
     }
