@@ -215,12 +215,18 @@ public class ErroneousDataTests_5 implements EfusionListener {
         test_output_log.debug("\nTarget:\n"+geoMission.getTarget().getTrue_current_loc()[0]+","+geoMission.getTarget().getTrue_current_loc()[1]);
         test_output_log.debug("\nTechnique Params:");
         test_output_log.debug("Qu: "+geoMission.getFilterProcessNoise()[0][0]);
+        test_output_log.debug("Initial State: "+geoMission.getInitialStateMode().name());
+
         test_output_log.debug("\nMeasurements:");
         for (Observation obs : geoMission.getObservations().values()) {
             test_output_log.debug(obs.getAssetId()+"_"+obs.getObservationType().name()+": "+obs.getMeas()+" +-"+obs.getMeas_error());
         }
 
-        test_output_log.debug("\nLat: "+geoMission.getTarget().getCurrent_loc()[0]+"\nLon: "+geoMission.getTarget().getCurrent_loc()[1]+"\nCEP major: "+geoMission.getTarget().getElp_major()+"\nCEP minor: "+geoMission.getTarget().getElp_minor()+"\nCEP rotation: "+geoMission.getTarget().getElp_rot());
+//        test_output_log.debug("\nLat: "+geoMission.getTarget().getCurrent_loc()[0]+"\nLon: "+geoMission.getTarget().getCurrent_loc()[1]+"\nCEP major: "+geoMission.getTarget().getElp_major()+"\nCEP minor: "+geoMission.getTarget().getElp_minor()+"\nCEP rotation: "+geoMission.getTarget().getElp_rot());
+//        test_output_log.debug("ATE: "+ATEStats.getMean());
+
+        ComputeResults computeResults = geoMission.getComputeResults();
+        test_output_log.debug("\nLat: "+geoMission.getTarget().getCurrent_loc()[0]+"\nLon: "+geoMission.getTarget().getCurrent_loc()[1]+"\nCEP major: "+computeResults.getGeolocationResult().getElp_long()+"\nCEP minor: "+computeResults.getGeolocationResult().getElp_short()+"\nCEP rotation: "+computeResults.getGeolocationResult().getElp_rot());
         test_output_log.debug("ATE: "+ATEStats.getMean());
     }
 

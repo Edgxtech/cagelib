@@ -302,12 +302,12 @@ public class KmlFileStaticHelpers {
                 Element polygon = doc.createElement("Polygon");
 
                 Element altitudeMode = doc.createElement("altitudeMode");
-                altitudeMode.appendChild(doc.createTextNode("Absolute"));
+                altitudeMode.appendChild(doc.createTextNode("relativeToGround"));
                 polygon.appendChild(altitudeMode);
 
-                Element altitude = doc.createElement("extrude");
-                altitude.appendChild(doc.createTextNode("1"));
-                polygon.appendChild(altitude);
+//                Element extrude = doc.createElement("extrude");
+//                extrude.appendChild(doc.createTextNode("1"));
+//                polygon.appendChild(extrude);
 
                 Element outer = doc.createElement("outerBoundaryIs");
                 Element cepOuterRing = doc.createElement("LinearRing");
@@ -318,7 +318,7 @@ public class KmlFileStaticHelpers {
                 {
                     double[] point = (double[])circlePoints.next();
 
-                    cepCircleCoords.appendChild(doc.createTextNode(point[1]+","+point[0]+",10 \n"));
+                    cepCircleCoords.appendChild(doc.createTextNode(point[1]+","+point[0]+",200 \n"));
                 }
                 cepOuterRing.appendChild(cepCircleCoords);
 

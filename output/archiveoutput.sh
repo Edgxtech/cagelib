@@ -20,9 +20,11 @@ while getopts ":i:vh" optname
   done
 
 function continue {
-	cp filterState.kml archivedOutput/$1_filterState_`date +%F`.kml
-	cp geoOutput.kml archivedOutput/$1_geoOutput_`date +%F`.kml
-	cp /Users/mobile3/Downloads/$1.jpg archivedOutput/$1_out.jpg
+	cp filterState.kml archivedOutput/$1_filterState.kml
+	cp geoOutput.kml archivedOutput/$1_geoOutput.kml
+	cp /Users/mobile3/Downloads/$1.jpg archivedOutput/$1_geoOutput.jpg
+	cp /Users/mobile3/Downloads/$1_z.jpg archivedOutput/$1_z_geoOutput.jpg
+	cp /var/log/efusionlib/efusionlib_testoutput.log archivedOutput/$1_testOutput.log
 }
 
 if [ -n "$1" ]; then

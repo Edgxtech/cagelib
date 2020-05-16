@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Folder>
+    <name>Canvas Folder</name>
+    <GroundOverlay>
+      <name>Blank Canvas</name>
+      <Icon>
+        <href>blank_canvas.jpg</href>
+      </Icon>
+      <LatLonBox>
+        <north>-33.8</north>
+        <south>-35.8</south>
+        <east>141</east>
+        <west>137</west>
+        <rotation>0</rotation>
+      </LatLonBox>
+    </GroundOverlay>
+  </Folder>
+</kml>

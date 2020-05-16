@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2"><Document><Placemark><name>High Residual</name><styleUrl>#style1</styleUrl><LineString><coordinates>138.66294191207797,-34.88193302933195,0 
+138.62302875473827,-34.868232245538806,0 
+138.5993441134249,-34.86985667493637,0 
+138.5909121749559,-34.87207173257756,0 
+138.58786810696247,-34.87296177512246,0 
+</coordinates></LineString></Placemark><Style id="style1"><LineStyle><color>ffffA500</color></LineStyle></Style><Placemark><name>Medium Residual</name><styleUrl>#style2</styleUrl><LineString><coordinates>138.58669889938312,-34.8732694082221,0 
+</coordinates></LineString></Placemark><Style id="style2"><LineStyle><color>ffffD500</color></LineStyle></Style><Placemark><name>Low Residual</name><styleUrl>#style3</styleUrl><LineString><coordinates>138.58623814771838,-34.87337486487179,0 
+138.5860554761794,-34.87341212672667,0 
+138.58598305116453,-34.87342578750375,0 
+</coordinates></LineString></Placemark><Style id="style3"><LineStyle><color>fffgG500</color><width>2</width></LineStyle></Style></Document></kml>

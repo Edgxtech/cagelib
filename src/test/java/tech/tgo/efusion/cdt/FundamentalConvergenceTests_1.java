@@ -68,11 +68,6 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         geoMission.setOutputFilterState(true);
         geoMission.setOutputFilterStateKmlFilename("filterState.kml");
 
-        // Optional test
-//        geoMission.setFilterUseSpecificInitialCondition(true);
-//        geoMission.setFilterSpecificInitialLat(-32.0);
-//        geoMission.setFilterSpecificInitialLon(116.9);
-
         try {
             efusionProcessManager.configure(geoMission);
         }
@@ -164,12 +159,15 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         test_output_log.debug("\nTarget:\n"+geoMission.getTarget().getTrue_current_loc()[0]+","+geoMission.getTarget().getTrue_current_loc()[1]);
         test_output_log.debug("\nTechnique Params:");
         test_output_log.debug("Qu: "+geoMission.getFilterProcessNoise()[0][0]);
+        test_output_log.debug("Initial State: "+geoMission.getInitialStateMode().name());
+
         test_output_log.debug("\nMeasurements:");
         for (Observation obs : geoMission.getObservations().values()) {
             test_output_log.debug(obs.getAssetId()+"_"+obs.getObservationType().name()+": "+obs.getMeas()+" +-"+obs.getMeas_error());
         }
 
-        test_output_log.debug("\nLat: "+geoMission.getTarget().getCurrent_loc()[0]+"\nLon: "+geoMission.getTarget().getCurrent_loc()[1]+"\nCEP major: "+geoMission.getTarget().getElp_major()+"\nCEP minor: "+geoMission.getTarget().getElp_minor()+"\nCEP rotation: "+geoMission.getTarget().getElp_rot());
+        ComputeResults computeResults = geoMission.getComputeResults();
+        test_output_log.debug("\nLat: "+geoMission.getTarget().getCurrent_loc()[0]+"\nLon: "+geoMission.getTarget().getCurrent_loc()[1]+"\nCEP major: "+computeResults.getGeolocationResult().getElp_long()+"\nCEP minor: "+computeResults.getGeolocationResult().getElp_short()+"\nCEP rotation: "+computeResults.getGeolocationResult().getElp_rot());
         test_output_log.debug("ATE: "+ATEStats.getMean());
     }
 
@@ -387,6 +385,7 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
     public void test123c() {
         /* 1.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch
+        // The box_single_out use case may only end up being useful for engineering purposes
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
@@ -531,6 +530,65 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
         asset_a.setProvide_aoa(true);
         asset_b.setProvide_tdoa(true);
         asset_c.setProvide_range(true);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void test131a() {
+        /* 1.3.1 Converge to AOA, TDOA, Range */
+        simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
+        simulatedTargetObserver.setTrue_lon(138.596404);
+        asset_a.setProvide_aoa(true);
+        asset_b.setProvide_tdoa(true);
+        asset_c.setProvide_range(true);
+        geoMission.setInitialStateMode(InitialStateMode.box_all_out);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void test131b() {
+        /* 1.3.1 Converge to AOA x2, TDOA, Range */
+        // USED to show that GDOP form 1.3.1 led to selection of wrong intersection point
+        simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
+        simulatedTargetObserver.setTrue_lon(138.596404);
+        asset_a.setProvide_aoa(true);
+        asset_b.setProvide_tdoa(true);
+        asset_c.setProvide_range(true);
+        asset_c.setProvide_aoa(true);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
