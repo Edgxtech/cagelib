@@ -382,7 +382,7 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
     }
 
     @Test
-    public void test123c() {
+    public void test123d() {
         /* 1.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch
         // The box_single_out use case may only end up being useful for engineering purposes
@@ -412,7 +412,7 @@ public class FundamentalConvergenceTests_1 implements EfusionListener {
     }
 
     @Test
-    public void test123d() {
+    public void test123c() {
         /* 1.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT

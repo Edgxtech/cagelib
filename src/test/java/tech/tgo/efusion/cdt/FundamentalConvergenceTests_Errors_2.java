@@ -265,11 +265,7 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
         simulatedTargetObserver.setTrue_lon(138.596404);
         asset_a.setProvide_aoa(true);
         asset_b.setProvide_aoa(true);
-        //geoMission.setInitialStateMode(InitialStateMode.top_left);
         geoMission.setInitialStateMode(InitialStateMode.top_right);
-//        geoMission.setInitialStateMode(InitialStateMode.specified);
-//        geoMission.setFilterSpecificInitialLat(-34.90);
-//        geoMission.setFilterSpecificInitialLon(138.0);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
@@ -405,7 +401,7 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
     }
 
     @Test
-    public void test223c() {
+    public void test223d() {
         /* 2.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
         // Shows that first identified solution is incorrect one, should have used box_all_out
@@ -435,7 +431,7 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
     }
 
     @Test
-    public void test223d() {
+    public void test223c() {
         /* 2.2.3 Converge to AOA, Range */
         // NOTE: sensitive to init conditions may sometimes chose wrong branch, try test 123a with TOP LEFT init conditions to
         // Shows that all results are obtained.
@@ -550,10 +546,67 @@ public class FundamentalConvergenceTests_Errors_2 implements EfusionListener {
         /* 2.3.1 Converge to AOA, TDOA, Range */
         simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
         simulatedTargetObserver.setTrue_lon(138.596404);
-        //geoMission.setInitialStateMode(InitialStateMode.box_all_out);
         asset_a.setProvide_aoa(true);
         asset_b.setProvide_tdoa(true);
         asset_c.setProvide_range(true);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void test231a() {
+        /* 2.3.1 Converge to AOA, TDOA, Range */
+        simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
+        simulatedTargetObserver.setTrue_lon(138.596404);
+        geoMission.setInitialStateMode(InitialStateMode.box_all_out);
+        asset_a.setProvide_aoa(true);
+        asset_b.setProvide_tdoa(true);
+        asset_c.setProvide_range(true);
+        Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
+        {{
+            put(asset_a.getId(), asset_a);
+            put(asset_b.getId(), asset_b);
+            put(asset_c.getId(), asset_c);
+            asset_b.setTdoa_asset_ids(Arrays.asList(new String[]{"C"}));
+        }};
+        simulatedTargetObserver.setTestAssets(assets);
+        simulatedTargetObserver.run();
+
+        try {
+            Thread thread = efusionProcessManager.start();
+            thread.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        printPerformance();
+    }
+
+    @Test
+    public void test231b() {
+        /* 2.3.1 Converge to AOA, TDOA, Range */
+        simulatedTargetObserver.setTrue_lat(-34.916327); // TOP LEFT
+        simulatedTargetObserver.setTrue_lon(138.596404);
+        asset_a.setProvide_aoa(true);
+        asset_b.setProvide_tdoa(true);
+        asset_c.setProvide_range(true);
+        asset_c.setProvide_aoa(true);
         Map<String, TestAsset> assets = new HashMap<String, TestAsset>()
         {{
             put(asset_a.getId(), asset_a);
