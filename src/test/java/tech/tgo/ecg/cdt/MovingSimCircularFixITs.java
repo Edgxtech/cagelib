@@ -1,4 +1,4 @@
-package tech.tgo.ecg.fix;
+package tech.tgo.ecg.cdt;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Before;
