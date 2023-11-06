@@ -1,19 +1,19 @@
-eFusion Library (efusionlib)
+# CaGE Library (cagelib)
 
-eFusion (efusion) is a sensor fusion library for position location and tracking
+Compound Geolocation Engine (CaGE) is a sensor fusion library which utilises an Extended Kalman Filter for emitter location and tracking
 
-Features
+## Features
 
-    * Location estimation with Tracking and Fix Mode
+    * Emitter location estimation with Tracking and Fix Mode
     * Takes sensor measurements including TDOA, AOA and Range
     * Optional generation of KML result output, client implementation alternate
 
-How to Use
+## How to Use
 
     /* Add to project dependencies */
     <dependency>
-        <groupId>tech.tgo.efusion</groupId>
-        <artifactId>efusionlib</artifactId>
+        <groupId>tech.edgx.cage</groupId>
+        <artifactId>cagelib</artifactId>
         <version>0.1</version>
     </dependency>
 
@@ -85,9 +85,9 @@ How to Use
     }
     catch (Exception e) {}
 
-Copyright / License
+## Copyright / License
 
-    Copyright (c) Tgo Technology
+    Copyright (c) Edgx Technology
 
     This is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
 

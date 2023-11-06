@@ -23,18 +23,6 @@
     </repositories>
     <build>
         <plugins>
-            <!-- Makes the JAR executable, by configuring the plugin to use the included manifest file -->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-jar-plugin</artifactId>-->
-                <!--<version>${maven.jar.plugin.version}</version>-->
-                <!--<configuration>-->
-                    <!--<archive>-->
-                        <!--<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
-                    <!--</archive>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-            <!-- JaCoCo configuration - provides test coverage reports -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
