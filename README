@@ -45,7 +45,7 @@ How to Use
     geoMission.setShowTrueLoc(true);
 
     try {
-        efusionProcessManager.configure(geoMission);
+        cageProcessManager.configure(geoMission);
     }
     catch (Exception e) {}
 
@@ -72,7 +72,7 @@ How to Use
 
     /* Start Computing Thread - Tracking Mode */
     try {
-        efusionProcessManager.start();
+        cageProcessManager.start();
         Thread.sleep(40000);
         timer.cancel();
     }
@@ -80,7 +80,7 @@ How to Use
 
     /* Start Computing Thread - Fix Mode */
     try {
-        Thread thread = efusionProcessManager.start();
+        Thread thread = cageProcessManager.start();
         thread.join();
     }
     catch (Exception e) {}
